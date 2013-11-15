@@ -1,0 +1,6 @@
+.DS_STORE
+scanner.ml
+parser.ml
+parser.mli
+*.cmo
+*.cmi
