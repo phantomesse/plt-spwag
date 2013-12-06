@@ -1,6 +1,4 @@
-OBJS = ast.cmi parser.cmo scanner.cmo
-
-all: $(OBJS)
+all: ast.cmi parser.cmi parser.cmo scanner.cmo
 
 scanner.ml: scanner.mll
 	ocamllex scanner.mll
