@@ -61,6 +61,7 @@ expr:
     | expr MINUS expr      { Binop($1, Minus, $3) }
     | expr TIMES expr      { Binop($1, Times, $3) }
     | expr DIVIDE expr     { Binop($1, Divide, $3) }
-    | ID                  { Var($1) }
-    | ID ASSIGN expr      { Assign($1, $3) }
+    | VAR ID               { Var($2) }
+    | VAR ID ASSIGN expr   { Assign($2, $4) }
+    | ID ASSIGN expr       { Assign($1, $3) }
     | LITERAL              { Lit($1) }
