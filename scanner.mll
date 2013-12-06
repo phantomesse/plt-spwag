@@ -1,7 +1,7 @@
 { open Parser }
 
 rule token =
-    parse [' ' '\r' '\t']                            { token lexbuf }
+    parse [' ' '\r'  '\t' ]                          { token lexbuf }
     | "##"                                           { multi_line_comment lexbuf }
     | '#'                                            { single_line_comment lexbuf }
     | '"'                                            { text_string lexbuf }
@@ -19,6 +19,8 @@ rule token =
     | '&'                                            { AND }
     | '('                                            { LPAREN }
     | ')'                                            { RPAREN }
+    | '{'                                            { LBRACE }
+    | '}'                                            { RBRACE }
     | ','                                            { COMMA }
     | '\n'                                           { NEWLINE }
     | "attr"                                         { ATTR }

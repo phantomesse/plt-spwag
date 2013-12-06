@@ -1,3 +1,5 @@
+all: scanner.ml parser.ml parser.mli
+
 scanner.ml: scanner.mll
 	ocamllex scanner.mll
 

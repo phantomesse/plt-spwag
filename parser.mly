@@ -36,13 +36,21 @@ formal_list:
     | ID { [$1] }
     | formal_list COMMA ID { $3 :: $1 }
 
+actuals_opt:
+    | /* nothing */ { [] }
+    | actuals_list  { List.rev $1 }
+
+actuals_list:
+    | expr                    { [$1] }
+    | actuals_list COMMA expr { $3 :: $1 }
+
 stmt_list:
     | /* nothing */         { [] }
     | stmt_list stmt   { $2 :: $1 }
 
 stmt:
     | expr NEWLINE                         { Expr($1) }
-    | RETURN expr                          { Return($2) }
+    | RETURN expr NEWLINE                  { Return($2) }
     | LBRACE stmt_list RBRACE              { Block(List.rev $2) }
     | IF expr stmt %prec NOELSE            { If($2, $3, Block([])) }
     | IF expr stmt ELSE stmt               { If($2, $3, $5) }
@@ -53,16 +61,6 @@ expr:
     | expr MINUS expr      { Binop($1, Minus, $3) }
     | expr TIMES expr      { Binop($1, Times, $3) }
     | expr DIVIDE expr     { Binop($1, Divide, $3) }
-    | ID ASSIGN expr       { Assign($1, $3) }
-    | ID                   { Var($1) }
+    | VAR ASSIGN expr      { Assign($1, $3) }
+    | VAR                  { Var($1) }
     | LITERAL              { Lit($1) }
-
-actuals_opt:
-    | /* nothing */ { [] }
-    | actuals_list  { List.rev $1 }
-
-actuals_list:
-    | expr                    { [$1] }
-    | actuals_list COMMA expr { $3 :: $1 }
-
-
