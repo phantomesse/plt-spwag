@@ -1,17 +1,29 @@
-type operator = Plus | Minus | Times | Divide | Assign | Equals | Notequals | Lessthan | Greaterthan
-
-type func_type = Slide | Comp | Attr | Func
-
+(* Null type *)
 type null = Null
 
-type identifier = (* Identifiers *)
+(* Identifiers *)
+type identifier = 
     Identifier of string
 
-type parent = (* For inheritance of components *)
+(* Operators *)
+type operator = Plus | Minus | Times | Divide | Assign | Equals | Notequals | Lessthan | Greaterthan
+
+(* Function types *)
+type func_type = Slide | Comp | Attr | Func
+
+(* For inheritance of components *)
+type parent = 
     Parent of identifier 
     | Noparent of null
 
-type expr = (* Expressions *)
+(* Handles calls of functions, components, *)
+type func_call = { 
+    name : identifier; (* Name of the function *)
+    actuals : expr list; (* Evaluated actual parameters *)
+    mods : stmt list; (* Additional statements *)
+}   
+(* Expressions *)
+and expr = 
     | Binop of expr * operator * expr (* a + b *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
@@ -21,11 +33,6 @@ type expr = (* Expressions *)
     | Call of func_call
     | Noexpr of null (* for double newlines *)
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
-and func_call = { (* Handles calls of functions, components, *)
-    name : identifier; (* Name of the function *)
-    actuals : expr list; (* Evaluated actual parameters *)
-    mods : stmt list; (* Additional statements *)
-}   
 and stmt = (* Statements ; WIP *)
     | Block of stmt list (* { ... } *)
     | Expr of expr (* foo = bar + 3; *)
@@ -48,4 +55,5 @@ type func_definition = { (* Handles declarations of functions, components, attri
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
 }
 
+(* The program itself *)
 type program = identifier list * func_definition list (* global vars, funcs*)
