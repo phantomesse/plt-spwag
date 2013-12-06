@@ -25,6 +25,7 @@ rule token =
     | '\n'                                           { NEWLINE }
     | "attr"                                         { ATTR }
     | "comp"                                         { COMP }
+    | "func"                                         { FUNC }
     | "define"                                       { DEF }
     | "else"                                         { ELSE }
     | "end"                                          { END }

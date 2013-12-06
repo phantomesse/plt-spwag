@@ -1,7 +1,7 @@
 %{ open Ast %}
 
 %token LPAREN RPAREN PLUS MINUS TIMES DIVIDE EOF EQUALS NOTEQUALS LESSTHAN GREATERTHAN COMMA NEWLINE
-%token ATTR COMP DEF ELSE END FALSE IF IMPORT ISA NULL RETURN SLIDE TRUE VAR WHILE LBRACE RBRACE
+%token ATTR COMP FUNC DEF ELSE END FALSE IF IMPORT ISA NULL RETURN SLIDE TRUE VAR WHILE LBRACE RBRACE
 %token <int> LITERAL
 %token <string> ID
 
@@ -19,14 +19,35 @@
 %%
 
 program: /* global vars, functions */
-    | /* nothing */         { [], [] }
-    | program func_decl { fst $1, ($2 :: snd $1) }
+    | /* nothing */             { [], [] }
+    | program NEWLINE func_decl { fst $1, ($3 :: snd $1) }
 
 func_decl:
-    ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
-    {{ fname = $1;
-    formals = $3;
-    body = List.rev $6 }}
+    | DEF SLIDE ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+      {{
+        fname = $3;
+        formals = $5;
+        body = List.rev $8
+      }}
+    | DEF COMP ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+      {{
+        fname = $3;
+        formals = $5;
+        body = List.rev $8
+      }}
+    | DEF ATTR ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+      {{
+        fname = $3;
+        formals = $5;
+        body = List.rev $8
+      }}
+    | DEF FUNC ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+      {{
+        fname = $3;
+        formals = $5;
+        body = List.rev $8
+      }}
+
 
 formals_opt:
     | /* nothing */         { [] }
