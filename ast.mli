@@ -51,7 +51,6 @@ type func_definition = { (* Handles declarations of functions, components, attri
     name : identifier; (* Name of the function *)
     formals : identifier list; (* Name of the formal parameters *)
     inheritance : parent; (* Name of any parent components, ie box, or null *)
-    locals : identifier list; (* Locally Defined Variables *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
 }
 
