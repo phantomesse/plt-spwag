@@ -50,7 +50,7 @@ stmt_list:
 
 stmt:
     | expr NEWLINE                         { Expr($1) }
-    | RETURN expr NEWLINE                  { Return($2) }
+    | RETURN expr                          { Return($2) }
     | LBRACE stmt_list RBRACE              { Block(List.rev $2) }
     | IF expr stmt %prec NOELSE            { If($2, $3, Block([])) }
     | IF expr stmt ELSE stmt               { If($2, $3, $5) }
@@ -61,6 +61,6 @@ expr:
     | expr MINUS expr      { Binop($1, Minus, $3) }
     | expr TIMES expr      { Binop($1, Times, $3) }
     | expr DIVIDE expr     { Binop($1, Divide, $3) }
-    | VAR ASSIGN expr      { Assign($1, $3) }
-    | VAR                  { Var($1) }
+    | ID                  { Var($1) }
+    | ID ASSIGN expr      { Assign($1, $3) }
     | LITERAL              { Lit($1) }
