@@ -37,7 +37,7 @@ type stmt = (* Statements ; WIP *)
      end
 *)
 
-type func_definition = { (* Handles declarations of functions, components, attributes, slides)
+type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
     type: func_type; (* e.g. slide, component, attribute, func *)
     name : identifier; (* Name of the function *)
     formals : identifier list; (* Name of the formal parameters *)
