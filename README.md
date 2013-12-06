@@ -1,5 +1,8 @@
 # Single Page Web App Generator (SPWAG)
 
+Just type 'make' to compile our files.
+
+
 ## GitHub Page
 [http://phantomesse.github.io/plt-spwag/](http://phantomesse.github.io/plt-spwag/)
 
