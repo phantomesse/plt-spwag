@@ -23,13 +23,19 @@ type func_call = {
     name : identifier; (* Name of the function *)
     actuals : expr list; (* Evaluated actual parameters *)
     mods : stmt list; (* Additional statements *)
-}   
+}  
+
+type var_declaration = {
+    name : identifier;
+    value : expr;
+}
+
 (* Expressions *)
 and expr_detail = 
     | Binop of expr * operator * expr (* a + b *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
-    | Litstr of var_decl (* “foo” *)
+    | Litstr of var_declaration (* “foo” *)
     | Litbool of bool (* true *)
     | Assign of identifier * expr (* foo - 42 *) (*we should examine this*)
     | Call of func_call

@@ -29,7 +29,7 @@ and expr =
     | Litper of int (* 42% *)
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
-    | Assign of identifier * expr (* foo - 42 *) (*we should examine this*)
+    | Assign of string * expr (* foo - 42 *) (*we should examine this*)
     | Call of string * expression list
     | Noexpr of null (* for double newlines *)
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
