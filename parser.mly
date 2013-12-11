@@ -4,7 +4,7 @@
 %token ATTR COMP FUNC DEF ELSE END IF IMPORT ISA NULL RETURN SLIDE VAR WHILE LBRACE RBRACE
 %token <int> LITERAL PERCENT
 %token <string> ID
-%token <bool> TRUE FALSE
+%token TRUE FALSE
 
 %nonassoc NOELSE
 %nonassoc IF ELSE
@@ -87,5 +87,5 @@ expr:
     | LITERAL              { Litint($1) }
     | PERCENT              { Litper($1) }
     | ID                   { Litstr($1) }
-    | TRUE                 { Litbool($1) }
-    | FALSE                { Litbool($1) }
+    | TRUE                 { Litbool(true) }
+    | FALSE                { Litbool(false) }

@@ -41,7 +41,7 @@ rule token =
     | "while"                                        { WHILE }
     | ['a'-'z']['a'-'z' '0'-'9' '-']*  as idstr      { ID(idstr) }
     | ['0'-'9']+ as lit                              { LITERAL(int_of_string lit) }
-    | ['0'-'9']+'%' as lit                           { PERCENT(int_of_string String.sub lit 0 (String.length lit - 1)) }
+    | ['0'-'9']+'%' as lit                           { PERCENT(int_of_string (String.sub lit 0 ((String.length lit)-1))) }
     | eof                                            { EOF }
     | _ as char                                      { raise (Failure("illegal character " ^ Char.escaped char)) }
 and multi_line_comment = parse
