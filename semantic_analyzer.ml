@@ -15,7 +15,7 @@ type translation_environment = {
 (* Taken from Edwards' slides *)
 let rec find_variable (scope: symbol_table) name =
     try
-	List.find (find (fun (s, _, _, _) -> s = name) scope.variables
+	List.find (fun (s, _, _, _) -> s = name) scope.variables
     with Not_found ->
     	match scope.parent with
 	    Some(parent) -> find_variable parent name
@@ -35,8 +35,9 @@ let rec expr env = function
 
   | Ast.Noexpr(v) -> Sast.Noexpr(v), Sast.Types.null
 
-  | Ast.Call(v) -> Sast.Call(v), Sast.Types.funct_type
-
+  | Ast.Call(s, exprList) -> Sast.Call(s, exprlist) 
+  (* This is extremely problematic, we'll deal with this later *) 
+ 
   | Ast.Assign(id, e1) -> (* General idea is to make sure the arguments are valid; code may not work though *)
 	let vdecl = try
 	    find_variable env.scope id
@@ -49,7 +50,7 @@ let rec expr env = function
 	with Not_found ->
 	    raise (Error("undeclared expression " ^ e1))
 	in
-	let (_, id_type) = vdecl in ( *get the variable's type *)
+	let (_, id_type) = vdecl in (* get the variable's type *)
 	let (_, expr_type ) = expreval in
 	Sast.Assign(id, e1), id_type, expr_type
 
@@ -82,7 +83,7 @@ let rec stmt env = function
    	
 	let scope' = { S.parent = Some(env.scope); S.variables = [] }
 	and exceptions' =
-	    { excep_parent = Some(env.exception_scope); exception = [] }
+	    { excep_parent = Some(env.exception_scope); exceptions = [] }
 	in
 
 	(* New environment: same, but with new symbol tables *)
@@ -117,10 +118,10 @@ let rec parent env = function
 	with Not_found ->
 	    raise (Error("undeclared identifier " ^ id))
 	in
-	let (_, id_type) = vdecl in ( *get the variable's type *)
+	let (_, id_type) = vdecl in (* get the variable's type *)
 	Sast.Parent(id), id_type
 
-  | Ast.Noparent(v) -> Sast.Noparent(v), Sast.Types.null
+  | Ast.Noparent(v) -> Sast.Noparent(v), Sast.Types.Null
 
 
 

@@ -21,7 +21,8 @@ type func_call = {
     name : identifier; (* Name of the function *)
     actuals : expr list; (* Evaluated actual parameters *)
     mods : stmt list; (* Additional statements *)
-}   
+}  
+
 (* Expressions *)
 and expr = 
     | Binop of expr * operator * expr (* a + b *)
@@ -30,8 +31,9 @@ and expr =
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
     | Assign of string * expr (* foo - 42 *) (*we should examine this*)
-    | Call of string * expression list
+    | Call of string * expr list
     | Noexpr of null (* for double newlines *)
+
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)
     | Block of stmt list (* { ... } *)
@@ -46,6 +48,13 @@ and stmt = (* Statements ; WIP *)
 # body
      end
 *)
+
+(*A variable has a name and value *) 
+type var_declaration = {
+    name : identifier;
+    value : expr;
+}
+
 type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
     t: func_type; (* e.g. slide, component, attribute, func *)
     name : identifier; (* Name of the function *)

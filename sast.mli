@@ -1,3 +1,5 @@
+open Ast
+
 (* Null type *)
 type t = Int | Per | Str | Bool | Null | Func_type
 
@@ -19,23 +21,14 @@ type parent =
     | Noparent of null
 
 (* Handles calls of functions, components, *)
-type func_call = { 
-    name : identifier; (* Name of the function *)
-    actuals : expr list; (* Evaluated actual parameters *)
-    mods : stmt list; (* Additional statements *)
-}  
 
-type var_declaration = {
-    name : identifier;
-    value : expr;
-}
 
 (* Expressions *)
 and expr_detail = 
     | Binop of expr * operator * expr (* a + b *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
-    | Litstr of var_declaration (* “foo” *)
+    | Litstr of Ast.var_declaration (* “foo” *)
     | Litbool of bool (* true *)
     | Assign of identifier * expr (* foo - 42 *) (*we should examine this*)
     | Call of func_call
@@ -57,6 +50,20 @@ and stmt = (* Statements ; WIP *)
 	# body
      end
 *)
+
+(* Handles calls of functions, components, *)
+type func_call = { 
+    name : identifier; (* Name of the function *)
+    actuals : expr list; (* Evaluated actual parameters *)
+    mods : stmt list; (* Additional statements *)
+}  
+
+(*A variable has a name and value *) 
+type var_declaration = {
+    name : identifier;
+    value : expr;
+}
+
 
 type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
     t: func_type; (* e.g. slide, component, attribute, func *)
