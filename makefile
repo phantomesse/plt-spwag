@@ -1,4 +1,4 @@
-all: ir.cmi sast.cmi ast.cmi parser.cmi parser.cmo scanner.cmo
+all: ast.cmi sast.cmi parser.cmi ir.cmi parser.cmo scanner.cmo
 
 scanner.ml: scanner.mll
 	ocamllex scanner.mll
