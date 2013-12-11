@@ -1,4 +1,6 @@
 (* Null type *)
+type Types = Int | Per | Str | Bool | null | func_type
+
 type null = Null
 
 (* Identifiers *)
@@ -24,7 +26,7 @@ type func_call = {
 }   
 (* Expressions *)
 and expr_detail = 
-    | Binop of expr * Ast.op * expr (* a + b *)
+    | Binop of expr * Ast.operator * expr (* a + b *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
     | Litstr of var_decl (* “foo” *)
