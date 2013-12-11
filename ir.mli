@@ -10,6 +10,9 @@
 	easier output
 *)
 
+(* The sast is needed for javascript functions *)
+open Sast 
+
 (* This represents an element within a page *)
 (* An empty string "" corresponds to a null value *)
 type element = {
@@ -62,4 +65,4 @@ type page = {
 (* The overall program is just a list of pages *)
 (* This is a list of pages, and a list of javascript function definitions *)
 (* These functions must be functions! Cannot be components, attributes, etc. *)
-type program = page list * sast.func_definition list 
+type program = page list * Sast.func_definition list 
