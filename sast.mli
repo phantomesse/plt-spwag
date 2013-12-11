@@ -1,5 +1,5 @@
 (* Null type *)
-type Types = Int | Per | Str | Bool | null | func_type
+type t = Int | Per | Str | Bool | Null | Func_type
 
 type null = Null
 
@@ -26,7 +26,7 @@ type func_call = {
 }   
 (* Expressions *)
 and expr_detail = 
-    | Binop of expr * Ast.operator * expr (* a + b *)
+    | Binop of expr * operator * expr (* a + b *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
     | Litstr of var_decl (* “foo” *)
@@ -35,7 +35,7 @@ and expr_detail =
     | Call of func_call
     | Noexpr of null (* for double newlines *)
 
-and expr = expr_detail * Types.t
+and expr = expr_detail * t
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)

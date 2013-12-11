@@ -30,7 +30,7 @@ and expr =
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
     | Assign of identifier * expr (* foo - 42 *) (*we should examine this*)
-    | Call of func_call
+    | Call of string * expression list
     | Noexpr of null (* for double newlines *)
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)
