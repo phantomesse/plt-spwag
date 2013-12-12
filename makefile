@@ -1,4 +1,9 @@
-all: ast.cmi sast.cmi parser.cmi ir.cmi parser.cmo scanner.cmo
+OBJS = ast.cmi sast.cmi parser.cmi ir.cmi parser.cmo scanner.cmo spwag.cmo
+
+all: ast.cmi sast.cmi parser.cmi ir.cmi parser.cmo scanner.cmo spwag.cmo
+
+spwag: $(OBJS)
+	ocamlc -o spwag $(OBJS)
 
 scanner.ml: scanner.mll
 	ocamllex scanner.mll
