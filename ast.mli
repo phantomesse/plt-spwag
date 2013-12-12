@@ -31,7 +31,6 @@ and expr =
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
     | Assign of identifier * expr (* foo - 42 *) (*we should examine this*)
-    | Call of string * expr list
     | Noexpr of null (* for double newlines *)
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
@@ -41,6 +40,7 @@ and stmt = (* Statements ; WIP *)
     | Return of expr (* return 42; *)
     | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *)
     | While of expr * stmt (* while (i<10) \n  i = i + 1 \n end \n *)
+    | Call of func_call
 
 (* A function alters the control flow. This is how you define a function:
      define type identifier (parameters)
