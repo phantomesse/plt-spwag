@@ -1,9 +1,9 @@
 %{ open Ast %}
 
 %token LPAREN RPAREN PLUS MINUS TIMES DIVIDE ASSIGN EOF EQUALS NOTEQUALS LESSTHAN GREATERTHAN NOT OR AND COMMA NEWLINE
-%token ATTR COMP FUNC DEF ELSE END IF IMPORT ISA NULL RETURN SLIDE VAR WHILE LBRACE RBRACE
+%token ATTR COMP FUNC DEF ELSE END IF IMPORT ISA NULL RETURN SLIDE VAR WHILE LBRACE RBRACE LBRACK RBRACK
 %token <int> LITERAL PERCENT
-%token <string> ID
+%token <string> ID STRING
 %token TRUE FALSE
 
 %nonassoc NOELSE
@@ -20,11 +20,11 @@
 %%
 
 program: /* global vars, functions */
-    | /* nothing */             { [], [] }
+      /* nothing */             { [], [] }
     | program NEWLINE func_decl { fst $1, ($3 :: snd $1) }
 
 func_decl:
-    | DEF SLIDE ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+      DEF SLIDE ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
       {{
         t = Slide;
         name = Identifier($3);
@@ -58,34 +58,56 @@ func_decl:
       }}
 
 formals_opt:
-    | /* nothing */         { [] }
+     /* nothing */          { [] }
     | formal_list           { List.rev $1 }
 
 formal_list:
-    | ID                    { [Identifier($1)] }
+      ID                    { [Identifier($1)] }
     | formal_list COMMA ID  { Identifier($3) :: $1 }
 
+actuals_opt:
+     /* nothing */          { [] }
+    | actuals_list          { List.rev $1 }
+
+actuals_list:
+      expr                  	{ [$1] }
+    | actuals_list COMMA expr   { $3 :: $1 }
+
+mods_opt:
+	/* nothing */			{ [] }
+	| stmt_list				{ List.rev $1}
+
 stmt_list:
-    | /* nothing */         { [] }
+     /* nothing */          { [] }
     | stmt_list stmt        { $2 :: $1 }
 
 stmt:
-    | expr NEWLINE                         { Expr($1) }
-    | RETURN expr                          { Return($2) }
-    | LBRACE stmt_list RBRACE              { Block(List.rev $2) }
-    | IF expr stmt %prec NOELSE            { If($2, $3, Block([])) }
-    | IF expr stmt ELSE stmt               { If($2, $3, $5) }
-    | WHILE LPAREN expr RPAREN stmt        { While($3, $5) }
-
+	NEWLINE	stmt						 		  	{ $2 }
+    | expr NEWLINE                       		  	{ Expr($1) }
+    | RETURN expr NEWLINE                		  	{ Return($2) }
+    | LBRACE stmt_list RBRACE            		  	{ Block(List.rev $2) }
+    | IF expr NEWLINE stmt %prec NOELSE  		  	{ If($2, $4, Block([])) }
+    | IF expr NEWLINE stmt ELSE stmt     		  	{ If($2, $4, $6) }
+    | WHILE expr NEWLINE LBRACE stmt_list RBRACE	{ While($2, Block(List.rev $5)) }
+	| VAR ID NEWLINE					   			{ Declaration(Identifier($2))}
+	| VAR ID ASSIGN expr NEWLINE		   			{ Decassign(Identifier($2), $4) }
+	
 expr:
-    | expr PLUS expr       { Binop($1, Plus, $3) }
+      expr PLUS expr       { Binop($1, Plus, $3) }
     | expr MINUS expr      { Binop($1, Minus, $3) }
     | expr TIMES expr      { Binop($1, Times, $3) }
     | expr DIVIDE expr     { Binop($1, Divide, $3) }
-    | VAR ID ASSIGN expr   { Assign(Identifier($2), $4) }
     | ID ASSIGN expr       { Assign(Identifier($1), $3) }
     | LITERAL              { Litint($1) }
+	| STRING			   { Litstr($1) }
     | PERCENT              { Litper($1) }
-    | ID                   { Litstr($1) }
+    | ID                   { Variable(Identifier($1)) }
     | TRUE                 { Litbool(true) }
     | FALSE                { Litbool(false) }
+	| ID LPAREN actuals_opt RPAREN NEWLINE LBRACE mods_opt RBRACE
+	  {Call({
+	  	name = Identifier($1);
+		actuals = $3;
+		mods = $7;
+	  })}
+

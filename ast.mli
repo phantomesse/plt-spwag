@@ -25,36 +25,26 @@ type func_call = {
 
 (* Expressions *)
 and expr = 
-    | Binop of expr * operator * expr (* a + b *)
+      Binop of expr * operator * expr (* a + b *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
-    | Assign of identifier * expr (* foo - 42 *) (*we should examine this*)
-    | Noexpr of null (* for double newlines *)
+    | Assign of identifier * expr (* foo - 42 *) 
+    | Variable of identifier (* a *)
+    | Call of func_call (* Calling a function, unique in that it can contain statements*)
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)
-    | Block of stmt list (* { ... } *)
+	  Block of stmt list (* { ... } *)
     | Expr of expr (* foo = bar + 3; *)
     | Return of expr (* return 42; *)
     | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *)
     | While of expr * stmt (* while (i<10) \n  i = i + 1 \n end \n *)
-    | Call of func_call
+	| Declaration of identifier (* Declaring a variable *)
+	| Decassign of identifier * expr (* Declaring a variable and then assigning it something*)
 
-(* A function alters the control flow. This is how you define a function:
-     define type identifier (parameters)
-       # variable declaration (subcomponents, subattributes defined maybe?)
-# body
-     end
-*)
-
-(*A variable has a name and value *) 
-type var_declaration = {
-    name : identifier;
-    value : expr;
-}
-
+(* Function definition that makes up the basic structure of the program*)
 type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
     t: func_type; (* e.g. slide, component, attribute, func *)
     name : identifier; (* Name of the function *)

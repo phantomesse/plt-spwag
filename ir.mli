@@ -38,7 +38,8 @@ type element = {
 	height: string;
 	image: string;
 	text: string;
-	elements: element list;
+	elements: element list; (* TODO: This needs to be a map *)
+	(* Add javascript function calls *)
 }
 
 (* This is a page *)
