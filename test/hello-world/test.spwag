@@ -6,7 +6,7 @@ define slide main() {
         font-size(40px)
         width(100%)
     }
-    box ("hello-world-image") {
+    box("hello-world-image") {
         image("cat.jpg")
     }
 }
