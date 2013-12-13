@@ -99,10 +99,10 @@ let string_of_vdecl = function
 	Identifier(s) -> "int " ^ s ^ ";\n"
 
 let string_of_function_type = function
-	Slide -> "Slide" 
-	| Comp -> "Comp" 
-	| Attr -> "Attr"
-	| Func -> "Func"
+	Slide -> "define slide" 
+	| Comp -> "define comp" 
+	| Attr -> "define attr"
+	| Func -> "define func"
 
 let string_of_fdecl fdecl =
   (string_of_function_type fdecl.t) ^ " " ^

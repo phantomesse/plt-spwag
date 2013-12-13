@@ -21,40 +21,40 @@
 
 program: /* global vars, functions */
       /* nothing */             { [], [] }
-    | program NEWLINE func_decl { fst $1, ($3 :: snd $1) }
+    | program func_decl 		{ fst $1, ($2 :: snd $1) }
 
 func_decl:
-      DEF SLIDE ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+      DEF SLIDE ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
         t = Slide;
         name = Identifier($3);
         formals = $5;
         inheritance = Noparent(Null);
-        body = List.rev $8
+        body = List.rev $9
       }}
-    | DEF COMP ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+    | DEF COMP ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
         t = Comp;
         name = Identifier($3);
         formals = $5;
         inheritance = Noparent(Null);
-        body = List.rev $8
+        body = List.rev $9
       }}
-    | DEF ATTR ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+    | DEF ATTR ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
         t = Attr;
         name = Identifier($3);
         formals = $5;
         inheritance = Noparent(Null);
-        body = List.rev $8
+        body = List.rev $9
       }}
-    | DEF FUNC ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+    | DEF FUNC ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
         t = Func;
         name = Identifier($3);
         formals = $5;
         inheritance = Noparent(Null);
-        body = List.rev $8
+        body = List.rev $9
       }}
 
 formals_opt:
@@ -79,10 +79,10 @@ ids_list:
 
 mods_opt:
 	/* nothing */						{ Block([]) }
-	| LBRACE NEWLINE stmt_list RBRACE	{ Block(List.rev $3) }
+	| LBRACE stmt_list RBRACE			{ Block(List.rev $2) }
 
 stmt_list:
-     /* nothing */          { [] }
+     NEWLINE	            { [] }
     | stmt_list stmt        { $2 :: $1 }
 
 stmt:

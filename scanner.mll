@@ -26,7 +26,7 @@ rule token =
     | '['											 { LBRACK }
 	| ']'											 { RBRACK }
 	| ','                                            { COMMA }
-    | '\n'[' ' '\r' '\t' '\n']+                      { NEWLINE }
+    | '\n'[' ' '\r' '\t' '\n']*                      { NEWLINE }
     | "attr"                                         { ATTR }
     | "comp"                                         { COMP }
     | "func"                                         { FUNC }
