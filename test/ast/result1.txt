@@ -1,0 +1,4 @@
+
+define slide main()
+{
+}
