@@ -73,22 +73,25 @@ actuals_list:
       expr                  	{ [$1] }
     | actuals_list COMMA expr   { $3 :: $1 }
 
+ids_list:
+	  LBRACK expr RBRACK			{ [$2] }
+	| ids_list LBRACK expr RBRACK	{ $3 :: $1 }
+
 mods_opt:
-	/* nothing */			{ [] }
-	| stmt_list				{ List.rev $1}
+	/* nothing */						{ Block([]) }
+	| LBRACE NEWLINE stmt_list RBRACE	{ Block(List.rev $3) }
 
 stmt_list:
      /* nothing */          { [] }
     | stmt_list stmt        { $2 :: $1 }
 
 stmt:
-	NEWLINE	stmt						 		  	{ $2 }
-    | expr NEWLINE                       		  	{ Expr($1) }
+      expr NEWLINE                       		  	{ Expr($1) }
     | RETURN expr NEWLINE                		  	{ Return($2) }
-    | LBRACE stmt_list RBRACE            		  	{ Block(List.rev $2) }
+    | LBRACE stmt_list RBRACE NEWLINE      		  	{ Block(List.rev $2) }
     | IF expr NEWLINE stmt %prec NOELSE  		  	{ If($2, $4, Block([])) }
     | IF expr NEWLINE stmt ELSE stmt     		  	{ If($2, $4, $6) }
-    | WHILE expr NEWLINE LBRACE stmt_list RBRACE	{ While($2, Block(List.rev $5)) }
+    | WHILE expr NEWLINE stmt						{ While($2, $4) }
 	| VAR ID NEWLINE					   			{ Declaration(Identifier($2))}
 	| VAR ID ASSIGN expr NEWLINE		   			{ Decassign(Identifier($2), $4) }
 	
@@ -104,10 +107,11 @@ expr:
     | ID                   { Variable(Identifier($1)) }
     | TRUE                 { Litbool(true) }
     | FALSE                { Litbool(false) }
-	| ID LPAREN actuals_opt RPAREN NEWLINE LBRACE mods_opt RBRACE
+	| ID ids_list		   { Component(Identifier($1), List.rev $2) }
+	| ID LPAREN actuals_opt RPAREN mods_opt 
 	  {Call({
 	  	name = Identifier($1);
 		actuals = $3;
-		mods = $7;
+		mods = $5;
 	  })}
 

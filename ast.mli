@@ -20,7 +20,7 @@ type parent =
 type func_call = { 
     name : identifier; (* Name of the function *)
     actuals : expr list; (* Evaluated actual parameters *)
-    mods : stmt list; (* Additional statements *)
+    mods : stmt; (* Additional statements, which could be a block *)
 }  
 
 (* Expressions *)
@@ -31,7 +31,8 @@ and expr =
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
     | Assign of identifier * expr (* foo - 42 *) 
-    | Variable of identifier (* a *)
+    | Variable of identifier (* although this is named Variable, can also be the name of a slide/function *)
+	| Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
     | Call of func_call (* Calling a function, unique in that it can contain statements*)
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
