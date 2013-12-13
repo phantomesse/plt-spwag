@@ -1,6 +1,6 @@
-OBJS = ast.cmi sast.cmi parser.cmi ir.cmi parser.cmo scanner.cmo spwag.cmo
+OBJS = ast.cmo parser.cmo scanner.cmo spwag.cmo
 
-all: ast.cmi sast.cmi parser.cmi ir.cmi parser.cmo scanner.cmo spwag.cmo
+all: ast.cmo parser.cmi parser.cmo scanner.cmo spwag
 
 spwag: $(OBJS)
 	ocamlc -o spwag $(OBJS)
@@ -19,4 +19,4 @@ parser.ml parser.mli: parser.mly
 
 .PHONY: clean
 clean:
-	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi
+	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi spwag

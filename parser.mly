@@ -110,7 +110,7 @@ expr:
 	| ID ids_list		   { Component(Identifier($1), List.rev $2) }
 	| ID LPAREN actuals_opt RPAREN mods_opt 
 	  {Call({
-	  	name = Identifier($1);
+	  	cname = Identifier($1);
 		actuals = $3;
 		mods = $5;
 	  })}

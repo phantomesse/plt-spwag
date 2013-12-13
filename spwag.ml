@@ -10,10 +10,9 @@ let _ =
   let program = Parser.program Scanner.token lexbuf in
   match action with
     Ast -> let listing = Ast.string_of_program program
-    (* TODO: Implement Ast.string_of_program function in ast.ml *)
            in print_string listing
-  | Irgenerator -> Ast.string_of_program program (* TESTING PURPOSES ONLY *)
-  | Compile -> Ast.string_of_program program
+(*  | Irgenerator -> Ast.string_of_program program (* TESTING PURPOSES ONLY *)
+  | Compile -> Ast.string_of_program program *)
 (*  
   | Irgenerator -> ignore (Irgenerator.run program)
   | Compile -> Compile.translate program
