@@ -51,6 +51,7 @@ type func_definition = { (* Handles declarations of functions, components, attri
     name : identifier; (* Name of the function *)
     formals : identifier list; (* Name of the formal parameters *)
     inheritance : parent; (* Name of any parent components, ie box, or null *)
+	paractuals: expr list; (* This represents the actuals passed to the parent *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
 }
 
@@ -64,8 +65,10 @@ let string_of_identifier = function
 let rec string_of_call call = 
 	(string_of_identifier call.cname) ^ "(" ^
 	String.concat ", " (List.map string_of_expr call.actuals) ^ ")"
-	^ "{\n" ^ 
-	(string_of_stmt call.mods) ^ "}"
+	^ (match call.mods with 
+	Block([]) -> ""
+	| Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}" 
+	| something -> "ERROR!!!!!!" )
 and string_of_expr = function
     Binop(e1, o, e2) ->
 	    string_of_expr e1 ^ " " ^
@@ -92,11 +95,11 @@ and string_of_stmt = function
 	| If(e, s1, s2) ->  "if " ^ string_of_expr e ^ "\n" ^
 	    string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
 	| While(e, s) -> "while " ^ string_of_expr e ^ "\n " ^ string_of_stmt s
-	| Declaration(i) -> "var " ^ (string_of_identifier i)
-	| Decassign(i, e) -> "var " ^ (string_of_identifier i) ^ "= " ^ (string_of_expr e) 
+	| Declaration(i) -> "var " ^ (string_of_identifier i) ^ "\n"
+	| Decassign(i, e) -> "var " ^ (string_of_identifier i) ^ "= " ^ (string_of_expr e) ^ "\n"
 
 let string_of_vdecl = function
-	Identifier(s) -> "int " ^ s ^ ";\n"
+	Identifier(s) -> "var " ^ s ^ "\n"
 
 let string_of_function_type = function
 	Slide -> "define slide" 
@@ -104,12 +107,21 @@ let string_of_function_type = function
 	| Attr -> "define attr"
 	| Func -> "define func"
 
+let string_of_inheritance i p = 
+	" isa " ^ (string_of_identifier (match i with Parent(id) -> id | Noparent(n) -> Identifier("ERROR!!"))) ^ 
+	"(" ^ String.concat ", " (List.map string_of_expr p) ^ ")" 
+
 let string_of_fdecl fdecl =
-  (string_of_function_type fdecl.t) ^ " " ^
-  (string_of_identifier fdecl.name) ^ 
-  "(" ^ String.concat ", " (List.map string_of_identifier fdecl.formals) ^ ")\n{\n" ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
-  "}\n"
+	(string_of_function_type fdecl.t) ^ " " ^
+	(string_of_identifier fdecl.name) ^ 
+	"(" ^ String.concat ", " (List.map string_of_identifier fdecl.formals) ^ ")" ^ 
+	(match fdecl.t with 
+		Comp -> (string_of_inheritance fdecl.inheritance fdecl.paractuals)
+		| _ -> ""
+	) ^
+	"\n{\n" ^ 
+	String.concat "" (List.map string_of_stmt fdecl.body) ^
+	"}\n"
 
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^

@@ -1,0 +1,15 @@
+define slide main()
+{
+  var a = true
+  var b = false
+  12%
+  "String"
+}
+
+define slide two()
+{
+}
+
+define comp home() isa box()
+{
+}

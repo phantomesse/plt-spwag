@@ -1,4 +1,8 @@
-%{ open Ast %}
+%{ 
+open Ast 
+open Linecounter
+let parse_error msg = Printf.eprintf "%s at line %d \n" msg !linecount 
+%}
 
 %token LPAREN RPAREN PLUS MINUS TIMES DIVIDE ASSIGN EOF EQUALS NOTEQUALS LESSTHAN GREATERTHAN NOT OR AND COMMA NEWLINE
 %token ATTR COMP FUNC DEF ELSE END IF IMPORT ISA NULL RETURN SLIDE VAR WHILE LBRACE RBRACE LBRACK RBRACK
@@ -21,6 +25,8 @@
 
 program: /* global vars, functions */
       /* nothing */             { [], [] }
+	| program NEWLINE			{ $1 }
+	| program VAR ID NEWLINE	{(Identifier($3) :: fst $1), snd $1 }
     | program func_decl 		{ fst $1, ($2 :: snd $1) }
 
 func_decl:
@@ -30,15 +36,18 @@ func_decl:
         name = Identifier($3);
         formals = $5;
         inheritance = Noparent(Null);
+		paractuals = [];
         body = List.rev $9
       }}
-    | DEF COMP ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
+    | DEF COMP ID LPAREN formals_opt RPAREN ISA ID LPAREN actuals_opt RPAREN
+	  NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
         t = Comp;
         name = Identifier($3);
         formals = $5;
-        inheritance = Noparent(Null);
-        body = List.rev $9
+        inheritance = Parent(Identifier($8));
+		paractuals = $10;
+        body = List.rev $14
       }}
     | DEF ATTR ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
@@ -46,6 +55,7 @@ func_decl:
         name = Identifier($3);
         formals = $5;
         inheritance = Noparent(Null);
+		paractuals = [];
         body = List.rev $9
       }}
     | DEF FUNC ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
@@ -54,6 +64,7 @@ func_decl:
         name = Identifier($3);
         formals = $5;
         inheritance = Noparent(Null);
+		paractuals = [];
         body = List.rev $9
       }}
 
@@ -83,7 +94,8 @@ mods_opt:
 
 stmt_list:
      NEWLINE	            { [] }
-    | stmt_list stmt        { $2 :: $1 }
+    | stmt_list NEWLINE 	{ $1 }
+	| stmt_list stmt        { $2 :: $1 }
 
 stmt:
       expr NEWLINE                       		  	{ Expr($1) }

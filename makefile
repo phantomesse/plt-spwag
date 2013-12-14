@@ -1,6 +1,6 @@
-OBJS = ast.cmo parser.cmo scanner.cmo spwag.cmo
+OBJS = ast.cmo linecounter.cmo parser.cmo scanner.cmo spwag.cmo
 
-all: ast.cmo parser.cmi parser.cmo scanner.cmo spwag
+all: ast.cmo linecounter.cmo parser.cmi parser.cmo scanner.cmo spwag
 
 spwag: $(OBJS)
 	ocamlc -o spwag $(OBJS)

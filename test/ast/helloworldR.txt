@@ -1,0 +1,16 @@
+
+define slide main()
+{
+box(){
+id("hello-world-text")
+text("Hello world!")
+padding-top(40)
+padding-bottom(20)
+font-size(40)
+width(100%)
+}
+box(){
+id("hello-world-text")
+image("cat.jpg")
+}
+}
