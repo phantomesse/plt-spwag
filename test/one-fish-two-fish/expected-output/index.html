@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <link rel="stylesheet" type="text/less" href="../../../config/config.css">
+    <style type="text/css">
+        #title-background {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #title-text {
+            padding-top: 40px;
+            padding-bottom: 20px;
+            font-size: 40px;
+            width: 100%;
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <div id="main" class="slide">
+        <div id="title-background">
+            <img src="titlebg.png" />
+        </div>
+
+        <div id="title-text" class="box">
+            One Fish Two Fish
+        </div>
+
+        <div id="subtitle-text" class="box">
+            by Dr. Seuss
+        </div>
+
+        <a class="next" href="#slide1"></a>
+    </div>
+
+    <div id="slide1" class="slide">
+        <div id="text1" class="box poem-text-box">
+            one fish
+        </div>
+
+        <a class="prev" href="#main"></a>
+        <a class="next" href="#slide2"></a>
+    </div>
+
+    <div id="slide2" class="slide">
+        <div id="text2" class="box poem-text-box">
+            two fish
+        </div>
+
+        <a class="prev" href="#slide1"></a>
+    </div>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../config/config.js"></script>
+</body>
+</html>

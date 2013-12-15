@@ -1,0 +1,46 @@
+define slide main() {
+    box("title-background") {
+        image("titlebg.png")
+        position-x(0px)
+        position-y(0px)
+    }
+
+    box("title-text") {
+        text("One Fish Two Fish")
+        padding-top(40px)
+        padding-bottom(20px)
+        font-size(40px)
+        width(100%)
+    }
+
+    box("subtitle-text") {
+        text("by Dr. Seuss")
+    }
+
+    next("slide1");
+}
+
+define slide slide1() {
+    poem-text-box("text1", "one fish");
+
+    prev("main");
+    next("slide2");
+}
+
+define slide slide2() {
+    poem-text-box("text2", "two fish");
+
+    prev("slide1");
+    next("slide3");
+}
+
+define comp poem-text-box(id, mytext) isa box(id) {
+    text(mytext)
+}
+
+
+One fish, Two fish, Red fish, Blue fish,
+Black fish, Blue fish, Old fish, New fish.
+This one has a littlecar.
+This one has a little star.
+Say! What a lot of fish there are.

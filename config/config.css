@@ -8,7 +8,7 @@
 }
 
 html, body {
-    padding-top: 20px;
+    padding: 10px 0px;
     background: #EEE;
     font: 20px 'Ubuntu', sans-serif;
     width: 100%;
@@ -21,10 +21,10 @@ div.slide {
     position: relative;
     background: white;
     text-align: center;
-    border-radius: 5px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     width: 900px;
     height: 600px;
+    transition: all 0.1s linear 0s;
 }
 
 div.box {
@@ -50,12 +50,10 @@ a.prev, a.next {
 
 a.prev {
     left: 0px;
-    border-radius: 5px 0px 0px 5px;
 }
 
 a.next {
     right: 0px;
-    border-radius: 0px 5px 5px 0px;
 }
 
 a.prev:hover, a.next:hover {
