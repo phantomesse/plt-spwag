@@ -17,6 +17,38 @@
             width: 100%;
         }
 
+        .poem-text-box {
+            padding-top: 40px;
+            padding-bottom: 20px;
+            width: 100%;
+        }
+
+        .fish-box {
+        }
+
+        #one-fish {
+            background-color: #EEE;
+        }
+
+        #two-fish1 {
+            background-color: #1DC917;
+            width: 350px;
+            height: 350px;
+        }
+
+        #two-fish2 {
+            background-color: #1DC917;
+            width: 350px;
+            height: 350px;
+        }
+
+        #red-fish {
+            background-color: #E72E28;
+        }
+
+        #blue-fish {
+            background-color: #289AE7;
+        }
 
     </style>
 </head>
@@ -43,6 +75,10 @@
             one fish
         </div>
 
+        <div id="one-fish" class="box fish-box">
+            <img src="fish.png" />
+        </div>
+
         <a class="prev" href="#main"></a>
         <a class="next" href="#slide2"></a>
     </div>
@@ -52,7 +88,42 @@
             two fish
         </div>
 
+        <div id="two-fish1" class="box fish-box">
+            <img src="fish.png" />
+        </div>
+
+        <div id="two-fish2" class="box fish-box">
+            <img src="fish.png" />
+        </div>
+
         <a class="prev" href="#slide1"></a>
+        <a class="next" href="#slide3"></a>
+    </div>
+
+    <div id="slide3" class="slide">
+        <div id="text3" class="box poem-text-box">
+            red fish
+        </div>
+
+        <div id="red-fish" class="box fish-box">
+            <img src="fish.png" />
+        </div>
+
+        <a class="prev" href="#slide2"></a>
+        <a class="next" href="#slide4"></a>
+    </div>
+
+    <div id="slide4" class="slide">
+        <div id="text4" class="box poem-text-box">
+            blue fish
+        </div>
+
+        <div id="blue-fish" class="box fish-box">
+            <img src="fish.png" />
+        </div>
+
+        <a class="prev" href="#slide3"></a>
+        <a class="next" href="#slide5"></a>
     </div>
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>

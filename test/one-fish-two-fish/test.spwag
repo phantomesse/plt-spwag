@@ -17,25 +17,61 @@ define slide main() {
         text("by Dr. Seuss")
     }
 
-    next("slide1");
+    next("slide1")
 }
 
 define slide slide1() {
-    poem-text-box("text1", "one fish");
+    poem-text-box("text1", "one fish")
+    fish-box("one-fish", "#EEE")
 
-    prev("main");
-    next("slide2");
+    prev("main")
+    next("slide2")
 }
 
 define slide slide2() {
-    poem-text-box("text2", "two fish");
+    poem-text-box("text2", "two fish")
+    
+    fish-box("two-fish1", "#1DC917") {
+        width(350px)
+        height(350px)
+    }
 
-    prev("slide1");
-    next("slide3");
+    fish-box("two-fish2", "#1DC917") {
+        width(350px)
+        height(350px)
+    }
+
+    prev("slide1")
+    next("slide3")
 }
+
+define slide slide3() {
+    poem-text-box("text3", "red fish")
+    fish-box("red-fish", "#E72E28")
+
+    prev("slide3")
+    next("slide4")
+}
+
+define slide slide4() {
+    poem-text-box("text4", "blue fish")
+    fish-box("blue-fish", "#E72E28")
+
+    prev("slide3")
+    next("slide5")
+}
+
 
 define comp poem-text-box(id, mytext) isa box(id) {
     text(mytext)
+    padding-top(40px)
+    padding-bottom(20px)
+    width(100%)
+}
+
+define comp fish-box(id, color) isa box(id) {
+    image("fish.png")
+    background-color(color)
 }
 
 
