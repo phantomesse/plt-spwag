@@ -12,7 +12,7 @@ type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | 
 type func_type = Slide | Comp | Attr | Func
 
 (* For inheritance of components *)
-type parent = 
+type parent =
     Parent of identifier 
     | Noparent of null
 
@@ -25,7 +25,7 @@ type func_call = {
 
 (* Expressions *)
 and expr = 
-      Binop of expr * operator * expr (* a + b *)
+    | Binop of expr * operator * expr (* a + b *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
     | Litstr of string (* “foo” *)
@@ -87,7 +87,7 @@ and string_of_expr = function
 		String.concat "" (List.map (fun ex -> "[" ^ (string_of_expr ex) ^ "]") e)
 	| Call(f) -> string_of_call f
 and string_of_stmt = function
-	  Block(stmts) ->
+	| Block(stmts) ->
 	    "{" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
 	| Expr(expr) -> string_of_expr expr ^ "\n";
 	| Return(expr) -> "return " ^ string_of_expr expr ^ "\n";
@@ -102,8 +102,8 @@ let string_of_vdecl = function
 	Identifier(s) -> "var " ^ s ^ "\n"
 
 let string_of_function_type = function
-	Slide -> "define slide" 
-	| Comp -> "define comp" 
+	| Slide -> "define slide"
+	| Comp -> "define comp"
 	| Attr -> "define attr"
 	| Func -> "define func"
 

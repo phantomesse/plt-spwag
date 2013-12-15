@@ -109,7 +109,7 @@ and string_of_expr = function
         String.concat "" (List.map (fun ex -> "[" ^ (string_of_expr ex) ^ "]") e)
     | Call(f) -> string_of_call f
 and string_of_stmt = function
-      Block(stmts) ->
+    | Block(stmts) ->
         "{" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
     | Expr(expr) -> string_of_expr expr ^ "\n";
     | Return(expr) -> "return " ^ string_of_expr expr ^ "\n";
