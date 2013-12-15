@@ -34,9 +34,9 @@ and expr_detail =
     | Litper of int (* 42% *)
     | Litstr of string(* “foo” *)
     | Litbool of bool (* true *)
-    | Assign of string * expr (* Assign of Identificer : foo - 42 *) 
-    | Variable of string   (* Variable of Identifier *)
-    | Component of string * expr list (* Identifier * expr list *)
+    | Assign of Identifier * expr (* Assign of Identifier : foo - 42 *) 
+    | Variable of Identifier   (* Variable of Identifier *)
+    | Component of Identifier * expr list (* Identifier * expr list *)
     | Call of func_call
     | Noexpr of null (* for double newlines *)
 
@@ -49,8 +49,8 @@ and stmt = (* Statements ; WIP *)
     | Return of expr (* return 42; *)
     | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *)
     | While of expr * stmt (* while (i<10) \n  i = i + 1 \n end \n *)
-    | Declaration of string (*Declaration of identifier *)
-    | Decassign of string * expr (* Declaring a variable and assigning it to something else  *)
+    | Declaration of Identifier (*Declaration of identifier *)
+    | Decassign of Identifier * expr (* Declaring a variable and assigning it to something else  *)
 
 (* A function alters the control flow. This is how you define a function:
      define type identifier (parameters)
@@ -61,7 +61,7 @@ and stmt = (* Statements ; WIP *)
 
 (*A variable has a name and value *) 
 type var_declaration = {
-    name : string; (* identifier *)
+    name : Identifier; (* identifier *)
     value : expr;
 }
 
