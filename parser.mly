@@ -30,7 +30,7 @@ let parse_error msg = Printf.eprintf "%s at around line %d \n" msg !linecount
 %%
 
 program: /* global vars, functions */
-    | /* nothing */            { [], [] }
+      /* nothing */            { [], [] }
     | program NEWLINE          { $1 }
     | program VAR ID NEWLINE   {(Identifier($3) :: fst $1), snd $1 }
     | program func_decl        { fst $1, ($2 :: snd $1) }
@@ -75,27 +75,27 @@ func_decl:
       }}
 
 formals_opt:
-    | /* nothing */                 { [] }
+      /* nothing */                 { [] }
     | formal_list                   { List.rev $1 }
 
 formal_list:
-    | ID                            { [Identifier($1)] }
+      ID                            { [Identifier($1)] }
     | formal_list COMMA ID          { Identifier($3) :: $1 }
 
 actuals_opt:
-    | /* nothing */                 { [] }
+      /* nothing */                 { [] }
     | actuals_list                  { List.rev $1 }
 
 actuals_list:
-    | expr                          { [$1] }
+      expr                          { [$1] }
     | actuals_list COMMA expr       { $3 :: $1 }
 
 ids_list:
-    | LBRACK expr RBRACK            { [$2] }
+      LBRACK expr RBRACK            { [$2] }
     | ids_list LBRACK expr RBRACK   { $3 :: $1 }
 
 mods_opt:
-    | /* nothing */                 { Block([]) }
+      /* nothing */                 { Block([]) }
     | LBRACE stmt_list RBRACE       { Block(List.rev $2) }
 
 stmt_list:

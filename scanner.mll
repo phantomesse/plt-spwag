@@ -52,5 +52,5 @@ rule token =
     | eof                                            { EOF }
     | _ as char                                      { raise (Failure("illegal character " ^ Char.escaped char)) }
 and multi_line_comment = parse
-    | "##" { token lexbuf } (* End-of-comment *)
+    "##" { token lexbuf } (* End-of-comment *)
     | _ { multi_line_comment lexbuf } (* Eat everything else *)
