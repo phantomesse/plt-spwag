@@ -11,9 +11,6 @@ type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | 
 (* Function types *)
 type func_type = Slide | Comp | Attr | Func
 
-(* Negation *)
-type not = Not
-
 (* For inheritance of components *)
 type parent =
       Parent of identifier 

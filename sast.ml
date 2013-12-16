@@ -1,21 +1,9 @@
+open Ast (*Consult Ast for types defined there *)
+
 (* All objects must be one of these types *)
-type t = Int | Per | Str | Bool | Null | Slide | Comp | Attr | Func
+type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype
 
-(* Null type *)
-type null = Null
-
-(* Identifiers *)
-type identifier = 
-    Identifier of string
-
-(* Operators *)
-type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And
-
-(* Function types *)
-type func_type = Slide | Comp | Attr | Func
-
-(* Negation *)
-type not = Not
+(* I left the functions that need to be parsed there *)
 
 (* For inheritance of components *)
 type parent =
@@ -62,9 +50,6 @@ type func_definition = { (* Handles declarations of functions, components, attri
     inheritance : parent; (* Name of any parent components, ie box, or null *)
     paractuals: expr list; (* This represents the actuals passed to the parent *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
-}
 
 (* The program itself *)
 type program = identifier list * func_definition list (* global vars, funcs*)
-
-(* ----------------------------------------------------------------------  *)
