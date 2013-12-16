@@ -1,9 +1,44 @@
+##
+ The main slide, starting point is here
+##
+var globalbool
 define slide main()
 {
+  # Test variables
   var a = true
-  var b = false
+  var b = 11
+  var c = 12
+  var another = 6%  # This is a comment
+  
+  # Test literals
   12%
-  "String"
+  globalbool = false
+  "apple"
+  
+  ## Expression evaluation, function call ##
+  if !(b > c)
+  {
+    home() {
+        id("myhome")
+        text("Hello world!")
+        padding-top(40)
+        padding-bottom(20)
+        font-size(40)
+        width(100%)
+    }
+  }
+  else
+    a
+    
+  while a < b + c * (d + e)
+  {
+    case()
+    prev(two)
+  }
+  
+  # Test assignment
+  var astring
+  astring = "hello"
 }
 
 define slide two()
@@ -13,3 +48,12 @@ define slide two()
 define comp home() isa box()
 {
 }
+
+define attr a()
+{
+}
+
+define func case()
+{
+}
+

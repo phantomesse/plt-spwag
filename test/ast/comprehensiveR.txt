@@ -1,0 +1,48 @@
+var globalbool
+
+define func case()
+{
+}
+
+define attr a()
+{
+}
+
+define comp home() isa box()
+{
+}
+
+define slide two()
+{
+}
+
+define slide main()
+{
+var a= true
+var b= 11
+var c= 12
+var another= 6%
+12%
+globalbool = false
+"apple"
+if !((b > c))
+{
+home(){
+id("myhome")
+text("Hello world!")
+padding-top(40)
+padding-bottom(20)
+font-size(40)
+width(100%)
+}
+}
+else
+a
+while (a < (b + (c * (d + e))))
+ {
+case()
+prev(two)
+}
+var astring
+astring = "hello"
+}

@@ -1,7 +1,7 @@
 %{ 
 open Ast 
 open Linecounter
-let parse_error msg = Printf.eprintf "%s at line %d \n" msg !linecount 
+let parse_error msg = Printf.eprintf "%s at around line %d \n" msg !linecount 
 %}
 
 %token LPAREN RPAREN PLUS MINUS TIMES DIVIDE ASSIGN EOF EQUALS NOTEQUALS LESSTHAN GREATERTHAN NOT OR AND COMMA NEWLINE
@@ -11,12 +11,18 @@ let parse_error msg = Printf.eprintf "%s at line %d \n" msg !linecount
 %token TRUE FALSE
 
 %nonassoc NOELSE
-%nonassoc IF ELSE
-%right ASSIGN
-%left EQUALS NOTEQUALS
+%nonassoc ELSE
 %left COMMA
+%right ASSIGN
+%left OR
+%left AND
+%left EQUALS NOTEQUALS
+%left LESSTHAN GREATERTHAN
 %left PLUS MINUS
 %left TIMES DIVIDE
+%right NOT
+%left LBRACK RBRACK
+%left LPAREN RPAREN
 
 %start program
 %type <Ast.program> program
@@ -30,7 +36,7 @@ program: /* global vars, functions */
     | program func_decl        { fst $1, ($2 :: snd $1) }
 
 func_decl:
-    | DEF SLIDE ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
+      DEF SLIDE ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
         t = Slide;
         name = Identifier($3);
@@ -93,37 +99,45 @@ mods_opt:
     | LBRACE stmt_list RBRACE       { Block(List.rev $2) }
 
 stmt_list:
-    | NEWLINE                       { [] }
+      NEWLINE                       { [] }
     | stmt_list NEWLINE             { $1 }
     | stmt_list stmt                { $2 :: $1 }
 
 stmt:
-    | expr NEWLINE                                  { Expr($1) }
+      expr NEWLINE                                  { Expr($1) }
     | RETURN expr NEWLINE                           { Return($2) }
     | LBRACE stmt_list RBRACE NEWLINE               { Block(List.rev $2) }
     | IF expr NEWLINE stmt %prec NOELSE             { If($2, $4, Block([])) }
-    | IF expr NEWLINE stmt ELSE stmt                { If($2, $4, $6) }
+    | IF expr NEWLINE stmt ELSE NEWLINE stmt        { If($2, $4, $7) }
     | WHILE expr NEWLINE stmt                       { While($2, $4) }
     | VAR ID NEWLINE                                { Declaration(Identifier($2))}
     | VAR ID ASSIGN expr NEWLINE                    { Decassign(Identifier($2), $4) }
     
 expr:
-    | expr PLUS expr       { Binop($1, Plus, $3) }
-    | expr MINUS expr      { Binop($1, Minus, $3) }
-    | expr TIMES expr      { Binop($1, Times, $3) }
-    | expr DIVIDE expr     { Binop($1, Divide, $3) }
-    | ID ASSIGN expr       { Assign(Identifier($1), $3) }
-    | LITERAL              { Litint($1) }
-    | STRING               { Litstr($1) }
-    | PERCENT              { Litper($1) }
-    | ID                   { Variable(Identifier($1)) }
-    | TRUE                 { Litbool(true) }
-    | FALSE                { Litbool(false) }
-    | ID ids_list          { Component(Identifier($1), List.rev $2) }
+	  NOT expr				 { Notop($2) }
+    | expr PLUS expr         { Binop($1, Plus, $3) }
+    | expr MINUS expr        { Binop($1, Minus, $3) }
+    | expr TIMES expr        { Binop($1, Times, $3) }
+    | expr DIVIDE expr       { Binop($1, Divide, $3) }
+    | expr EQUALS expr       { Binop($1, Equals, $3) }
+    | expr NOTEQUALS expr    { Binop($1, Notequals, $3) }
+    | expr LESSTHAN expr     { Binop($1, Lessthan, $3) }
+    | expr GREATERTHAN expr  { Binop($1, Greaterthan, $3) }
+    | expr OR expr           { Binop($1, Or, $3) }
+    | expr AND expr          { Binop($1, And, $3) }
+    | ID ASSIGN expr         { Assign(Identifier($1), $3) }
+    | LITERAL                { Litint($1) }
+    | STRING                 { Litstr($1) }
+    | PERCENT                { Litper($1) }
+    | ID                     { Variable(Identifier($1)) }
+    | TRUE                   { Litbool(true) }
+    | FALSE                  { Litbool(false) }
+    | ID ids_list            { Component(Identifier($1), List.rev $2) }
     | ID LPAREN actuals_opt RPAREN mods_opt 
       {Call({
         cname = Identifier($1);
         actuals = $3;
         mods = $5;
       })}
+	| LPAREN expr RPAREN   { $2 }
 

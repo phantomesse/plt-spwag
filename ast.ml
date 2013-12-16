@@ -6,7 +6,7 @@ type identifier =
     Identifier of string
 
 (* Operators *)
-type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan
+type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And
 
 (* Function types *)
 type func_type = Slide | Comp | Attr | Func
@@ -26,6 +26,7 @@ type func_call = {
 (* Expressions *)
 and expr =
     | Binop of expr * operator * expr (* a + b *)
+	| Notop of expr (* !a only applies to booleans *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
     | Litstr of string (* “foo” *)
@@ -70,13 +71,15 @@ let rec string_of_call call =
     | Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}" 
     | something -> "ERROR!!!!!!" )
 and string_of_expr = function
-    Binop(e1, o, e2) ->
-        string_of_expr e1 ^ " " ^
+	Notop(e) -> "!(" ^ (string_of_expr e) ^ ")"
+    | Binop(e1, o, e2) ->
+        "(" ^ string_of_expr e1 ^ " " ^
         (match o with
       Plus -> "+" | Minus -> "-" | Times -> "*" | Divide -> "/"
         | Equals -> "==" | Notequals -> "!="
-        | Lessthan -> "<" | Greaterthan -> ">") ^ " " ^
-        string_of_expr e2
+        | Lessthan -> "<" | Greaterthan -> ">"
+		| Or -> "||" | And -> "&&" ) ^ " " ^
+        string_of_expr e2 ^ ")"
     | Litint(l) -> string_of_int l
     | Litper(l) -> (string_of_int l) ^ "%"
     | Litstr(s) -> "\"" ^ s ^ "\""
@@ -87,7 +90,7 @@ and string_of_expr = function
         String.concat "" (List.map (fun ex -> "[" ^ (string_of_expr ex) ^ "]") e)
     | Call(f) -> string_of_call f
 and string_of_stmt = function
-    | Block(stmts) -> "{" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+    | Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
     | Expr(expr) -> string_of_expr expr ^ "\n";
     | Return(expr) -> "return " ^ string_of_expr expr ^ "\n";
     | If(e, s, Block([])) -> "if " ^ string_of_expr e ^ "\n" ^ string_of_stmt s

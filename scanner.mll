@@ -8,7 +8,7 @@
 rule token =
     parse [' ' '\r'  '\t' ]                          { token lexbuf }
     | "##"                                           { multi_line_comment lexbuf }
-    | '#'                                            { single_line_comment lexbuf }
+    | "#"[^'#']([^'\n']*)"\n"                        { incr Linecounter.linecount; NEWLINE }
     | '+'                                            { PLUS }
     | '-'                                            { MINUS }
     | '*'                                            { TIMES }
@@ -19,8 +19,8 @@ rule token =
     | '<'                                            { LESSTHAN }
     | '>'                                            { GREATERTHAN }
     | '!'                                            { NOT }
-    | '|'                                            { OR }
-    | '&'                                            { AND }
+    | "||"                                           { OR }
+    | "&&"                                           { AND }
     | '('                                            { LPAREN }
     | ')'                                            { RPAREN }
     | '{'                                            { LBRACE }
@@ -54,6 +54,3 @@ rule token =
 and multi_line_comment = parse
     | "##" { token lexbuf } (* End-of-comment *)
     | _ { multi_line_comment lexbuf } (* Eat everything else *)
-and single_line_comment = parse
-    | '\n' { ignore (token lexbuf); incr Linecounter.linecount; NEWLINE } (* End-of-single-line-comment *)
-    | _ { single_line_comment lexbuf } (* Eat everything else *)
