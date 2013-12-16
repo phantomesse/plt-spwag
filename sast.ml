@@ -1,5 +1,5 @@
-(* Null type *)
-type t = Int | Per | Str | Bool | Null | Func_type
+(* All objects must be one of these types *)
+type t = Int | Per | Str | Bool | Null | Slide | Comp | Attr | Func
 
 (* Null type *)
 type null = Null
@@ -13,6 +13,9 @@ type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | 
 
 (* Function types *)
 type func_type = Slide | Comp | Attr | Func
+
+(* Negation *)
+type not = Not
 
 (* For inheritance of components *)
 type parent =

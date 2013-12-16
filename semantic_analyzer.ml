@@ -12,32 +12,125 @@ type translation_environment = {
     scope : symbol_table;
 }
 
-(* Taken from Edwards' slides *)
+(* See if t1 and t2 have the same types *)
+let types_equal t1 t2 = match t1,t2 with _, _ -> if (t1 = t2)
+    then true
+		else false
+
+let string_of_type_t = function
+      Int -> "Int"
+    | Bool -> "Bool"
+    | Str -> "Str"
+    | Per -> "Per"
+    | Func_type -> "Func_type"
+    | Null -> "Null"
+
+let string_of_func_type = function
+	  Slide -> "Slide"
+	| Comp -> "Comp"
+	| Attr -> "Attr"
+	| Func -> "Func"
+	
+let string_of_expr = function
+	| _ -> "(not implemented yet)"
+
+(* Operations: Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And *)
+let string_of_binop = function
+	 Plus -> "Plus"
+	| Minus -> "Minus"
+	| Times -> "Times"
+	| Divide -> "Divide"
+	| Equals -> "Equals"
+	| Notequals -> "Notequals"
+	| Lessthan -> "Lessthan"
+	| Greaterthan -> "Greaterthan"
+	| And -> "And"
+	| Or -> "Or"
+
+(* We need to write find_variable and a find_function functions *)
+(* This find_variable function is taken from Edwards' slides and will probably be heavily modified *)
 let rec find_variable (scope: symbol_table) name =
     try
-    List.find (fun (s, _, _, _) -> s = name) scope.variables
+		List.find (fun (s, _, _, _) -> s = name) scope.variables
     with Not_found ->
         match scope.parent with
         Some(parent) -> find_variable parent name
     | _ -> raise Not_found
 
+(* This find_function function is taken from a past project and will probably be heavily modified *)
+let rec find_function (scope: symbol_table) name =
+	let rec getGlobalScope scope = match scope.parent with	(* Functions are defined at the highest level? *)
+		| None -> scope
+		| Some(parent) -> (getGlobalScope parent)
+	in
+	try
+		List.find (fun {s, _, _, _} -> s = name) (getGlobalScope scope).functions
+	with Not_found -> (* This block lists the valid functions; we should look at this carefully *)
+		let build_string tmpString nextString = tmpString^" \n"^nextString in
+		let func_names_string = List.fold_left build_string("") (List.map (fun {fdt=_; fname=n; formals=_; fbody=_} -> n ) (getGlobalScope scope).functions) in
+		let num_funcs = List.length (getGlobalScope scope).functions in
+		raise(Failure("Function "^name^" not found in global scope, funcs found were "^(string_of_int num_funcs)^func_names_string))
 
 let rec expr env = function
 
-    (* An integer constant: convert and return Int type *)
-    Ast.Litint(v) -> Sast.Litint(v), Sast.Types.Int
+    (* Simple evaluation of primitives *)
+    Ast.Litint(v) -> Sast.Litint(v), Sast.Int
+  | Ast.Litper(v) -> Sast.Litper(v), Sast.Per
+  | Ast.Litstr(v) -> Sast.Litstr(v), Sast.Str
+  | Ast.Litbool(v) -> Sast.Litbool(v), Sast.Bool
+  | Ast.Noexpr(v) -> Sast.Noexpr(v), Sast.Null
 
-  | Ast.Litper(v) -> Sast.Litper(v), Sast.Types.Per
-
-  | Ast.Litstr(v) -> Sast.Litstr(v), Sast.Types.Str
-
-  | Ast.Litbool(v) -> Sast.Litbool(v), Sast.Types.Bool
-
-  | Ast.Noexpr(v) -> Sast.Noexpr(v), Sast.Types.null
-
-  | Ast.Call(s, exprList) -> Sast.Call(s, exprlist) 
-  (* This is extremely problematic, we'll deal with this later *) 
+  | Ast.Binop (expr1, op, expr2) ->  (* evaluate operators *)
+	let e1 = expr env expr1 and
+		e2 = exprCheck scope expr2 in		
  
+    let _, t1 = e1 (* Get the type of each child *) 
+    and _, t2 = e2 in
+	
+	match t1, op, t2 with
+	  | (Bool), (And|Or), (Bool) ->  (* And/or operators *)
+			Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
+				
+      | (Int), (Lessthan | Greaterthan), (Int) ->  (* > , < *)
+			Sast.Binop(e1, op, e2), Sast.Bool
+					
+	  | (Int), (Plus | Minus | Times | Divide), (Int) ->  (* Arithmetic on ints *)
+			Sast.Binop(e1, op, e2), Sast.Int   
+
+	  | (Per), (Plus | Minus | Times | Divide), (Per) ->  (* Arithmetic on percents *)
+			Sast.Binop(e1, op, e2), Sast.Per   
+			
+      | _, (Equals | Notequals), _  ->   (* Compare Anything *)
+			Sast.Binop(e1, op, e2), Sast.Bool
+					
+	  | (Str), Plus, (Str | Int) ->  (* String Concatenation *) 
+			Sast.Binop(e1, op, e2), Ast.Str
+
+	  | (Str | Int), Plus, (Str | Int) ->  (* String Concatenation *) 
+			Sast.Binop(e1, op, e2), Ast.Str		
+					
+	 (* Otherwise Invalid *)
+	  | tA, op, tB -> raise(Failure("Binop "^ (string_of_binop op) ^" has improper operands, found "^ (string_of_type_t tA) ^", "^ (string_of_type_t tB) ^ "\n"))
+		
+  | Ast.Notop(op, e1) -> (* check if negate = ! and e1 is a boolean *)
+	let e1 = expr env expr in
+	let _, t1 = e1 in (* Get the type of e1 *)
+	match op, t1 with 
+	  | Not, Bool -> Sast.Notop(op, e1), Ast.Bool
+	  | _ -> raise(Failure("Invalid operand ("^string_of_type_t t1^") for not operator")))
+
+	   | Ast.Call(s, exprList) -> Sast.Call(s, exprlist) 
+  (* Following are problematic: 
+	  
+  | Assign of identifier * expr (* foo - 42 *) 
+  | Variable of identifier (* although this is named Variable, can also be the name of a slide/function *)
+  | Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
+  | Call of func_call (* Calling a function, unique in that it can contain statements *)
+
+  | Ast.Variable(s) -> (* although this is named Variable, can also be the name of a slide/function *)
+	  let newVdecl = find_variable scope s in (* is s a valid variable? *)
+		Sast.Variable(newVdecl.vname), newVdecl.vdt   (* look for it as a variable with find_variable *)
+  
   | Ast.Assign(id, e1) -> (* General idea is to make sure the arguments are valid; code may not work though *)
     let vdecl = try
         find_variable env.scope id
@@ -53,28 +146,8 @@ let rec expr env = function
     let (_, id_type) = vdecl in (* get the variable's type *)
     let (_, expr_type ) = expreval in
     Sast.Assign(id, e1), id_type, expr_type
-
-  | Ast.Binop(e1, op, e2) ->
-    let e1 = expr env e1    (* Check left and right children *)
-    and e2 = expr env e2 in
-
-    let _, t1 = e1      (* Get the type of each child *)
-    and _, t2 = e2 in
-
-    if op <> Ast.Equals && op <> Ast.Notequals then
-        (* Most operators require both left and right to be integer *)
-        (require_integer e1 "Left operand must be integer";
-         require_integer e2 "Right operand must be integer")
-    else
-        if not (weak_eq_type t1 g2) then
-            (* Equality operators just require type to be "close" *)
-        error ("Type mismatch in comparison: left is " ^
-            Printer.string_of_sast_type t1 ^ "\" right is \"" ^ 
-            Printer.string_of_sast_type t2 ^ "\""
-            ) loc;
-            
-    Sast.Binop (e1, op, e2), Sast.Types.Int
-
+*)
+	  
 let rec stmt env = function
     | Ast.Expr(e) ->    Sast.Expr(expr env e)
     | Ast.Block(s1) ->  let scope' = { S.parent = Some(env.scope); S.variables = [] }
@@ -104,3 +177,13 @@ let rec parent env = function
                                         let (_, id_type) = vdecl in (* get the variable's type *)
                                             Sast.Parent(id), id_type
     | Ast.Noparent(v) -> Sast.Noparent(v), Sast.Types.Null
+
+(* Run our program *)
+(* Input: Ast.Program, Symbol_Table *)
+(* Output: Sast.Program *)
+
+let evalprogram program globalTable = 
+    let _ = check_order program in
+    let endScope, _ = List.fold_left process(globalTable, []) program in
+
+    endScope

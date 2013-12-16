@@ -11,6 +11,9 @@ type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | 
 (* Function types *)
 type func_type = Slide | Comp | Attr | Func
 
+(* Negation *)
+type not = Not
+
 (* For inheritance of components *)
 type parent =
     Parent of identifier 
@@ -26,7 +29,7 @@ type func_call = {
 (* Expressions *)
 and expr =
      Binop of expr * operator * expr (* a + b *)
-	| Notop of expr (* !a only applies to booleans *)
+	| Notop of not * expr (* !a only applies to booleans *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
     | Litstr of string (* “foo” *)
