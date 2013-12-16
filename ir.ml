@@ -5,11 +5,11 @@
 
     An empty string "" corresponds to a null value.
 *)
+open Sast 
+module StringMap = Map.Make(String)
 
-(*open Sast*) (* The sast is needed for javascript functions *)
-
+(* This css is either located with an element, or applies to a class of elements (comp definition) *)
 type css = {
-    id : string;
     clazz : string;
     
     position_x : string;
@@ -37,29 +37,52 @@ type css = {
 
     width : string;
     height : string;
+
+	display : bool;
 }
 
-type javascript = {
-    id : string;
-    clazz : string;
-    call : string;              (* on-click, on-press *)
-    execute : string list;      (* List of functions to execute *)
-}
-
+(* Elements with a slide or element *)
 type element = {
-    id : string;                (* Id of the element *)
-    clazz : string;             (* Inheritance of this element; default is "box" *)
-    image : string;             (* Image inside the element (optional) *)
-    text : string;              (* Text inside the element (optional) *)
-    elements : string list;     (* Map of element ids *)
+    id : string;                		  (* Unique id of a component WITHIN its outer component, concatenate with hyphens to obtain css id*)
+    clazz : string;             		  (* This class specifies all attributes applied to this element via the component definition *)
+    image : string;             		  (* Image inside the element (optional) *)
+    text : string;              		  (* Text inside the element (optional) *)
+	style : css;						  (* CSS as applied to this particular element with this id *)
+	onclick : string;					  (* Name of javascript function to apply on click, empty string means none *)
+    elements : element StringMap.t;       (* Map of element id (string) -> element *)
 }
 
+(* Possible CSS that can apply to slides *)
+type slide_css = {
+    padding_top : string;
+    padding_bottom : string;
+    padding_left : string;
+    padding_right : string;
+
+    text_color: string;
+    background_color : string;
+
+    font : string;
+    font_size : string;
+    font_decoration : string;
+
+    border : string;
+    border_color : string;
+}
+
+(* This is a slide*)
 type slide = {
-    id : string;                (* Id of the slide *)
-    next : string;              (* Id of the next slide *)
-    prev : string;              (* Id of the previous slide *)
-    elements : string list;     (* Map of element ids *)
+    id : string;              			  (* Id of the slide = name of the slide function*)
+    next : string;            			  (* Id of the next slide = name of the slide function that is next *)
+    prev : string;            			  (* Id of the previous slide = name of the slide function that is prev *)
+    image : string;			  			  (* URL of any background image *)
+	style : slide_css;		  			  (* CSS as applied to the slide in general *)
+	onclick : string;		  			  (* Name of javascript function to apply on click, empty string means none *)
+	onpress : string * string;		      (* Key to press, name of javascript function to apply on press *)
+	elements : element StringMap.t;       (* Map of element id (string) -> element *)
 }
 
-(* These functions must be functions! Cannot be components, attributes, etc. *)
-type program = slide list (* * Sast.func_definition list *)
+(* Slide list is the list of slides, with its child elements, with their child elements, etc. *)
+(* func defintion list is a list of all the functions (not attr/comp/slide) to evaluate javascript *)
+(* css list is a list of css that applies to CLASSES (or CLAZZES), these are generated from component definitions (and not component calls) *)
+type program = slide list *  Sast.func_definition list * css list
