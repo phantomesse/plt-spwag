@@ -3,7 +3,11 @@ open Ast (*Consult Ast for types defined there *)
 (* All objects must be one of these types *)
 type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype
 
-(* I left the functions that need to be parsed there *)
+(* I left the stuff that is called in the semantic analyzer below *)
+
+(* Identifiers *)
+type identifier = 
+    Identifier of string
 
 (* For inheritance of components *)
 type parent =
