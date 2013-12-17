@@ -54,6 +54,7 @@ type func_definition = { (* Handles declarations of functions, components, attri
     inheritance : parent; (* Name of any parent components, ie box, or null *)
     paractuals: expr list; (* This represents the actuals passed to the parent *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
+}
 
 (* The program itself *)
 type program = identifier list * func_definition list (* global vars, funcs*)
