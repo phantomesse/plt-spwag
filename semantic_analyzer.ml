@@ -263,6 +263,80 @@ let rec parent env = function
                 Sast.Parent(id), id_type
     | Ast.Noparent(v) -> Sast.Noparent(v), Sast.null
 
+(* Below section modified from chartlan of f2012
+
+  TODO: Inheritance?
+
+We have:                        They have:
+t: func_type                    returntype : Types.t
+name: identifier                fname: string
+formals : identifier list       formals: variable_decl list
+inheritance : parent            ---- ??? ---- ??? ---- ??????????
+paractuals : expr list          locals: variable_decl list
+body : stmt list                body: stmt list
+
+*)
+
+let rec func_definition = function
+    in let trans_func env (f:Sast.func_definition)  =  
+    let sf = find_function env.scope f.name
+    in let functions' = List.filter (fun f -> f.f_name != sf.f_name) env.scope.functions
+    in let scope' = {parent = Some(env.scope); variables = []; functions = []}
+    in let env' = {env with scope = scope'}
+    in let env' = List.fold_left add_local env' (f.formals)
+    in let formals' = env'.scope.variables
+    in let env' = List.fold_left add_local env' (f.paractuals)
+    in let remove v =
+      not (List.exists (fun fv -> fv.v_name = v.v_name) formals')
+    in let locals' = List.filter remove env'.scope.variables 
+    in let body' = List.map (fun f -> trans_stmt env' f) (f.body)
+    in let new_f = {
+      sf with 
+      fformals = formals';
+      flocals = locals';
+      fbody = body';
+      parsed = true;
+    }
+    in let funcs = new_f :: functions'
+    in let scope' = {env.scope with functions = funcs}
+    in {env with scope = scope'}
+    in let validate_func f =
+    let is_return = function
+        Sast.Return(e) -> true
+      | _ -> false
+    in let valid_return = function
+        Sast.Return(e) -> if assign_allowed f.t (snd e) then
+                            true
+                          else
+                             raise (Failure(   "Invalid return type " 
+                            
+                             ))
+      | _ -> false
+    in let returns = List.filter is_return f.f_body
+    in let returns_valid = List.for_all valid_return returns
+    in let return_count = List.length returns
+    in if (return_count = 0 && f.f_name <> "print" && f.f_name <>"printarray"&& f.f_name <> "printstring" ) then
+      raise (Failure( " must return something" ))
+    else
+      f
+   in let make_print t = 
+    {
+      f_t = Sast.Int;
+      f_name = if (t = Sast.Str) then "printstring" else "print";
+      f_formals = [{
+        v_name = "val";
+        v_type = t;
+            v_size=1;
+        
+      }];
+      f_locals = [];
+      f_body = [];
+      parsed = false;
+    }
+
+(* Above section modified from asttosast file of chartlan from f2012 *)
+
+
 (* Run our program *)
 (* Input: Ast.Program, Symbol_Table *)
 (* Output: Sast.Program *)
