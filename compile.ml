@@ -1,5 +1,4 @@
 open Ir
 
-let compile program =
-    print_string "Compile.compile"
-    (* TODO: implement *)
+let compile (styles, slides, funcs) =
+    print_string "hi"

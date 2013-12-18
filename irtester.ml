@@ -1,6 +1,5 @@
 open Ast
 open Sast
-(*open Irgenerator*)
 
 let idList = [ Identifier("slide"); Identifier("hello-world-text"); Identifier("hello-world-image") ]
 
@@ -17,4 +16,5 @@ let funList = [ mainSlide ]
 
 let program = (idList, funList)
 
-let ir = Irgenerator.blah
+in let blah = Irgenerator.generate program
+    in print_string blah

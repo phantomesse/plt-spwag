@@ -19,4 +19,4 @@ let _ =
                 | Irgenerator -> (* let sast = Semantic_analyzer.evalprogram program symbol_table
                                  in *) (*let ir = Irgenerator.generate program (* sast *) (* for testing purposes only *)
                                  in print_string ir*) print_string "HI" 
-                | Compile -> Compile.compile program
+                | Compile -> (*Compile.compile program*) print_string "HI"
