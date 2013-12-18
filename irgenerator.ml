@@ -1,6 +1,8 @@
-(*open Sast*)
+open Sast
 open Ir
 
-let generate program =
-    print_string "Irgenerator.generate"
-    (* TODO: generate Ir from Sast *)
+let string_of_vdecl = function
+    Identifier(s) -> "var " ^ s ^ "\n"
+
+let generate (vars, funcs) =
+    String.concat "" (List.map string_of_vdecl vars) ^ "\n"

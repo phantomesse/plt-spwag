@@ -1,4 +1,5 @@
-OBJS = sast.cmo ast.cmo linecounter.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo
+# OBJS = ast.cmo semantic_analyzer.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo
+OBJS = ast.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo
 
 spwag: $(OBJS)
 	ocamlc -o spwag $(OBJS)

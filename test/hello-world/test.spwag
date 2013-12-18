@@ -1,12 +1,15 @@
-define slide main() {
-    box("hello-world-text") {
+define slide main()
+{
+    box() {
+        id("hello-world-text")
         text("Hello world!")
-        padding-top(40px)
-        padding-bottom(20px)
-        font-size(40px)
+        padding-top(40)
+        padding-bottom(20)
+        font-size(40)
         width(100%)
     }
-    box("hello-world-image") {
+    box() {
+        id("hello-world-image")
         image("cat.jpg")
     }
 }

@@ -8,12 +8,11 @@ type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype
 (* I left the stuff that is called in the semantic analyzer below *)
 
 (* Identifiers *)
-type identifier = 
-    Identifier of string
+type identifier = Identifier of string
 
 (* For inheritance of components *)
 type parent =
-    Parent of identifier 
+    | Parent of identifier 
     | Noparent of null
 
 (* Handles calls of functions and components *)
@@ -25,7 +24,7 @@ type func_call = {
 
 (* Expressions *)
 and expr_detail =
-     Binop of expr * operator * expr (* a + b *)
+    | Binop of expr * operator * expr (* a + b *)
     | Notop of expr (* !a only applies to booleans *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
@@ -40,7 +39,7 @@ and expr = expr_detail * t
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)
-     Block of stmt list (* { ... } *)
+    | Block of stmt list (* { ... } *)
     | Expr of expr (* foo = bar + 3; *)
     | Return of expr (* return 42; *)
     | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *)
@@ -56,6 +55,7 @@ type func_definition = { (* Handles declarations of functions, components, attri
     inheritance : parent; (* Name of any parent components, ie box, or null *)
     paractuals: expr list; (* This represents the actuals passed to the parent *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
+}
 
 (* The program itself *)
 type program = identifier list * func_definition list (* global vars, funcs*)

@@ -16,5 +16,7 @@ let _ =
                 match action with
                 | Ast -> let listing = Ast.string_of_program program
                          in print_string listing
-                | Irgenerator -> Irgenerator.generate program (* for testing purposes only *)
+                | Irgenerator -> (* let sast = Semantic_analyzer.evalprogram program symbol_table
+                                 in *) let ir = Irgenerator.generate program (* sast *) (* for testing purposes only *)
+                                 in print_string ir 
                 | Compile -> Compile.compile program
