@@ -9,12 +9,15 @@ open Ir
 - How are vars handled? Vars here refers to SAST.identifier list, 
 	which is a list of global vars. Do we have global vars in SPWAG?
 	How does this work with local scoping paradigm?
+- Handle StringMap Resolution
+
 *)
 
 (* list declarations *)
 let javascript_funcs_list = [];
 let slides_list = [];
 let css_list = [];
+
 (* the empty string represents NULL *)
 let null = "";
 
@@ -51,6 +54,39 @@ let resolve_css func = (* attr function must only contain single block (list) of
     	width = field_value_from_pair_list "width" attr_list;
     	height = field_value_from_pair_list "height" attr_list;
 	} :: css_list
+
+
+let resolve_slide func =
+	let body_list = List.map field_value_pair func.body in
+	{
+		id = func.name;                          (* Id of the slide = name of the slide function*)
+    	next = field_value_from_pair_list "next" attr_list;     (* Id of the next slide = name of the slide function that is next *)
+    	prev = field_value_from_pair_list "prev" attr_list;		(* Id of the previous slide = name of the slide function that is prev *)
+    	image = field_value_from_pair_list "prev" attr_list;	(* URL of any background image *)
+    	style = resolve_slide_css body_list;                    (* CSS as applied to the slide in general *)
+    (*onclick : Sast.func_call;             (* Name of javascript function to apply on click *)
+    onpress : string * Sast.func_call;*)    (* Key to press, name of javascript function to apply on press *)
+    	elements = element StringMap.t; (* TODO : Handle StringMap Resolution *)
+	} :: slides_list
+
+
+let resolve_slide_css field_value_pair_list = 
+	{
+    	padding_top = field_value_from_pair_list "padding_top" field_value_pair_list;
+    	padding_bottom = field_value_from_pair_list "padding_bottom" field_value_pair_list;
+    	padding_left = field_value_from_pair_list "padding_left" field_value_pair_list;
+    	padding_right = field_value_from_pair_list "padding_right" field_value_pair_list;
+
+    	text_color = field_value_from_pair_list "text_color" field_value_pair_list;
+   		background_color = field_value_from_pair_list "background_color" field_value_pair_list;
+
+    	font = field_value_from_pair_list "font" field_value_pair_list;
+    	font_size = field_value_from_pair_list "font_size" field_value_pair_list;
+    	font_decoration = field_value_from_pair_list "font_decoration" field_value_pair_list;
+
+    	border = field_value_from_pair_list "border" field_value_pair_list;
+    	border_color = field_value_from_pair_list "border_color" field_value_pair_list;
+	}
 
 
 (* get the last-provided value of a field from a (field:String, value:String) tuple list *)
