@@ -27,7 +27,7 @@ type css = {
     padding_left : string;
     padding_right : string;
 
-    text_color: string;
+    text_color : string;
     background_color : string;
 
     font : string;
