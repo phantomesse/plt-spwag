@@ -1,15 +1,9 @@
 (* Author: Richard Chiou *)
 
+open Ast (* We need to import the operators over, the semantic_analyzer is really confused otherwise. *)
+
 (* All objects must be one of these types *)
-type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype
-
-(* I left the stuff that is called in the semantic analyzer below *)
-
-(* Operators *)
-type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And
-
-(* Function types *)
-type func_type = Slide | Comp | Attr | Func
+type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier
 
 (* Identifiers *)
 type identifier = Identifier of string

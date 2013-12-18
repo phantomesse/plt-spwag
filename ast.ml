@@ -1,9 +1,8 @@
 (* Authors: Richard Chiou, Yunhe(John) Wang, and Aditya Majumdar *)
 
 (* Identifiers *)
-type identifier = 
-    Identifier of string
-
+type identifier = Identifier of string
+		
 (* Operators *)
 type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And
 
@@ -19,7 +18,7 @@ type func_call = {
 
 (* Expressions *)
 and expr =
-    | Binop of expr * operator * expr (* a + b *)
+      Binop of expr * operator * expr (* a + b *)
     | Notop of expr (* !a only applies to booleans *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
@@ -32,7 +31,7 @@ and expr =
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)
-    | Block of stmt list (* { ... } *)
+     Block of stmt list (* { ... } *)
     | Expr of expr (* foo = bar + 3; *)
     | Return of expr (* return 42; *)
     | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *)

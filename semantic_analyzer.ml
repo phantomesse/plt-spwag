@@ -28,6 +28,7 @@ let string_of_type_t = function
 	| Comptype -> "Comptype"
 	| Attrtype -> "Attrtype"
 	| Functype -> "Functype"
+	| Varidentifier -> "Varidentifier"
 
 let string_of_func_type = function
 	  Slide -> "Slide"
@@ -54,14 +55,14 @@ let string_of_binop = function
 
 (* We need to write find_variable and a find_function functions *)
 (* This find_variable function is taken from Edwards' slides and will probably be heavily modified *)
-(*let rec find_variable (scope: symbol_table) name =
+let rec find_variable scope name =
     try
-		List.find (fun (s, _, _, _) -> s = name) scope.variables
+		List.find (fun (s) -> s = name) scope.variables
     with Not_found ->
         match scope.parent with
         Some(parent) -> find_variable parent name
     | _ -> raise Not_found
-*)
+
 (* This find_function function is taken from a past project and will probably be heavily modified *)
 (*let rec find_function (scope: symbol_table) name =
 	let rec getGlobalScope scope = match scope.parent with	(* Functions are defined at the highest level? *)
@@ -77,13 +78,7 @@ let string_of_binop = function
 		raise(Failure("Function "^name^" not found in global scope, funcs found were "^(string_of_int num_funcs)^func_names_string))
 *)
 
-
-(*Parent: check if Parent has
-
-List of symbol table
-Evalute identifier to be valid
-
-Evalutee func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions,
+(*Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions,
 evaluate mods are statements 
 
 check identifier is in symbol table,
@@ -94,17 +89,13 @@ Component of identifier: identifier has to be slide or variable (component or sl
 expr list are strings
 *)
 
-(* Identifier *)
-let identify env = 
-    Ast.Identifier(v) ->
-	let vdecl = try
-		find_variable env.scope v (* Locate a variable by name *)
-	with Not_found ->
-		raise (Failure("undeclared identifier " ^ v))
-	in
-	let _, t1 = vdecl in
-	Sast.Identifier(v), t1
+(* Check if valid identifier *)
+let rec identify env = function
+    Ast.Identifier(v) -> Sast.Identifier(v)
+    (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
+	Sast.Identifier(vdecl), Sast.Varidentifier*)
 
+(* Check if valid expression*)
 let rec expr env = function
 
     (* Simple evaluation of primitives *)
@@ -114,6 +105,7 @@ let rec expr env = function
   | Ast.Litbool(v) -> Sast.Litbool(v), Sast.Bool
 
   | Ast.Binop (expr1, op, expr2) ->  (* evaluate operators *)
+    (
 	let e1 = expr env expr1 and
 		e2 = expr env expr2 in		
  
@@ -121,13 +113,13 @@ let rec expr env = function
     and _, t2 = e2 in
 	
 	match t1, op, t2 with
-	  | (Bool), (Ast.And | Ast.Or), (Bool) ->  (* And/or operators *)
+	  | (Bool), (And | Or), (Bool) ->  (* And/or operators *)
 			Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
 				
-      | (Int), (Ast.Lessthan | Ast.Greaterthan), (Int) ->  (* > , < *)
+      | (Int), (Lessthan | Greaterthan), (Int) ->  (* > , < *)
 			Sast.Binop(e1, op, e2), Sast.Bool
 					
-	  | (Int), (Ast.Plus | Ast.Minus | Ast.Times | Ast.Divide), (Int) ->  (* Arithmetic on ints *)
+	  | (Int), (Plus | Minus | Times | Divide), (Int) ->  (* Arithmetic on ints *)
 			Sast.Binop(e1, op, e2), Sast.Int   
 
 	  | (Per), (Plus | Minus | Times | Divide), (Per) ->  (* Arithmetic on percents *)
@@ -137,47 +129,42 @@ let rec expr env = function
 			Sast.Binop(e1, op, e2), Sast.Bool
 					
 	  | (Str), Plus, (Str | Int) ->  (* String Concatenation *) 
-			Sast.Binop(e1, op, e2), Sast.Str
-
-	  | (Str | Int), Plus, (Str | Int) ->  (* String Concatenation *) 
 			Sast.Binop(e1, op, e2), Sast.Str		
 					
 	 (* Otherwise Invalid *)
-	  | tA, op, tB -> raise(Failure("Binop "^ (string_of_binop op) ^" has improper operands, found "^ (string_of_type_t tA) ^", "^ (string_of_type_t tB) ^ "\n"))
-		
+	  | a, op, b -> raise(Failure("Binop "^ (string_of_binop op) ^" does not work with operands "^ (string_of_type_t a) ^", "^ (string_of_type_t b) ^ "\n"))
+	)
+	
   | Ast.Notop(v) -> (* check if negate = ! and e1 is a boolean *)
+    (
 	let e1 = expr env v in
 	let _, t1 = e1 in (* Get the type of e1 *)
 	match t1 with 
-	  | Bool -> Sast.Notop(e1), Ast.Bool
+	  | Bool -> Sast.Notop(e1), Sast.Bool
 	  | _ -> raise(Failure("Invalid operand ("^string_of_type_t t1^") for not operator"))
-
+	)
+	
   | Ast.Assign(lhs, rhs) -> 		
     let e1 = expr env rhs			(* check if valid expression *) 
 	and id = identify env lhs in	(* check if identifier *)
-    let _, t1 = e1 (* type of rhs *)
-	and _, t2 = id (* type of lhs *) in
-	if (t1 = t2) then				(* the types need to match? *)
-		Sast.Assign(lhs, rhs), t2
-	else
-		raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))
+    (* let _, t1 = e1 (* type of rhs *) in *)
+	(*if (types_equal t1 t2) then *)			(* the types need to match? *)
+		Sast.Assign(id, e1), Sast.Varidentifier
+	(*else
+		raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))*)
 	
   | Ast.Variable(v) -> 				(* If identify function works, this will work *)
 	let id = identify env v in
-	let _, t1 = id (* type of rhs *) in
-	Sast.Variable(v), t1
+	(*let _, t1 = id (* type of rhs *) in*)
+	Sast.Variable(id), Sast.Varidentifier
   
-  (* check Variable of identifier: find type of identifier
-	Component of identifier: identifier has to be slide or variable (component or slide) *)
+  (* Component of identifier: identifier has to be slide or variable (component or slide) *)
 	  
   (* Following are problematic: 
   | Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
   | Call of func_call (* Calling a function, unique in that it can contain statements *)
 
 	Below code is old
-  | Ast.Variable(s) -> (* although this is named Variable, can also be the name of a slide/function *)
-	  let newVdecl = find_variable scope s in (* is s a valid variable? *)
-		Sast.Variable(newVdecl.vname), newVdecl.vdt   (* look for it as a variable with find_variable *)
   
   | Ast.Assign(id, e1) -> (* General idea is to make sure the arguments are valid; code may not work though *)
     let vdecl = try
@@ -210,7 +197,8 @@ let rec expr env = function
 let rec stmt env = function
     | Ast.Expr(e) ->    Sast.Expr(expr env e)
     | Ast.Return(e1) -> Sast.Return(expr env e1) (* I have not written checking for e1 yet *)
-    | Ast.Block(s1) ->  let scope' = { S.parent = Some(env.scope); S.variables = [] }
+	
+    (*| Ast.Block(s1) ->  let scope' = { S.parent = Some(env.scope); S.variables = [] }
                         and exceptions' = { excep_parent = Some(env.exception_scope); exceptions = [] }
                         in
                             (* New environment: same, but with new symbol tables *)
@@ -219,51 +207,54 @@ let rec stmt env = function
                             let s1 = List.map (fun s -> stmt env' s) s1 in
                                 scope'.S.variables <- List.rev scope'.S.variables; (* side-effect *)
                                 Sast.Block(scope', s1)
-    | Ast.If(e, s1, s2) ->  
+	This block code needs to be rewritten *)
+    | Ast.If(e, s1, s2) ->  (
         let e1 = expr env e in
 		let _, t1 = e1 in 	(* Get the type of e1 *)
-		if (t1 = Bool) then
-			Sast.If (e, stmt env s1, stmt env s2) (* Check then, else *)
-		else raise(Failure(string_of_type_t t1^"type must be bool"))
-
-    | Ast.While(e, s1) ->   
-		let e = expr env e in
+		match t1 with 
+	  | Bool -> Sast.If (e1, stmt env s1, stmt env s2) (* Check then, else *)
+	  | _ -> raise(Failure(string_of_type_t t1^"type must be bool"))
+	  )
+	  
+	| Ast.While(e, s1) ->  (
+		let e1 = expr env e in
 		let _, t1 = e1 in 	(* Get the type of e1 *)
-		if (t1 = Bool) then
-			Sast.While (e, stmt env s1) (* Check body *)
-		else raise(Failure(string_of_type_t t1^"type must be bool"))
-		
+		match t1 with 
+	  | Bool ->	Sast.While (e1, stmt env s1) (* Check body *)
+	  | _ -> raise(Failure(string_of_type_t t1^"type must be bool"))
+	  )
+	  
 	| Ast.Declaration(v) ->
-		let id = identify env v in
-		let _, t1 = id in
-		if (find_variable env id = true) then (* If declaration exists, don't allow duplicate *)
-			raise(Failure("Existing variable declaration for "^v))
+		if (find_variable env v = v) then (* If declaration exists, don't allow duplicate *)
+			raise(Failure("Existing variable declaration for "^string_of_expr v))	(* We need to write a identifier to string function *)
 		(* else we have to add the variable declaration to the symbol table; I'll write this later *)
 		else
-			Sast.Declaration(v), t1;
+			let id = identify env v in Sast.Declaration(id)
                 
 	| Ast.Decassign(v, e) ->
+		if (find_variable env v = v) then (* If declaration exists, don't allow duplicate *)
+			raise(Failure("Existing variable declaration for "^string_of_expr v))	(* We need to write a identifier to string function *)	
+		else
 		let id = identify env v 
 		and e = expr env e in
-		let _, t1 = v in
-		let _, t2 = e in
-		if (find_variable env id = true) then (* If declaration exists, don't allow duplicate *)
-			raise(Failure("Existing variable declaration for "^v))		
-		if (t1 = t2) then	(* variable types need to match *)
+		Sast.Decassign(id, e)
+		(*let _, t2 = e in
+		if (types_equal t1 t2) then	(* variable types need to match *)
 							(* we have to add the variable declaration to the symbol table; I'll write this later *)
 			Sast.Decassign(v, e), t1 (* Declaring a variable and then assigning it something*)
 		else	
-			raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))	
+			raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))	*)
 
+(* Removed parent declaration
 let rec parent env = function
     | Ast.Parent(id) -> (* This code is bugged *)
 		let vdecl = try find_variable env.scope id
             with Not_found ->
-                raise (Error("undeclared identifier " ^ id))
+                raise (Failure("undeclared identifier " ^ id))
             in
 			let (_, id_type) = vdecl in (* get the variable's type *)
                 Sast.Parent(id), id_type
-    | Ast.Noparent(v) -> Sast.Noparent(v), Sast.null
+    | Ast.Noparent(v) -> Sast.Noparent(v), Sast.null*)
 
 (* Below section modified from chartlan of f2012
 
@@ -279,8 +270,8 @@ body : stmt list                body: stmt list
 
 *)
 
-let rec func_definition = function
-    in let trans_func env (f:Sast.func_definition)  =  
+(*let rec func_definition = function
+    in let trans_func env (f:Sast.func_definition) =  
     let sf = find_function env.scope f.name
     in let functions' = List.filter (fun f -> f.f_name != sf.f_name) env.scope.functions
     in let scope' = {parent = Some(env.scope); variables = []; functions = []}
@@ -335,7 +326,7 @@ let rec func_definition = function
       f_body = [];
       parsed = false;
     }
-
+*)
 (* Above section modified from asttosast file of chartlan from f2012 *)
 
 
@@ -344,8 +335,9 @@ let rec func_definition = function
 (* Output: Sast.Program *)
 (* This is WIP *)
 
-let evalprogram program globalTable = 
+(*let evalprogram program globalTable = 
     let _ = check_order program in
     let endScope, _ = List.fold_left process(globalTable, []) program in
 
     endScope
+*)
