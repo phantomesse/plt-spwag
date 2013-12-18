@@ -1,20 +1,22 @@
 open Ast
 open Sast
 
-let idList = [ Identifier("slide"); Identifier("hello-world-text"); Identifier("hello-world-image") ]
+let _ =
 
-let mainSlide = {
-    t = Slide;
-    name = Identifier("main");
-    formals = [];
-    inheritance = Noparent(Null);
-    paractuals =  [];
-    body = [];
-}
+	let idList = [ Identifier("slide"); Identifier("hello-world-text"); Identifier("hello-world-image") ] in
 
-let funList = [ mainSlide ]
+	let mainSlide = {
+    	t = Slide;
+    	name = Identifier("main");
+    	formals = [];
+    	inheritance = Noparent(Null);
+    	paractuals =  [];
+    	body = [];
+	} in
 
-let program = (idList, funList)
+	let funList = [ mainSlide ] in
 
-in let blah = Irgenerator.generate program
-    in print_string blah
+	let program = (idList, funList) in
+
+		let blah = Irgenerator.generate program
+	    	in print_string blah

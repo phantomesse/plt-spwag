@@ -4,8 +4,8 @@ OBJS = ast.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo irgenerator.cmo i
 spwag: $(OBJS)
 	ocamlc -o spwag $(OBJS)
 
-irtester: $(OBJS)
-	ocamlc -o irtester $(OBJS)
+irtester: ast.cmo sast.cmo irgenerator.cmo irtester.cmo
+	ocamlc -o irtester ast.cmo sast.cmo irgenerator.cmo irtester.cmo
 
 scanner.ml: scanner.mll
 	ocamllex scanner.mll
