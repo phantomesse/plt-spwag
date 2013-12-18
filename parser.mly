@@ -41,7 +41,7 @@ func_decl:
         t = Slide;
         name = Identifier($3);
         formals = $5;
-        inheritance = Noparent(Null);
+        inheritance = None;
         paractuals = [];
         body = List.rev $9
       }}
@@ -51,7 +51,7 @@ func_decl:
         t = Comp;
         name = Identifier($3);
         formals = $5;
-        inheritance = Parent(Identifier($8));
+        inheritance = Some(Identifier($8));
         paractuals = $10;
         body = List.rev $14
       }}
@@ -60,7 +60,7 @@ func_decl:
         t = Attr;
         name = Identifier($3);
         formals = $5;
-        inheritance = Noparent(Null);
+        inheritance = None;
         paractuals = [];
         body = List.rev $9
       }}
@@ -69,7 +69,7 @@ func_decl:
         t = Func;
         name = Identifier($3);
         formals = $5;
-        inheritance = Noparent(Null);
+        inheritance = None;
         paractuals = [];
         body = List.rev $9
       }}

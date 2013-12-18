@@ -1,19 +1,18 @@
 (* Author: Richard Chiou *)
 
-open Ast (*Consult Ast for types defined there *)
-
 (* All objects must be one of these types *)
 type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype
 
 (* I left the stuff that is called in the semantic analyzer below *)
 
+(* Operators *)
+type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And
+
+(* Function types *)
+type func_type = Slide | Comp | Attr | Func
+
 (* Identifiers *)
 type identifier = Identifier of string
-
-(* For inheritance of components *)
-type parent =
-    | Parent of identifier 
-    | Noparent of null
 
 (* Handles calls of functions and components *)
 type func_call = {
@@ -52,7 +51,7 @@ type func_definition = { (* Handles declarations of functions, components, attri
     t: func_type; (* e.g. slide, component, attribute, func *)
     name : identifier; (* Name of the function *)
     formals : identifier list; (* Name of the formal parameters *)
-    inheritance : parent; (* Name of any parent components, ie box, or null *)
+    inheritance : identifier option; (* Name of any parent components, ie box, or null *)
     paractuals: expr list; (* This represents the actuals passed to the parent *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
 }
