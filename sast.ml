@@ -16,11 +16,11 @@ type parent =
     | Noparent of null
 
 (* Handles calls of functions and components *)
-type func_call = { 
+type func_call = {
     cname : identifier; (* Name of the function *)
     actuals : expr list; (* Evaluated actual parameters *)
     mods : stmt; (* Additional statements, which could be a block *)
-}  
+}
 
 (* Expressions *)
 and expr_detail =

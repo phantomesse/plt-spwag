@@ -1,4 +1,4 @@
-(* 
+(*
     ir.mli is the immediate represenation between the abstract syntax tree (ast.ml) and the actual compiled code, which is an HTML file with embedded CSS and JavaScript.
 
     All functions that generate static code are resolved into IR components, while all dynamic code are represented by the SAST for javascript generation.
@@ -48,7 +48,7 @@ type element = {
     image : string;                       (* Image inside the element (optional) *)
     text : string;                        (* Text inside the element (optional) *)
     style : css;                          (* CSS as applied to this particular element with this id *)
-    onclick : Sast.func_call;             (* Name of javascript function to apply on click, empty string means none *)
+    (*onclick : Sast.func_call;*)             (* Name of javascript function to apply on click, empty string means none *)
     elements : element StringMap.t;       (* Map of element id (string) -> element *)
 }
 
@@ -77,12 +77,12 @@ type slide = {
     prev : string;                        (* Id of the previous slide = name of the slide function that is prev *)
     image : string;                       (* URL of any background image *)
     style : slide_css;                    (* CSS as applied to the slide in general *)
-    onclick : Sast.func_call;             (* Name of javascript function to apply on click, empty string means none *)
-    onpress : string * Sast.func_call;    (* Key to press, name of javascript function to apply on press *)
+    (*onclick : Sast.func_call;             (* Name of javascript function to apply on click *)
+    onpress : string * Sast.func_call;*)    (* Key to press, name of javascript function to apply on press *)
     elements : element StringMap.t;       (* Map of element id (string) -> element *)
 }
 
 (* Slide list is the list of slides, with its child elements, with their child elements, etc. *)
 (* func defintion list is a list of all the functions (not attr/comp/slide) to evaluate javascript *)
 (* css list is a list of css that applies to CLASSES (or CLAZZES), these are generated from component definitions (and not component calls) *)
-type program = css list * slide list *  Sast.func_definition list 
+type program = css list * slide_css list * slide list *  Sast.func_definition list

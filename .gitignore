@@ -6,3 +6,4 @@ parser.mli
 *.cmi
 spwag
 irtester
+compiletester
