@@ -19,7 +19,7 @@ type func_call = {
 
 (* Expressions *)
 and expr =
-    | Binop of expr * operator * expr (* a + b *)
+      Binop of expr * operator * expr (* a + b *)
     | Notop of expr (* !a only applies to booleans *)
     | Litint of int (* 42 *)
     | Litper of int (* 42% *)
@@ -32,7 +32,7 @@ and expr =
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)
-    | Block of stmt list (* { ... } *)
+      Block of stmt list (* { ... } *)
     | Expr of expr (* foo = bar + 3; *)
     | Return of expr (* return 42; *)
     | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *)
@@ -65,7 +65,7 @@ let rec string_of_call call =
     | Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}" 
     | something -> "ERROR!!!!!!" )
 and string_of_expr = function
-    | Notop(e) -> "!(" ^ (string_of_expr e) ^ ")"
+      Notop(e) -> "!(" ^ (string_of_expr e) ^ ")"
     | Binop(e1, o, e2) ->
         "(" ^ string_of_expr e1 ^ " " ^
         (match o with
@@ -84,7 +84,7 @@ and string_of_expr = function
         String.concat "" (List.map (fun ex -> "[" ^ (string_of_expr ex) ^ "]") e)
     | Call(f) -> string_of_call f
 and string_of_stmt = function
-    | Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+      Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
     | Expr(expr) -> string_of_expr expr ^ "\n";
     | Return(expr) -> "return " ^ string_of_expr expr ^ "\n";
     | If(e, s, Block([])) -> "if " ^ string_of_expr e ^ "\n" ^ string_of_stmt s
@@ -98,7 +98,7 @@ let string_of_vdecl = function
     Identifier(s) -> "var " ^ s ^ "\n"
 
 let string_of_function_type = function
-    | Slide -> "define slide"
+      Slide -> "define slide"
     | Comp -> "define comp"
     | Attr -> "define attr"
     | Func -> "define func"
