@@ -5,3 +5,4 @@ parser.mli
 *.cmo
 *.cmi
 spwag
+irtester
