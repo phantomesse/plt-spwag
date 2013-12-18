@@ -17,6 +17,6 @@ let _ =
                 | Ast -> let listing = Ast.string_of_program program
                          in print_string listing
                 | Irgenerator -> (* let sast = Semantic_analyzer.evalprogram program symbol_table
-                                 in *) let ir = Irgenerator.generate program (* sast *) (* for testing purposes only *)
-                                 in print_string ir 
+                                 in *) (*let ir = Irgenerator.generate program (* sast *) (* for testing purposes only *)
+                                 in print_string ir*) print_string "HI" 
                 | Compile -> Compile.compile program
