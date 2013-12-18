@@ -22,7 +22,7 @@ let null = "";
 let resolve_css func = (* attr function must only contain single block (list) of attributes *)
 	let attr_list = List.map field_value_pair func.body in
 	{
-		clazz = func.name
+		clazz = func.name;
 
 		display = false; (* TODO how to handle this? Where does bool value come from? *)
    		position_x = field_value_from_pair_list "position_x" attr_list;
@@ -36,20 +36,20 @@ let resolve_css func = (* attr function must only contain single block (list) of
     	padding_top = field_value_from_pair_list "padding_top" attr_list;
     	padding_bottom = field_value_from_pair_list "padding_bottom" attr_list;
     	padding_left = field_value_from_pair_list "padding_left" attr_list;
-    	padding_right = field_value_from_pair_list "padding_right" attr_list
+    	padding_right = field_value_from_pair_list "padding_right" attr_list;
 
-    	text_color = field_value_from_pair_list "text_color" attr_list
-    	background_color = field_value_from_pair_list "background_color" attr_list
+    	text_color = field_value_from_pair_list "text_color" attr_list;
+    	background_color = field_value_from_pair_list "background_color" attr_list;
 
-    	font = field_value_from_pair_list "font" attr_list
-    	font_size = field_value_from_pair_list "font_size" attr_list
-    	font_decoration = field_value_from_pair_list "font_decoration" attr_list
+    	font = field_value_from_pair_list "font" attr_list;
+    	font_size = field_value_from_pair_list "font_size" attr_list;
+    	font_decoration = field_value_from_pair_list "font_decoration" attr_list;
 
-    	border = field_value_from_pair_list "border" attr_list
-    	border_color = field_value_from_pair_list "border_color" attr_list
+    	border = field_value_from_pair_list "border" attr_list;
+    	border_color = field_value_from_pair_list "border_color" attr_list;
 
-    	width = field_value_from_pair_list "width" attr_list
-    	height = field_value_from_pair_list "height" attr_list
+    	width = field_value_from_pair_list "width" attr_list;
+    	height = field_value_from_pair_list "height" attr_list;
 	} :: css_list
 
 
