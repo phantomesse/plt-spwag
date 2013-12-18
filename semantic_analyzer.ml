@@ -1,4 +1,13 @@
 (* Authors: Richard Chiou and Aditya Majumdar *)
+(* Quick to do list:
+	func_call
+	Component of identifier
+	Call of func_call
+	Declaration of identifier: add identifier to symbol table
+	Decassign of identifier * expr: add to symbol table
+	func_definition: Aditya wrote one, but it's heavily bugged at the moment
+	program: take in an Ast.program and output an Sast.program
+*)
 
 open Ast
 open Sast
@@ -53,8 +62,7 @@ let string_of_binop = function
 	| And -> "And"
 	| Or -> "Or"
 
-(* We need to write find_variable and a find_function functions *)
-(* This find_variable function is taken from Edwards' slides and will probably be heavily modified *)
+(* This find_variable function is adapted from the slides *)
 let rec find_variable scope name =
     try
 		List.find (fun (s) -> s = name) scope.variables
@@ -62,28 +70,23 @@ let rec find_variable scope name =
         match scope.parent with
         Some(parent) -> find_variable parent name
     | _ -> raise Not_found
-
-(* This find_function function is taken from a past project and will probably be heavily modified *)
-(*let rec find_function (scope: symbol_table) name =
-	let rec getGlobalScope scope = match scope.parent with	(* Functions are defined at the highest level? *)
+	
+(* This find_function function goes up to global scope before searching *)
+let rec find_function scope name =
+	let rec global scope = match scope.parent with	(* All functions are global *)
 		| None -> scope
-		| Some(parent) -> (getGlobalScope parent)
+		| Some(parent) -> (global parent)
 	in
 	try
-		List.find (fun {s, _, _, _} -> s = name) (getGlobalScope scope).functions
-	with Not_found -> (* This block lists the valid functions; we should look at this carefully *)
-		let build_string tmpString nextString = tmpString^" \n"^nextString in
-		let func_names_string = List.fold_left build_string("") (List.map (fun {fdt=_; fname=n; formals=_; fbody=_} -> n ) (getGlobalScope scope).functions) in
-		let num_funcs = List.length (getGlobalScope scope).functions in
-		raise(Failure("Function "^name^" not found in global scope, funcs found were "^(string_of_int num_funcs)^func_names_string))
-*)
+		List.find (fun {t=_, name=s, formals=_, inheritance=_, paractuals=_, body=_} -> s = name) (global scope).functions
+	with Not_found -> (* Not found, print error message *)
+		(*let build_string tmpString nextString = tmpString^" \n"^nextString in
+		let func_names_string = List.fold_left build_string("") (List.map (fun {t=_, name=s, formals=_, inheritance=_, paractuals=_, body=_} -> n ) (getGlobalScope scope).functions) in
+		let num_funcs = List.length (getGlobalScope scope).functions in*)
+		raise(Failure("Function "^name^" not found in global scope"))
 
 (*Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions,
 evaluate mods are statements 
-
-check identifier is in symbol table,
-check expression
-go into symbol table and assigned something if i
 
 Component of identifier: identifier has to be slide or variable (component or slide) 
 expr list are strings
