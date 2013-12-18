@@ -23,9 +23,9 @@ let null = "";
 
 
 (* get the last-provided value of a field from a (field:String, value:String) tuple list *)
-let field_value_from_pair_list (expr : String) (l: list) =
+let field_value_from_pair_list expr l =
 	if (List.length l = 0) then null 
-	else if (List.exists (expr, _) l) then (snd (List.find (expr, _) (List.rev l)))
+	else if ((List.exists (expr; _) l) then (snd (List.find (expr; _) (List.rev l)))
 	else null
 
 
