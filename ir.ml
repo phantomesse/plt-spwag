@@ -14,8 +14,8 @@ type literal =
   | Litper of int (* 42% *)
   | Litstr of string (* “foo” *)
   | Litbool of bool (* true *)
-  | Component of Sast.identifier * string list (* identifier["child"]["child"] etc. to fetch component *)
-  | Slide of Sast.identifier
+  | Litcomp of Sast.identifier * string list (* identifier["child"]["child"] etc. to fetch component *)
+  | Litslide of Sast.identifier (* identifier that is the name of a slide *)
 
 (* This is a call to whatever function is called onclick or onpress*)
 type js_call = {
