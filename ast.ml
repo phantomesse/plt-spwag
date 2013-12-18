@@ -1,7 +1,4 @@
-(* Authors: Richard Chiou, John Wang, and Aditya Majumdar *)
-
-(* Null type *)
-type null = Null
+(* Authors: Richard Chiou, Yunhe(John) Wang, and Aditya Majumdar *)
 
 (* Identifiers *)
 type identifier = 
@@ -12,11 +9,6 @@ type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | 
 
 (* Function types *)
 type func_type = Slide | Comp | Attr | Func
-
-(* For inheritance of components *)
-type parent =
-    | Parent of identifier 
-    | Noparent of null
 
 (* Handles calls of functions and components *)
 type func_call = { 
@@ -53,7 +45,7 @@ type func_definition = { (* Handles declarations of functions, components, attri
     t: func_type; (* e.g. slide, component, attribute, func *)
     name : identifier; (* Name of the function *)
     formals : identifier list; (* Name of the formal parameters *)
-    inheritance : parent; (* Name of any parent components, ie box, or null *)
+    inheritance : identifier option; (* Name of any parent components, ie box, or null *)
     paractuals: expr list; (* This represents the actuals passed to the parent *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
 }
@@ -112,7 +104,7 @@ let string_of_function_type = function
     | Func -> "define func"
 
 let string_of_inheritance i p = 
-    " isa " ^ (string_of_identifier (match i with Parent(id) -> id | Noparent(n) -> Identifier("ERROR!!"))) ^ 
+    " isa " ^ (string_of_identifier (match i with Some(id) -> id | None -> Identifier("ERROR!!"))) ^ 
     "(" ^ String.concat ", " (List.map string_of_expr p) ^ ")" 
 
 let string_of_fdecl fdecl =

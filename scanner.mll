@@ -1,4 +1,4 @@
-(* Authors: Lauren Zou, Aftab Khan, John Wang *)
+(* Authors: Lauren Zou, Aftab Khan, Yunhe(John) Wang *)
 
 { 
     open Parser
