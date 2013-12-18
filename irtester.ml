@@ -1,3 +1,5 @@
+(* Authors: Lauren Zou, Aftab Khan *)
+
 open Ast
 open Sast
 

@@ -1,3 +1,5 @@
+(* Author: Aftab Khan, Lauren Zou *)
+
 open Compile
 
 type action = Ast | Irgenerator | Compile

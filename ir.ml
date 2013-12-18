@@ -85,4 +85,4 @@ type slide = {
 (* Slide list is the list of slides, with its child elements, with their child elements, etc. *)
 (* func defintion list is a list of all the functions (not attr/comp/slide) to evaluate javascript *)
 (* css list is a list of css that applies to CLASSES (or CLAZZES), these are generated from component definitions (and not component calls) *)
-type program = css list * slide_css list * slide list *  Sast.func_definition list
+type program = css list * slide list *  Sast.func_definition list

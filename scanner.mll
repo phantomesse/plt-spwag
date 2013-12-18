@@ -1,3 +1,5 @@
+(* Authors: Lauren Zou, Aftab Khan, John Wang *)
+
 { 
     open Parser
     open Linecounter
