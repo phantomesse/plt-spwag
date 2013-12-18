@@ -20,7 +20,7 @@ type literal =
 
 (* This is a call to whatever function is called onclick or onpress*)
 type js_call = {
-	name : Sast.identifier;	(* Name of function passed to javascript, can only be of func type *)
+	cname : Sast.identifier;	(* Name of function passed to javascript, can only be of func type *)
 	actuals: literal list; (* The actual parameters of the function passed, can only be literals *)
 }
 
@@ -32,8 +32,9 @@ type js_definition = {
 }
 
 (* This css is either located with an element, or applies to a class of elements (comp definition) *)
+module Element = struct
 type css = {
-    clazz : string;
+    cclass : string;
     
     display : bool;
     
@@ -67,13 +68,14 @@ type css = {
 (* Elements with a slide or element *)
 type element = {
     id : string;                          (* Unique id of a component WITHIN its outer component, concatenate with hyphens to obtain css id*)
-    clazz : string;                       (* This class specifies all attributes applied to this element via the component definition *)
+    eclass : string;                       (* This class specifies all attributes applied to this element via the component definition *)
     image : string;                       (* Image inside the element (optional) *)
     text : string;                        (* Text inside the element (optional) *)
     style : css;                          (* CSS as applied to this particular element with this id *)
     onclick : js_call option;             (* Name of javascript function to apply on click, empty string means none *)
     elements : element StringMap.t;       (* Map of element id (string) -> element *)
 }
+end
 
 (* Possible CSS that can apply to slides *)
 type slide_css = {
@@ -102,11 +104,11 @@ type slide = {
     style : slide_css;                            (* CSS as applied to the slide in general *)
     onclick : js_call option;                     (* Name of javascript function to apply on click *)
     onpress : (string * js_call) option;          (* Key to press, name of javascript function to apply on press *)
-    elements : element StringMap.t;               (* Map of element id (string) -> element *)
+    elements : Element.element StringMap.t;       (* Map of element id (string) -> element *)
 }
 
 (* css list is a list of css that applies to CLASSES (or CLAZZES), these are generated from component definitions (and not component calls) *)
 (* Slide list is the list of slides, with its child elements, with their child elements, etc. *)
 (* identifier list is a list of the global variables, these start out null at javascript run time *)
 (* js definition list is a list of all the functions (not attr/comp/slide) to evaluate javascript *)
-type program = css list * slide list * Sast.identifier list * js_definition list
+type program = Element.css list * slide list * Sast.identifier list * js_definition list
