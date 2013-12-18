@@ -1,3 +1,5 @@
+(* Author: Richard Chiou *)
+
 open Ast (*Consult Ast for types defined there *)
 
 (* All objects must be one of these types *)

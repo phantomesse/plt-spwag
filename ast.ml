@@ -1,3 +1,5 @@
+(* Authors: Richard Chiou, John Wang, and Aditya Majumdar *)
+
 (* Null type *)
 type null = Null
 
