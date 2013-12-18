@@ -8,6 +8,28 @@
 open Sast 
 module StringMap = Map.Make(String)
 
+(* All expressions must be evaluated before passing to javascript *)
+type literal = 
+  | Litint of int (* 42 *)
+  | Litper of int (* 42% *)
+  | Litstr of string (* “foo” *)
+  | Litbool of bool (* true *)
+  | Component of Sast.identifier * string list (* identifier["child"]["child"] etc. to fetch component *)
+  | Slide of Sast.identifier
+
+(* This is a call to whatever function is called onclick or onpress*)
+type js_call = {
+	name : Sast.identifier;	(* Name of function passed to javascript, can only be of func type *)
+	actuals: literal list; (* The actual parameters of the function passed, can only be literals *)
+}
+
+(* This is the template for all possible js function definitions *)
+type js_definition = {
+	name : Sast.identifier;	(* Name of the function *)
+	formals : Sast.identifier list; (* Formal parameters *)
+	body : Sast.stmt list;	(* Body of javascript definition *)
+}
+
 (* This css is either located with an element, or applies to a class of elements (comp definition) *)
 type css = {
     clazz : string;
@@ -48,7 +70,7 @@ type element = {
     image : string;                       (* Image inside the element (optional) *)
     text : string;                        (* Text inside the element (optional) *)
     style : css;                          (* CSS as applied to this particular element with this id *)
-    onclick : Sast.func_call option;      (* Name of javascript function to apply on click, empty string means none *)
+    onclick : js_call option;             (* Name of javascript function to apply on click, empty string means none *)
     elements : element StringMap.t;       (* Map of element id (string) -> element *)
 }
 
@@ -77,12 +99,13 @@ type slide = {
     prev : string;                                (* Id of the previous slide = name of the slide function that is prev *)
     image : string;                               (* URL of any background image *)
     style : slide_css;                            (* CSS as applied to the slide in general *)
-    onclick : Sast.func_call;                     (* Name of javascript function to apply on click *)
-    onpress : (string * Sast.func_call) option;   (* Key to press, name of javascript function to apply on press *)
+    onclick : js_call option;                     (* Name of javascript function to apply on click *)
+    onpress : (string * js_call) option;          (* Key to press, name of javascript function to apply on press *)
     elements : element StringMap.t;               (* Map of element id (string) -> element *)
 }
 
-(* Slide list is the list of slides, with its child elements, with their child elements, etc. *)
-(* func defintion list is a list of all the functions (not attr/comp/slide) to evaluate javascript *)
 (* css list is a list of css that applies to CLASSES (or CLAZZES), these are generated from component definitions (and not component calls) *)
-type program = css list * slide list *  Sast.func_definition list
+(* Slide list is the list of slides, with its child elements, with their child elements, etc. *)
+(* identifier list is a list of the global variables, these start out null at javascript run time *)
+(* js definition list is a list of all the functions (not attr/comp/slide) to evaluate javascript *)
+type program = css list * slide list * Sast.identifier list * js_definition list
