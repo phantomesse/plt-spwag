@@ -106,7 +106,8 @@ let rec expr env = function
   | Ast.Litper(v) -> Sast.Litper(v), Sast.Per
   | Ast.Litstr(v) -> Sast.Litstr(v), Sast.Str
   | Ast.Litbool(v) -> Sast.Litbool(v), Sast.Bool
-
+  | Ast.Litnull(v) -> Sast.Litnull(v), Sast.Null
+  
   | Ast.Binop (expr1, op, expr2) ->  (* evaluate operators *)
     (
 	let e1 = expr env expr1 and
