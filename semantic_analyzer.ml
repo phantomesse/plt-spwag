@@ -50,7 +50,6 @@ let string_of_func_type = function
 let string_of_expr = function
 	| _ -> "(not implemented ... yet)"
 
-
 (* Operations: Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And *)
 let string_of_binop = function
 	 Plus -> "Plus"
@@ -92,8 +91,16 @@ let rec find_function scope name =
 	expr list are strings
 *)
 
+(* Handles calls of functions and components 
+type func_call = { 
+    cname : identifier; (* Name of the function *)
+    actuals : expr list; (* Evaluated actual parameters *)
+    mods : stmt; (* Additional statements, which could be a block *)
+}  *)
+(*let functioncall env = function*)
+
 (* Check if valid identifier *)
-let rec identify env = function
+let identify env = function
     Ast.Identifier(v) -> Sast.Identifier(v)
     (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
 	Sast.Identifier(vdecl), Sast.Varidentifier*)
@@ -161,6 +168,37 @@ let rec expr env = function
 	let id = identify env v in
 	(*let _, t1 = id (* type of rhs *) in*)
 	Sast.Variable(id), Sast.Varidentifier
+	
+(*  | Ast.Call(funccall) ->
+		(* Evaluate if this is a valid func_call: must have cname : identifier; (* Name of the function *)
+    actuals : expr list; (* Evaluated actual parameters *)
+    mods : stmt; (* Additional statements, which could be a block *) *)
+		(* Then check to see if said function exists *)
+
+		(*CGL has a call of string, exprList *)
+  | Ast.Call (string, exprList) ->
+		(
+		let funcFound = find_function scope string in
+		let formalTypes = List.map (fun {pdt=s; pname=_} -> s) funcFound.formals in
+		let checkedExprs = List.map (exprCheck scope) exprList in
+		let checkedTypes = List.map snd(checkedExprs) in
+		
+		(* check each type from checked list against fdecl param types in scope's function list *)
+		let rec typesMatch list1 list2 = match list1,list2 with
+		| [], [] -> true
+		| [], _ -> raise(Failure(" found parameters when expecting none "))
+		| _ , [] -> raise(Failure(" found no parameters when expecting parameters"))
+		| _ , _ -> 
+			try
+		  ( typeEq (List.hd(list1)) (List.hd(list2)) ) && typesMatch (List.tl(list1)) (List.tl(list2))
+			with Failure("hd") ->
+				raise(Failure(" trying List.hd on [] in exprCheck:Ast.Call"))
+		in
+		if (typesMatch formalTypes checkedTypes)
+		  then Sast.Call (string , checkedExprs) , funcFound.fdt
+	  else
+			raise(Failure("Arguments for function: "^ string ^" do not match function signature"))
+		)*)
   
   (* Component of identifier: identifier has to be slide or variable (component or slide) *)
 	  
