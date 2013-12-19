@@ -28,7 +28,6 @@ let funcs_to_js funcs =
 					| _ -> jss
 					) [] funcs 
 
-(* The following are functions needed for binding *)
 (* Creates a blank slide given it's Identifier *)
 let create_blank_slide i = 
 	let fill_css = 
@@ -37,6 +36,7 @@ let create_blank_slide i =
 		border = "";border_color = "";}
 	in
 	{Slide.id=(id_to_str i);next="";prev="";image="";style=fill_css;onclick=None;onpress=None;elements=StringMap.empty}
+
 (* Creates a blank element *)
 let create_blank_element = 
 	let fill_css = 
@@ -74,7 +74,7 @@ let bind_to_slide_comp path output = function
 		else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
 *)
 			
-
+exception ReturnException of literal * lookup_table
 
 (* Main function that performs IR generation *)
 let generate (vars, funcs) =
@@ -106,13 +106,55 @@ let generate (vars, funcs) =
 	 * @return the updated lookup table *)
 	let rec call (fdef:Sast.func_definition) actuals lookupparam = 
 		
+		(* Evaluates expressions for static code, binds elements, etc.
+		 * @param loclook (locals, lookup)
+		 * @param expression the expression to evaluate
+		 * @return (Ir.literal, (locals, lookup)) *)
+		let rec eval loclook expression = 
+			(Ir.Litnull, loclook)
+		in
+
 		(* Actually executes statements
+		 * It kind of doesn't use the type info, that's more useful for javascript dynamic code
 		 * @param loclook (locals, lookup)
 		 * @param statement the statement the execute
 		 * @return (locals, lookup) *)
-		let rec exec loclook statement = 
-			(fst loclook, snd loclook) 
-		in
+		let rec exec loclook = function
+			Sast.Block(stmts) -> let (_, lookup) = (List.fold_left exec loclook stmts) in (fst loclook, lookup) 
+			| Sast.Expr(e) -> let _, loclook = eval loclook (fst e) in loclook
+			| Sast.If(e, s1, s2) ->  
+	  			let v, loclook = eval loclook (fst e) in
+				(match v with
+					Ir.Litbool(false) -> exec loclook s2
+					| Ir.Litint(0) -> exec loclook s2
+					| Ir.Litper(0) -> exec loclook s2
+					| Ir.Litstr("") -> exec loclook s2
+					| Ir.Litnull -> exec loclook s2
+					| _ -> exec loclook s1)
+			| Sast.While(e, s) ->
+				let rec loop loclook =
+					let v, loclook = eval loclook (fst e) in
+					(match v with
+						Ir.Litbool(false) -> loclook
+						| Ir.Litint(0) -> loclook
+						| Ir.Litper(0) -> loclook
+						| Ir.Litstr("") -> loclook
+						| Ir.Litnull -> loclook
+						| _ -> loop (exec loclook s))
+				in loop loclook
+			| Sast.Declaration(Identifier(s)) -> 
+				if StringMap.mem s (fst loclook)
+				then raise (Failure("The following variable, already declared: " ^ s))
+				else (StringMap.add s Litnull (fst loclook), snd loclook)
+			| Sast.Decassign(Identifier(s), e) ->
+				let r, locklook = eval loclook (fst e) in
+				if StringMap.mem s (fst loclook)
+				then raise (Failure ("The following variable, already declared: " ^ s))
+				else (StringMap.add s r (fst loclook), snd loclook)
+			| Sast.Return(e) ->
+	  			let r, (locals, lookup) = eval loclook e in
+	  			raise (ReturnException(r, lookup))
+	 	in
 		
 		(* This section takes care of scoping issues before calling exec on statements *)
 		(* Assign the locals from the actual parameters *)
