@@ -23,7 +23,7 @@ and expr_detail =
     | Litper of int (* 42% *)
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
-	| Litnull of null (* null *)
+	| Litnull (* null *)
     | Assign of identifier * expr (* foo - 42 *) 
     | Variable of identifier (* although this is named Variable, can also be the name of a slide/function *)
     | Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
