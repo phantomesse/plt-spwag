@@ -110,12 +110,82 @@ let generate (vars, funcs) =
 		 * @param loclook (locals, lookup)
 		 * @param expression the expression to evaluate
 		 * @return (Ir.literal, (locals, lookup)) *)
-		let rec eval loclook expression = 
-			(Ir.Litnull, loclook)
+		let rec eval loclook = function
+		(* This part is easy, can do when half asleep
+			Sast.Binop(e1, op, e2) ->
+				let r1, loclook = eval loclook e1 in
+				let r2, loclook = eval loclook e2 in
+				let boolean i = if i then 1 else 0 in
+				(match r1, op, r2 with
+					Ir.Litint(i1), Plus, Ir.Litint(i2) -> (Ir.Litint(i1 + i2), loclook)
+					| Ir.Litint(i1), Minus, Ir.Litint(i2) -> (Ir.Litint(i1 - i2), loclook)
+					| Ir.Litint(i1), Times, Ir.Litint(i2) -> (Ir.Litint(i1 * i2), loclook)
+					| Ir.Litint(i1), Divide, Ir.Litint(i2) -> (Ir.Litint(i1 / i2), loclook)
+					| 
+				  | (Ir.Litbool), (And | Or), () ->  (* And/or operators *)
+						Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
+							
+				  | (Int), (Lessthan | Greaterthan), (Int) ->  (* > , < *)
+						Sast.Binop(e1, op, e2), Sast.Bool
+								
+				  | (Int), (Plus | Minus | Times | Divide), (Int) ->  (* Arithmetic on ints *)
+						Sast.Binop(e1, op, e2), Sast.Int   
+				
+				  | (Per), (Plus | Minus | Times | Divide), (Per) ->  (* Arithmetic on percents *)
+						Sast.Binop(e1, op, e2), Sast.Per   
+						
+				  | _, (Equals | Notequals), _  ->   (* Compare Anything *)
+						Sast.Binop(e1, op, e2), Sast.Bool
+								
+				  | (Str), Plus, (Str | Int) ->  (* String Concatenation *) 
+						Sast.Binop(e1, op, e2), Sast.Str		
+								
+				 (* Otherwise Invalid *)
+				  | a, op, b -> raise(Failure("Binop "^ (string_of_binop op) ^" does not work with operands "^ (string_of_type_t a) ^", "^ (string_of_type_t b) ^ "\n"))
+				)
+				
+				
+				(match op with
+				  Add -> v1 + v2
+				| Sub -> v1 - v2
+				| Mult -> v1 * v2
+				| Div -> v1 / v2
+				| Equal -> boolean (v1 = v2)
+				| Neq -> boolean (v1 != v2)
+				| Less -> boolean (v1 < v2)
+				| Leq -> boolean (v1 <= v2)
+				| Greater -> boolean (v1 > v2)
+				| Geq -> boolean (v1 >= v2)), env
+				|
+				*)
+			| Sast.Notop(e) -> 
+				let r, loclook = eval loclook (fst e) in
+				(match r with
+					Ir.Litbool(b) -> (Ir.Litbool(not b), loclook)
+					| _ -> raise (Failure ("This cannot be notted")))
+			| Sast.Litint(i) -> (Ir.Litint(i), loclook)
+			| Sast.Litper(i) -> (Ir.Litper(i), loclook)
+			| Sast.Litstr(s) -> (Ir.Litstr(s), loclook)
+			| Sast.Litbool(b) -> (Ir.Litbool(b), loclook)
+			| Sast.Litnull -> (Ir.Litnull, loclook)
+			| Sast.Assign(Identifier(i), (e,_)) ->
+				let r, (locals, lookup) = eval loclook e in
+				if StringMap.mem i locals 
+					then r, (StringMap.add i r locals, lookup)
+				else if StringMap.mem i lookup.vars_in
+					then r, (locals, {lookup with vars_in=StringMap.add i r lookup.vars_in})
+				else raise (Failure ("Undeclared identifier " ^ i))
+			| Sast.Variable(Identifier(i)) -> 
+				if StringMap.mem i (fst loclook) 
+					then (StringMap.find i (fst loclook), loclook)
+				else if StringMap.mem i (snd loclook).vars_in
+					then (StringMap.find i (snd loclook).vars_in, loclook)
+				else raise (Failure ("Undeclared identifier " ^ i))
+	
 		in
 
 		(* Actually executes statements
-		 * It kind of doesn't use the type info, that's more useful for javascript dynamic code
+		 * This part doesn't use the type info, more useful for javascript compiling later on
 		 * @param loclook (locals, lookup)
 		 * @param statement the statement the execute
 		 * @return (locals, lookup) *)
@@ -151,7 +221,7 @@ let generate (vars, funcs) =
 				if StringMap.mem s (fst loclook)
 				then raise (Failure ("The following variable, already declared: " ^ s))
 				else (StringMap.add s r (fst loclook), snd loclook)
-			| Sast.Return(e) ->
+			| Sast.Return((e, _)) ->
 	  			let r, (locals, lookup) = eval loclook e in
 	  			raise (ReturnException(r, lookup))
 	 	in
