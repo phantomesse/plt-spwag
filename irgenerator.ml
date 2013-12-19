@@ -1,17 +1,61 @@
-(* Authors: Aftab Khan, John Wang *)
+(* Authors: Yunhe (John) Wang and Aftab Khan *)
+(* Reference the Ast only for function types and operators, all else is in sast/ir *)
 
 open Sast
 open Ir
 
+(* Lookup table *)
+type lookup_table = {
+    lfuncs 			: func_definition StringMap.t; (* Map function names to functions *)
+	mutable lvars  	: literal StringMap.t; 	(* Global Variables, assignments can be changed *)
+  }
 
-(* TODO:
+(* John says: I agree, identifier is annoying, oh well*)
+let id_to_str = function Identifier(s) -> s 
 
-- How are vars handled? Vars here refers to SAST.identifier list, 
-	which is a list of global vars. Do we have global vars in SPWAG?
-	How does this work with local scoping paradigm?
-- Handle StringMap Resolution
+(* Converts funcs (Not attrs/comps/slides) to js definitions *)
+let funcs_to_js funcs = 
+	List.fold_left (fun jss (func:Sast.func_definition) -> {Ir.name=func.name;formals=func.formals;body=func.body}:: jss) [] funcs 
 
-*)
+(* Main function that performs IR generation *)
+let generate (vars, funcs) =
+	(* 
+	 * Create lookup table 
+	 * @param vars is the variables from Sast.program
+	 * @param funcs is the function definitions from Sast.program 
+	 * @return the lookup table as specified *)
+	let create_lookup vars funcs = 
+		let fill_funcs lookup (func : Sast.func_definition) = 
+			try ignore (StringMap.find (id_to_str func.name) lookup.lfuncs); 
+				raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
+			with Not_found ->
+				{lookup with lfuncs = StringMap.add (id_to_str func.name) func lookup.lfuncs} 	
+		in 
+		let fill_vars lookup id = {lookup with lvars=StringMap.add (id_to_str id) Litnull lookup.lvars}
+		in
+		(List.fold_left fill_vars (List.fold_left fill_funcs 
+										({lfuncs=StringMap.empty; 
+										  lvars=StringMap.empty;}) funcs) vars)
+	in 
+	(* This calls a function to generate ir
+	 * @param fdef is the function definition
+	 * @param actuals are the actual parameter list
+	 * @param lookup is the lookup table 
+	 * @param irout is the output ir 
+	 * @return (lookup, irout) *)
+	let call fdef lookup actuals irout = 
+		(lookup, irout)
+	in
+	let lookup = create_lookup vars funcs
+	in try
+		(* Find the main slide and call it *)
+		call (StringMap.find "main" lookup.lfuncs) lookup [] ([],[], vars, (funcs_to_js funcs))  
+	with Not_found -> raise (Failure ("There must exist a main() slide"))
+
+	
+(*	
+	
+	List.map separate_func_type funcs
 
 (* list declarations *)
 let javascript_funcs_list = [];
@@ -36,13 +80,7 @@ let field_value_pair (expr : String) =
 			(String.sub expr (lparen_index + 1) (((String.length expr) - 1 ) - (lparen_index + 1)))
 
 
-(* determines function type and triggers the appropriate parsing procedure*)
-let separate_func_type (func : Sast.func_definition) = 
-	match func.t with
-	| Ast.Func -> func :: javascript_funcs_list
-	| Ast.Attr -> resolve_global_css func 		(* css for classes *)
-	| Ast.Comp -> resolve_comp func
-	| Ast.Slide -> resolve_slide
+
 
 
 (* handle global css classes ('define attr ...') and add to list *)
@@ -52,9 +90,6 @@ let resolve_global_css func =
 		(resolve_css css_clazz attr_list) :: css_list
 
 
-(* Main function that performs IR generation *)
-let generate (vars, funcs) =
-	List.map separate_func_type funcs
 
 
 
@@ -150,4 +185,4 @@ let resolve_slide_css field_value_pair_list =
 	}
     
 
-let blah = print_string "blah"
+let blah = print_string "blah"*)

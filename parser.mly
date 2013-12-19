@@ -36,14 +36,14 @@ program: /* global vars, functions */
     | program func_decl        { fst $1, ($2 :: snd $1) }
 
 func_decl:
-      DEF SLIDE ID LPAREN formals_opt RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
+      DEF SLIDE ID LPAREN RPAREN NEWLINE LBRACE stmt_list RBRACE NEWLINE
       {{
         t = Slide;
         name = Identifier($3);
-        formals = $5;
+        formals = [];
         inheritance = None;
         paractuals = [];
-        body = List.rev $9
+        body = List.rev $8
       }}
     | DEF COMP ID LPAREN formals_opt RPAREN ISA ID LPAREN actuals_opt RPAREN
       NEWLINE LBRACE stmt_list RBRACE NEWLINE
