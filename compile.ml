@@ -1,57 +1,78 @@
+(* Author: Lauren Zou *)
+
 open Ir
+open Ir.Element
+open Ir.Slide
 
-let string_of_css css =
-    (*"." ^ css.clazz ^ "\n" ^*)
-    "{" ^
-    "\ttop: " ^ css.position_x ^ "\n" ^
-    "\twidth: " ^ css.width ^ "\n" ^ 
-    "\theight: " ^ css.height ^ "\n" ^
-    "}"
+let string_of_property property value =
+    if String.length value > 0 then
+        "            " ^ property ^ ": " ^ value ^ ";\n"
+    else
+        ""
+;;
 
-(*clazz : string;
+let string_of_css elem =
+    "        ." ^ elem.cclass ^ " {\n" ^
+
+    (*string_of_property "display", string_of_bool elem.display ^*)
     
-    display : bool;
-    
-    position_x : string;
-    position_y : string;
-    
-    margin_top : string;
-    margin_bottom : string;
-    margin_left : string;
-    margin_right : string;
-    
-    padding_top : string;
-    padding_bottom : string;
-    padding_left : string;
-    padding_right : string;
+    string_of_property "left" elem.position_x ^
+    string_of_property "top" elem.position_y ^
 
-    text_color: string;
-    background_color : string;
+    string_of_property "margin-top" elem.margin_top ^
+    string_of_property "margin-bottom" elem.margin_bottom ^
+    string_of_property "margin-left" elem.margin_left ^
+    string_of_property "margin-right" elem.margin_right ^
 
-    font : string;
-    font_size : string;
-    font_decoration : string;
+    string_of_property "padding-top" elem.padding_top ^
+    string_of_property "padding-bottom" elem.padding_bottom ^
+    string_of_property "padding-left" elem.padding_left ^
+    string_of_property "padding-right" elem.padding_right ^
 
-    border : string;
-    border_color : string;
+    string_of_property "color" elem.text_color ^
+    string_of_property "background-color" elem.background_color ^
 
-    width : string;
-    height : string;*)
+    string_of_property "font-family" elem.font ^
+    string_of_property "font-size" elem.font_size ^
+    (* Need to handle font decoration with italics, bold, and underline *)
 
-let compile (styles, slide_styles, slides, funcs) =
+    string_of_property "border-width" elem.border ^
+    string_of_property "border-color" elem.border_color ^
+
+    string_of_property "width" elem.width ^
+    string_of_property "height" elem.height ^
+
+    "        }"
+;;
+
+let compile (styles, slides, identifiers, scripts) =
     "<!DOCTYPE html>\n\n"^
-    "<html>\n"^
+    "<html>\n\n"^
     "<head>\n" ^
-    "\t<link rel=\"stylesheet\" type=\"text/less\" href=\"../../../config/config.css\">" ^ (* If we have time, we should abstract out the config paths *)
 
-    "\t<style type=\"text/css\">\n" ^
+    (* If we have time, we should abstract out the config paths *)
+    "    <link rel=\"stylesheet\" type=\"text/less\" href=\"../../../config/config.css\">\n" ^
+
+    "    <style type=\"text/css\">\n" ^
+
+    (* *)
     String.concat "" (List.map string_of_css styles) ^ "\n" ^
 
-    "\t</style>" ^
+    "    </style>\n" ^
 
-    "</head>" ^
-    "<body>" ^
+    "</head>\n\n" ^
+    "<body>\n" ^
 
+    (* HTML components such as slides and elements go here *)
 
-    "</body>" ^
+    "    <script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js\"></script>\n" ^
+    "    <script type=\"text/javascript\" src=\"../../../config/config.js\"></script>\n" ^
+
+    "    <script>\n" ^
+
+    (* Javascript goes here *)
+    
+    "    </script>\n" ^
+
+    "</body>\n\n" ^
     "</html>"

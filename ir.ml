@@ -1,3 +1,5 @@
+(* Authors: Yunhe (John) Wang, Lauren Zou, Aftab Khan *)
+
 (*
     ir.mli is the immediate represenation between the sast.ml and the actual compiled code, which is an HTML file with embedded CSS and JavaScript.
 
@@ -34,8 +36,6 @@ type js_definition = {
 (* This css is either located with an element, or applies to a class of elements (comp definition) *)
 module Element = struct
 type css = {
-    cclass : string;
-    
     display : bool;
     
     position_x : string;
@@ -68,7 +68,6 @@ type css = {
 (* Elements with a slide or element *)
 type element = {
     id : string;                          (* Unique id of a component WITHIN its outer component, concatenate with hyphens to obtain css id*)
-    eclass : string;                       (* This class specifies all attributes applied to this element via the component definition *)
     image : string;                       (* Image inside the element (optional) *)
     text : string;                        (* Text inside the element (optional) *)
     style : css;                          (* CSS as applied to this particular element with this id *)
@@ -109,8 +108,7 @@ type slide = {
 }
 end
 
-(* css list is a list of css that applies to CLASSES (or CLAZZES), these are generated from component definitions (and not component calls) *)
 (* Slide list is the list of slides, with its child elements, with their child elements, etc. *)
 (* identifier list is a list of the global variables, these start out null at javascript run time *)
 (* js definition list is a list of all the functions (not attr/comp/slide) to evaluate javascript *)
-type program = Element.css list * Slide.slide list * Sast.identifier list * js_definition list
+type program = Slide.slide list * Sast.identifier list * js_definition list

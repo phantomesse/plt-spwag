@@ -1,4 +1,4 @@
-(* Authors: Richard Chiou, Yunhe(John) Wang, and Aditya Majumdar *)
+(* Authors: Richard Chiou, Yunhe (John) Wang, and Aditya Majumdar *)
 
 (* Identifiers *)
 type identifier = Identifier of string
@@ -24,6 +24,7 @@ and expr =
     | Litper of int (* 42% *)
     | Litstr of string (* “foo” *)
     | Litbool of bool (* true *)
+	| Litnull (* null *)
     | Assign of identifier * expr (* foo - 42 *) 
     | Variable of identifier (* although this is named Variable, can also be the name of a slide/function *)
     | Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
@@ -77,7 +78,8 @@ and string_of_expr = function
     | Litper(l) -> (string_of_int l) ^ "%"
     | Litstr(s) -> "\"" ^ s ^ "\""
     | Litbool(b) -> if b then "true" else "false"
-    | Assign(v, e) -> (string_of_identifier v) ^ " = " ^ string_of_expr e
+    | Litnull -> "null"
+	| Assign(v, e) -> (string_of_identifier v) ^ " = " ^ string_of_expr e
     | Variable(v) -> (string_of_identifier v) 
     | Component(v, e) ->  (string_of_identifier v) ^ 
         String.concat "" (List.map (fun ex -> "[" ^ (string_of_expr ex) ^ "]") e)
