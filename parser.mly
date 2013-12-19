@@ -132,6 +132,7 @@ expr:
     | ID                     { Variable(Identifier($1)) }
     | TRUE                   { Litbool(true) }
     | FALSE                  { Litbool(false) }
+	| NULL					 { Litnull }
     | ID ids_list            { Component(Identifier($1), List.rev $2) }
     | ID LPAREN actuals_opt RPAREN mods_opt 
       {Call({
