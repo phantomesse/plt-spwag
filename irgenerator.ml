@@ -4,11 +4,18 @@
 open Sast
 open Ir
 
-(* Lookup table *)
+(* Lookup table
+ * Cur_path starts with the slide's name, followed by the parent elements
+ * That means if cur_path has only one string, it's a slide
+ * Slides are added immediately to slides_out
+ * cur_element stores the current element if it's id is not given
+ * If its id is given, cur_element is None, and you must look it up in slides_out *)
 type lookup_table = {
-    lfuncs 			: func_definition StringMap.t; (* Map function names to functions *)
-	mutable lvars  	: literal StringMap.t; 	(* Global Variables, assignments can be changed *)
-	mutable lpath	: string list; (* Path, starting from slide, to the current slide/element in scope *)
+    funcs_in 		: func_definition StringMap.t; (* Map function names to functions *)
+	vars_in			: literal StringMap.t; 	(* Global Variables *)
+	slides_out		: Slide.slide StringMap.t; (* Output Map of slides *)
+	cur_slide		: string; (* Name of the current slide being evaluated *)
+	cur_element		: Element.element option; (* Temporary storage for current element, before it is bound *)
 }
 
 (* John says: I agree, identifier is annoying, oh well*)
@@ -21,14 +28,53 @@ let funcs_to_js funcs =
 					| _ -> jss
 					) [] funcs 
 
-(* Creates a blank Ir.slide given its id (that is, the slide name) *)
+(* The following are functions needed for binding *)
+(* Creates a blank slide given it's Identifier *)
 let create_blank_slide i = 
 	let fill_css = 
 		{Slide.padding_top="";padding_bottom="";padding_left="";padding_right = "";
-    	text_color= "";background_color = "";font = "";font_size = "";font_decoration = "";
-    	border = "";border_color = "";}
+		text_color= "";background_color = "";font = "";font_size = "";font_decoration = "";
+		border = "";border_color = "";}
 	in
-	{Slide.id=i;next="";prev="";image="";style=fill_css;onclick=None;onpress=None;elements=StringMap.empty}
+	{Slide.id=(id_to_str i);next="";prev="";image="";style=fill_css;onclick=None;onpress=None;elements=StringMap.empty}
+(* Creates a blank element *)
+let create_blank_element = 
+	let fill_css = 
+		{Element.display=true; position_x = ""; position_y = ""; margin_top = "";
+    	margin_bottom = ""; margin_left = ""; margin_right = ""; padding_top = "";
+    	padding_bottom = ""; padding_left = ""; padding_right = ""; text_color = "";
+    	background_color = ""; font = ""; font_size = ""; font_decoration = "";
+    	border = ""; border_color = ""; width = ""; height = "";}
+	in
+	{Element.id="";image="";text="";style=fill_css;onclick=None;elements=StringMap.empty;}
+(*
+(* Binds something to the given slide or element
+ * @param path the path to whatever you want to bind
+ * @param output what you're binding to, should be slides_out
+ * @param elementp The element to bind to the path, or None to bind a blank slide
+ * @return the updated output -> slides_out
+ *)
+let bind_to_slide_comp path output = function
+	None -> 
+				in
+		StringMap.add (hd path) (create_blank_slide (hd path)) output
+	| Some(x) ->
+		(* e is the element, p is the full path for error printing, last param is the partial path *)
+		(* returns the parent element that needs its binding changed *)
+		let rec get_element (e : Element.element) p = function
+			[] -> e
+			| hd::[] -> e
+			| hd::tl -> 
+				try get_element (StringMap.find hd e.elements) tl
+  				with Not_found -> raise (Failure ("Cannot find the following element: " ^ String.concat "->" p))
+		in
+		let element_name = hd (List.rev path) in
+		if (StringMap.mem (id_to_str func.name) lookup.funcs_in) 
+		then raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
+		else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
+*)
+			
+
 
 (* Main function that performs IR generation *)
 let generate (vars, funcs) =
@@ -39,32 +85,34 @@ let generate (vars, funcs) =
 	 * @return the lookup table as specified *)
 	let create_lookup vars funcs = 
 		let fill_funcs lookup (func : Sast.func_definition) = 
-			try ignore (StringMap.find (id_to_str func.name) lookup.lfuncs); 
-				raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
-			with Not_found ->
-				{lookup with lfuncs = StringMap.add (id_to_str func.name) func lookup.lfuncs} 	
+			if (StringMap.mem (id_to_str func.name) lookup.funcs_in) 
+			then raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
+			else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
 		in 
-		let fill_vars lookup id = {lookup with lvars=StringMap.add (id_to_str id) Litnull lookup.lvars}
+		let fill_vars lookup id = {lookup with vars_in=StringMap.add (id_to_str id) Litnull lookup.vars_in}
 		in
 		(List.fold_left fill_vars (List.fold_left fill_funcs 
-										({lfuncs=StringMap.empty; 
-										  lvars=StringMap.empty;
-										  lpath=[]}) funcs) vars)
+										({funcs_in=StringMap.empty; 
+										  vars_in=StringMap.empty;
+										  slides_out=StringMap.empty;
+										  cur_slide="";
+										  cur_element=None;}) funcs) vars)
 	in 
 
 	(* This calls a function to generate ir
 	 * @param fdef is the function definition (Sast.func_definition)
 	 * @param actuals are the actual parameter list, of literals
 	 * @param lookup is the lookup table 
-	 * @param output is the string map of slides to be outputted
-	 * @return (lookup, output) *)
-	let rec call (fdef:Sast.func_definition) lookup actuals output = 
+	 * @return the updated lookup table *)
+	let rec call (fdef:Sast.func_definition) actuals lookupparam = 
 		
-		let rec exec env body = 
-			let elocals (a,_,_) = a in
-			let elookup (_,b,_) = b in
-			let eoutput (_,_,c) = c in
-			(elocals env, elookup env, eoutput env) in
+		(* Actually executes statements
+		 * @param loclook (locals, lookup)
+		 * @param statement the statement the execute
+		 * @return (locals, lookup) *)
+		let rec exec loclook statement = 
+			(fst loclook, snd loclook) 
+		in
 		
 		(* This section takes care of scoping issues before calling exec on statements *)
 		(* Assign the locals from the actual parameters *)
@@ -75,21 +123,41 @@ let generate (vars, funcs) =
       		with Invalid_argument(_) ->
 				raise (Failure ("Wrong number of arguments passed to " ^ (id_to_str fdef.name)))
 		in
-		(* Next, functions to update, rollback the path, and get 2nd,3rd elements *)
-		let update_lpath lookup s = {lookup with lpath = List.rev (s::lookup.lpath)} in
-		let rollback_lpath lookup = {lookup with lpath = List.rev (List.tl (List.rev lookup.lpath))} in
-		let sndthird (_,a,b) = (rollback_lpath a,b) in
-		(* TODO: Worry about inheritance *)
+		(* Immediately bind if it's a slide, update current slide as well *)
+		(* Create the element if it's a comp and its parent is "box" *)
+		(* Call its parent if it's a comp and its parent is not "box" *)
+		(* Finally, do nothing if it's any other type of function*)
+		let lookup = function 
+					Ast.Slide -> {lookupparam with 
+						slides_out= StringMap.add (id_to_str fdef.name) (create_blank_slide fdef.name) lookupparam.slides_out;
+						cur_slide = (id_to_str fdef.name);}
+					| Ast.Comp -> (match fdef.inheritance with
+						Some(Sast.Identifier("box")) -> {lookupparam with cur_element = Some(create_blank_element)}
+						| Some(Sast.Identifier(s)) ->  
+							let parent = 
+								try StringMap.find s lookupparam.funcs_in
+								with Not_found -> raise (Failure ("The following component is not defined: " ^ s))
+							in
+							let isComp = function Ast.Comp -> true | _ -> false in
+							if isComp parent.t
+							then
+								(call parent [] lookupparam) (* TODO: Evaluate the paractuals *)  
+							else
+								raise (Failure ("A component can only inherit from a component for " ^ (id_to_str fdef.name)))
+						| None -> raise (Failure ("The following component needs to inherit from a component: " ^ (id_to_str fdef.name)))
+						)
+					| _ -> lookupparam
+		in			
 		(* Now recursively execute every statement with the updated locals *)
-		sndthird (List.fold_left exec (locals, update_lpath lookup (id_to_str fdef.name), output) fdef.body) 
+		snd (List.fold_left exec (locals, lookup fdef.t) fdef.body) 
 	in
 
 	(* Here is where all the functions get called to produce the final output *)
 	let lookup = create_lookup vars funcs in
 	let pre_ir = 
-		try call (StringMap.find "main" lookup.lfuncs) lookup [] StringMap.empty  
+		try (call (StringMap.find "main" lookup.funcs_in) [] lookup)  
 		with Not_found -> raise (Failure ("There must exist a main() slide"))
 	in
-	(StringMap.fold (fun k d l -> d :: l) (snd pre_ir) [], vars, funcs_to_js funcs)
+	(StringMap.fold (fun k d l -> d :: l) (pre_ir.slides_out) [], vars, funcs_to_js funcs)
 
 	
