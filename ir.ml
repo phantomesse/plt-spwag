@@ -1,3 +1,5 @@
+(* Authors: Yunhe (John) Wang, Lauren Zou, Aftab Khan *)
+
 (*
     ir.mli is the immediate represenation between the sast.ml and the actual compiled code, which is an HTML file with embedded CSS and JavaScript.
 
@@ -72,7 +74,7 @@ type element = {
     image : string;                       (* Image inside the element (optional) *)
     text : string;                        (* Text inside the element (optional) *)
     style : css;                          (* CSS as applied to this particular element with this id *)
-    onclick : js_call option;             (* Name of javascript function to apply on click, empty string means none *)
+    (*onclick : js_call option;*)             (* Name of javascript function to apply on click, empty string means none *)
     elements : element StringMap.t;       (* Map of element id (string) -> element *)
 }
 end
@@ -103,8 +105,8 @@ type slide = {
     prev : string;                                (* Id of the previous slide = name of the slide function that is prev *)
     image : string;                               (* URL of any background image *)
     style : slide_css;                            (* CSS as applied to the slide in general *)
-    onclick : js_call option;                     (* Name of javascript function to apply on click *)
-    onpress : (string * js_call) option;          (* Key to press, name of javascript function to apply on press *)
+    (*onclick : js_call option;                     (* Name of javascript function to apply on click *)
+    onpress : (string * js_call) option;*)          (* Key to press, name of javascript function to apply on press *)
     elements : Element.element StringMap.t;       (* Map of element id (string) -> element *)
 }
 end

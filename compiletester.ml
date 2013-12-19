@@ -1,10 +1,14 @@
+(* Authors: Lauren Zou *)
+
 open Ir
+open Ir.Element
+open Ir.Slide
 
 let _ = 
 let hw_text_css = {
-    clazz="box-hello-world";
+    cclass="box-hello-world";
     
-    display=false;
+    display=true;
 
     position_x="";
     position_y="";
@@ -35,11 +39,11 @@ let hw_text_css = {
 
 let hw_text = {
     id="hello-world-text";
-    clazz="box";
+    eclass="box";
     image="";
     text="Hello world!";
     style=hw_text_css;
-    (*onclick="";*)
+    (*onclick=Null;*)
     elements=StringMap.empty
 } in
 

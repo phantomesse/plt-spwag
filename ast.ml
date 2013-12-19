@@ -1,4 +1,4 @@
-(* Authors: Richard Chiou, Yunhe(John) Wang, and Aditya Majumdar *)
+(* Authors: Richard Chiou, Yunhe (John) Wang, and Aditya Majumdar *)
 
 (* Identifiers *)
 type identifier = Identifier of string
