@@ -7,6 +7,8 @@
 	Decassign of identifier * expr: add to symbol table
 	func_definition: Aditya wrote one, but it's heavily bugged at the moment
 	program: take in an Ast.program and output an Sast.program
+		and associated functions to inspect the identifier and func_definition lists
+		These associated functions will be extremely long and painful to write
 *)
 
 open Ast
@@ -78,18 +80,16 @@ let rec find_function scope name =
 		| Some(parent) -> (global parent)
 	in
 	try
-		List.find (fun {t=_, name=s, formals=_, inheritance=_, paractuals=_, body=_} -> s = name) (global scope).functions
+		List.find (fun {t=_; name=s; formals=_; inheritance=_; paractuals=_; body=_} -> s = name) (global scope).functions
 	with Not_found -> (* Not found, print error message *)
 		(*let build_string tmpString nextString = tmpString^" \n"^nextString in
 		let func_names_string = List.fold_left build_string("") (List.map (fun {t=_, name=s, formals=_, inheritance=_, paractuals=_, body=_} -> n ) (getGlobalScope scope).functions) in
 		let num_funcs = List.length (getGlobalScope scope).functions in*)
 		raise(Failure("Function "^name^" not found in global scope"))
 
-(*Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions,
-evaluate mods are statements 
-
-Component of identifier: identifier has to be slide or variable (component or slide) 
-expr list are strings
+(*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements 
+	Component of identifier: identifier has to be slide or variable (component or slide) 
+	expr list are strings
 *)
 
 (* Check if valid identifier *)
@@ -272,6 +272,35 @@ paractuals : expr list          locals: variable_decl list
 body : stmt list                body: stmt list
 
 *)
+(* Taken from CGL programming language, modify this to fit ours
+let checkFunc scope func_def = match func_def.fbody with
+	| [] -> raise(Failure("Empty functions are invalid"))
+    | x ->
+		let return_type = fdecl.t (* What the function returns *)
+		let returnidentifier = {
+			vdt = fdecl.t;
+			vname = "return";
+			value = Ast.Noexpr;
+		} in
+		let formalToVdecl = function
+			| frml -> { vdt = frml.pdt;
+				          vname = frml.pname;
+									value = Ast.Noexpr }
+		in
+	  let retScope = {
+			parent = curScope.parent;
+			functions = curScope.functions;
+			variables = (List.map formalToVdecl (fdecl.formals) )@(retVdecl::curScope.variables);
+    } in
+		let checkedFdecl = 
+		{
+		  fdt = fdecl.fdt;
+		  fname = fdecl.fname;
+		  formals = fdecl.formals;
+		  fbody = fst(x, (List.fold_left processStatement(retScope, []) fdecl.fbody ));   (* UGLY HACK (x) *)
+		} in
+		checkedFdecl
+*)
 
 (*let rec func_definition = function
     in let trans_func env (f:Sast.func_definition) =  
@@ -332,15 +361,12 @@ body : stmt list                body: stmt list
 *)
 (* Above section modified from asttosast file of chartlan from f2012 *)
 
-
 (* Run our program *)
 (* Input: Ast.Program, Symbol_Table *)
 (* Output: Sast.Program *)
 (* This is WIP *)
 
-(*let evalprogram program globalTable = 
-    let _ = check_order program in
-    let endScope, _ = List.fold_left process(globalTable, []) program in
+(* type program = identifier list * func_definition list (* global vars, funcs*) *)
+(* Check the identifier list and the func_definition list before running the program *)
 
-    endScope
-*)
+(*let evalprogram program globalTable = *)

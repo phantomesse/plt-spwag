@@ -3,7 +3,7 @@
 open Ast (* We need to import the operators over, the semantic_analyzer is really confused otherwise. *)
 
 (* All objects must be one of these types *)
-type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier
+type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier | Null
 
 (* Identifiers *)
 type identifier = Identifier of string
