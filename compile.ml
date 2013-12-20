@@ -227,6 +227,58 @@ let get_javascript script =
     tab 2 ^ "}"
 ;;
 
+(* Translates literals into strings *)
+let string_of_literal literal = match literal with
+    | Litint integer -> string_of_int integer
+    | Litper integer -> string_of_int integer ^ "%"
+    | Litstr str -> str
+    | Litbool boolean -> string_of_bool boolean
+    | Litcomp (parent, children) ->
+        "$('#" ^ string_of_identifier parent ^ " " ^
+        String.concat " " (List.map (fun child -> "#" ^ child) children) ^ "')"
+    | Litslide identifier -> string_of_identifier identifier
+    | Litnull -> "null"
+;;
+
+(* Translates onclick functionality *)
+let string_of_onclick js_call id = match js_call with
+    | None -> ""
+    | Some(onclick) -> 
+        tab 2 ^ "$('#" ^ id ^ "').bind('click', " ^ string_of_identifier onclick.cname ^ "(" ^
+        String.concat ", " (List.map string_of_literal onclick.actuals) ^
+        "));\n"
+;;
+
+(* Translates onpress functionality *)
+let string_of_onpress js_call id = match js_call with
+    | None -> ""
+    | Some(onpress) ->
+        tab 2 ^ "$('#" ^ id ^ "').keypress(function(e) {\n" ^
+        tab 3 ^ "if (e.keycode == '" ^ fst onpress ^ "') {\n" ^
+        tab 4 ^ string_of_identifier (snd onpress).cname ^ "(" ^
+        String.concat ", " (List.map string_of_literal (snd onpress).actuals) ^
+        ");\n" ^
+        tab 3 ^ "}\n" ^
+        tab 2 ^ "});\n"
+;;
+
+(* Gets the onclick of an element *)
+let rec get_element_onclick (element, element_id) =
+    string_of_onclick element.Element.onclick element_id ^
+
+    (* Get onclick of children elements *)
+    String.concat "\n\n" (List.map get_element_onclick (StringMap.fold (fun id element l -> (element, element_id ^ "-" ^ id)::l) element.Element.elements []))
+;;
+
+(* Gets the onclick and onpress of a slide *)
+let get_slide_onclick_onpress slide =
+    string_of_onclick slide.Slide.onclick slide.Slide.id ^
+    string_of_onpress slide.Slide.onpress slide.Slide.id ^
+
+    (* Get onclick of children elements *)
+    String.concat "\n\n" (List.map get_element_onclick (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^id)::l) slide.Slide.elements []))
+;;
+
 let compile (slides, identifiers, scripts) =
     "<!DOCTYPE html>\n\n"^
     "<html>\n\n"^
@@ -253,7 +305,10 @@ let compile (slides, identifiers, scripts) =
 
     tab 1 ^ "<script>\n" ^
 
-    (* Javascript goes here *)
+    (* Handle onclicks and onpresses *)
+    String.concat "\n" (List.map get_slide_onclick_onpress slides) ^ "\n" ^
+
+    (* Javascript functions *)
     String.concat "\n" (List.map get_javascript scripts) ^ "\n" ^
     
     tab 1 ^ "</script>\n\n" ^

@@ -390,7 +390,7 @@ type func_definition = { (* Handles declarations of functions, components, attri
 
 (* func_def stuff *)
 
-(*let checkFunc scope func_definition = match func_definition.body with
+let checkFunc scope func_definition = match func_definition.body with
 [] -> raise(Failure("Empty functions are invalid"))
 (* Not sure if you need a | before  the [] case ... anyway, empty functions not allowed *)
     | x ->
@@ -407,20 +407,25 @@ type func_definition = { (* Handles declarations of functions, components, attri
 } in
   let retScope = {
       parent = scope.parent;
-      functionsons = scope.functions;
-      variables = (List.map formalToVdecl (func_definition.formals)
-      )@(returnidentifier::scope.variables);
+      functions = scope.functions;
+      variables = scope.variables;
           } in
   let checkedFunc_Definition = 
       {
             t = func_definition.t;
               name = func_definition.name;
                 formals = func_definition.formals;
-                  body = List.fold_left func_definition.body;
+                 (* body = List.fold_left func_definition.body; *)
+                 body = func_definition.body;
+                 (* inheritance = retScope.parent; *)
+                 inheritance = func_definition.inheritance;
+				(* parent is a symbol table option *)
+				(* inheritance is an identifier option *)
+
+                 paractuals = func_definition.paractuals;
 
       } in
   checkedFunc_Definition
-  *)
   
 (*let add_func_definition scope func = 
 	(

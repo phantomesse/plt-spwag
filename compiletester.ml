@@ -88,14 +88,23 @@ let myjs = {
         ];  (* Body of javascript definition *)
 } in
 
+let call= {
+    cname=Identifier("mycallyeah");    (* Name of function passed to javascript, can only be of func type *)
+    actuals=[
+        Litint(32);
+        Litint(52);
+        Litint(10)
+    ] (* The actual parameters of the function passed, can only be literals *)
+} in
+
 let main_slide = {
     id="main";
     next="";
     prev="";
     image="";
     style=main_slide_css;
-    onclick=None;
-    onpress=None;
+    onclick=Some(call);
+    onpress=Some(("A", call));
     elements=element_map
 } in
 
