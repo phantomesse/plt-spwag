@@ -62,6 +62,12 @@ let string_of_func_type = function
 	| Comp -> "Comp"
 	| Attr -> "Attr"
 	| Func -> "Func"
+
+let type_to_t = function
+	  Slide -> Sast.Slidetype
+	| Comp -> Sast.Comptype
+	| Attr -> Sast.Attrtype
+	| Func -> Sast.Functype
 	
 let string_of_expr = function
 	| _ -> "(not implemented ... yet)"
@@ -79,6 +85,7 @@ let string_of_binop = function
 	| And -> "And"
 	| Or -> "Or"
 
+	
 (* This find_variable function is adapted from the slides *)
 let rec find_variable scope name =
     try
@@ -195,7 +202,7 @@ let rec expr env = function
 	
 	(* let string_of_identifier = function
     Identifier(s) -> s *)
-(*  | Ast.Call(funccall) -> (
+  | Ast.Call(funccall: Ast.func_call) -> (
 		let fc = functioncall env funccall in		(* Evaluate if this is a valid func_call *)
 		let funct = find_function env fc.cname in	(* Check to see if said function exists *)
 		(* We need to now check that the arguments are valid *)
@@ -220,11 +227,11 @@ let rec expr env = function
 			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
 		if (checktypes formallist actuallist) then 
-			Sast.Call (fc), funct.t	(*Problematic Code*)
+			(Sast.Call (fc)), type_to_t funct.t	(*Problematic Code*)
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
-*)
+
   (* Component of identifier: identifier has to be slide or variable (component or slide) *)
   | Ast.Component (v, exprlist) ->
   

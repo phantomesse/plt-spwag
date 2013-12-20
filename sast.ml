@@ -29,7 +29,7 @@ and expr_detail =
     | Assign of identifier * expr (* foo - 42 *) 
     | Variable of identifier (* although this is named Variable, can also be the name of a slide/function *)
     | Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
-    | Call of func_call (* Calling a function, unique in that it can contain statements*)
+    | Call of Ast.func_call (* Calling a function, unique in that it can contain statements*)
 
 and expr = expr_detail * t
 
