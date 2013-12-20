@@ -16,7 +16,8 @@
 #define BUF_SIZE 1024
 
 void addNTabs(int n, char *destination){
-	for (int i = 0; i < n; ++i){
+	int i;
+	for (i = 0; i < n; ++i){
 		strcat(destination, " ");
 	}
 }
