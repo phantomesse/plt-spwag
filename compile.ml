@@ -84,8 +84,29 @@ let get_css_from_slide slide =
     String.concat "\n\n" (List.map get_css_from_element (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^ id)::l) slide.Slide.elements []))
 ;;
 
-let get_html_from_element (element, element_id) =
+let string_of_text text = 
+    if String.length text > 0 then
+        "            " ^ text
+    else
+        ""
+;;
+
+let string_of_image image = 
+    if String.length image > 0 then
+        "            <img src=\"" ^ image ^ " />"
+    else
+        ""
+;;
+
+let rec get_html_from_element (element, element_id) =
     "        <div id=\"" ^ element_id ^ "\" class=\"box\">\n" ^
+
+    string_of_text element.text ^
+    string_of_image element.image ^
+
+    (* Get the HTML from the elements of this element *)
+    String.concat "\n" (List.map get_html_from_element (StringMap.fold (fun id element l -> (element, element_id ^ "-" ^ id)::l) element.Element.elements [])) ^ "\n" ^
+
     "        </div>"
 ;;
 
