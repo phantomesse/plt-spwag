@@ -102,7 +102,7 @@ let rec find_function scope name = (* name is an identifier *)
 
 (*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements  *)
 	
-(* Check if valid identifier *)
+(* Convert AST identifier to SAST identifier *)
 let identify env = function
     Ast.Identifier(v) -> Sast.Identifier(v)
     (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
@@ -208,7 +208,7 @@ let rec expr env = function
 		let actuallist = List.map (identify env) stringstoids in
 		(*let actualtypes = List.map fst(actuallist) in*)
 		
-		(* check each type from checked list against fdecl param types in scope's function list *)
+		(* compare the forms and actuals *)
 		let rec checktypes list1 list2 = match list1, list2 with
 		| [], [] -> true
 		| [], _ -> raise(Failure(" there should be no parameters "))
@@ -259,20 +259,6 @@ let rec expr env = function
     let (_, id_type) = vdecl in (* get the variable's type *)
     let (_, expr_type ) = expreval in
     Sast.Assign(id, e1), id_type, expr_type
-*)
-
-(*stmt = (* Statements ; WIP *)
-      Block of stmt list (* { ... } *) Taken from Edwards' slides, but it probably doesn't work
-    | Expr of expr (* foo = bar + 3; *) Done!
-    | Return of expr (* return 42; *) Done!
-    | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *) Should work
-    | While of expr * stmt (* while (i<10) \n  i = i + 1 \n end \n *) Should work
-    | Declaration of identifier (* Declaring a variable *) Partially complete
-    | Decassign of identifier * expr (* Declaring a variable and then assigning it something *) Partially complete
-	*)
-
-(* 	Fixed the block statement by instead folding over a tuple with the scope and list of statements 
-	Need to take a look at Return though
 *)
 
 let rec stmts (env, stmtlist) stmt =
@@ -364,43 +350,9 @@ let rec stmts (env, stmtlist) stmt =
 		else	
 			raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))	*)
 
-(* Basing this off CGL language
-
-They have:
-
-type datatype = IntType | DoubleType | BoolType | StringType | CardType |
-    ListType | PlayerType | AnytypeType
-
-type formal =
-{
-    pdt : datatype;
-    pname : string;
-}    
-
-type fdecl =
-{
-    fdt : Ast.datatype;       || Our equivalent is t : func_type
-    fname : string;         || Our equivalent is name : identifier
-    formals : Ast.formal list;    || Our equivalent is formals : identifier list
-    fbody : stmt list;        || Our equivalent is body : stmt list;
-}
-
-Ours:
-
-type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
-    t: func_type; (* e.g. slide, component, attribute, func *)
-    name : identifier; (* Name of the function *)
-    formals : identifier list; (* Name of the formal parameters *)
-    inheritance : identifier option; (* Name of any parent components, ie box, or null *)
-    paractuals: expr list; (* This represents the actuals passed to the parent *)
-    body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
-}
-*)
-
 (* check to see if func_definition is valid, and return function that is evaluated *)
 let check_function env func_definition = match func_definition.body with
-	[] -> raise(Failure("Empty functions are invalid"))
-	(* Not sure if you need a | before the [] case ... anyway, empty functions not allowed *)
+	[] -> raise(Failure("Empty functions are invalid")) (* Empty functions not allowed *)
   | x ->
         (*let return_type = func_definition.t in Which type the function returns: this is unused because design issues *)
         (* Why are we even doing this return stuff *)
@@ -413,7 +365,7 @@ let check_function env func_definition = match func_definition.body with
           inheritance = func_definition.inheritance;
 } in *)
 
-	let parentscope = {		(* Do we need this parent scope? Maybe we should just use global because functions *)
+	let parentscope = {		
 		parent = env.parent;
 		functions = env.functions;
 		variables = (List.map (identify env) func_definition.formals)@(env.variables);	
