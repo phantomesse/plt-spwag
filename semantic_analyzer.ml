@@ -370,16 +370,9 @@ type func_definition = { (* Handles declarations of functions, components, attri
           formals = func_definition.formals;
           paractuals = func_definition.paractuals;
           inheritance = func_definition.inheritance;
-          
+
           (*body = Ast.Litnull; *)(* no expression? *)
 } in
-let formalToVdecl = function
-    | frml -> { 
-                vnamedt = frml.pdt;
-                vname = frml.pname;
-                value = Ast.Noexpr
-              }
-      in
   let retScope = {
       parent = scope.parent;
       functionsons = scope.functions;

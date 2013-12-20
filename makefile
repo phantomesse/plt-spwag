@@ -1,6 +1,7 @@
 # OBJS = ast.cmo semantic_analyzer.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo preprocessor.o spwag.cmo
 #OBJS = ast.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo ir.ml irgenerator.cmo compile.cmo preprocessor.o spwag.cmo
-OBJS = ast.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo preprocessor.o spwag.cmo 
+#OBJS = ast.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo preprocessor.o spwag.cmo 
+OBJS = ast.cmo sast.cmo linecounter.cmo parser.cmo scanner.cmo sastinjector.cmo ir.ml irgenerator.cmo compile.cmo preprocessor.o spwag.cmo
 
 
 spwag: $(OBJS)

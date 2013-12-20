@@ -80,6 +80,11 @@ let myjs = {
         Return(expression);
         If(expression, stmt, stmt);
         While(expression, stmt);
+        Expr(Component(Identifier("parent"), [
+             (Variable(Identifier("child1")), Varidentifier);
+             (Variable(Identifier("child2")), Varidentifier);
+             (Variable(Identifier("child3")), Varidentifier);
+         ]), Varidentifier)
         ];  (* Body of javascript definition *)
 } in
 
