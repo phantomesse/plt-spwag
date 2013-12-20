@@ -166,7 +166,10 @@ let ir_get_css attribute path lookup = (match path with
 		)
 	| Ir.Litcomp(Identifier(s), slist) ->
 		let the_slide = StringMap.find s lookup.slides_out in
-		let the_comp = StringMap.find (List.hd slist) the_slide.elements in
+		let the_comp = 
+			try StringMap.find (List.hd slist) the_slide.elements 
+			with Not_found -> raise (Failure ("Cannot find the following component: " ^ s ^ "->" ^ (List.hd slist)))
+		in
 		(* e is the element, p is the full path for error printing, last param is the partial path *)
 		(* returns the element represented by the path *)
 		let rec get_comp (e : Element.element) p = function
@@ -175,7 +178,7 @@ let ir_get_css attribute path lookup = (match path with
 				try get_comp (StringMap.find hd e.elements) p tl
   				with Not_found -> raise (Failure ("Cannot find the following component: " ^ String.concat "->" p))
 		in
-		let the_comp = get_comp the_comp slist (List.tl slist) in
+		let the_comp = get_comp the_comp (s::slist) (List.tl slist) in
 		let is_null s_in = ((compare s_in "") = 0) in
 		let is_per s_in = ((String.get s_in ((String.length s_in)-1)) = '%') in
 		let per_to_int s_in = int_of_string (String.sub s_in 0 ((String.length s_in)-1)) in 
@@ -212,6 +215,50 @@ let ir_get_css attribute path lookup = (match path with
 		)
 	| _ -> raise (Failure ("The first parameter of get() must be a slide or component."))
 	)
+
+(* sets the css attribute of a particular component/slide that must have already been bound
+ * @param attribute the attribute, as a string
+ * @param avalue as a Ir.literal
+ * @param path the Ir.Litcomp or Ir.Litslide
+ * @param lookup the lookup table
+ * @return the updated lookup table
+ *)
+let ir_set_css attribute avalue path lookup = (match path with
+	Ir.Litslide(Identifier(s)) -> 
+		let the_slide = ir_bind_css_slide attribute avalue (StringMap.find s lookup.slides_out) in
+		{lookup with slides_out=(StringMap.add s the_slide lookup.slides_out)}
+	| Ir.Litcomp(Identifier(s), child::[]) ->
+		let the_slide = StringMap.find s lookup.slides_out in
+		let the_comp = 
+			try (StringMap.find child the_slide.elements)
+  			with Not_found -> raise (Failure ("Cannot find the following component: " ^ s ^ "->" ^ child))
+		in
+		let the_comp = ir_bind_css_element attribute avalue the_comp in
+		(the_slide.elements <- (StringMap.add the_comp.id the_comp the_slide.elements); lookup;)
+	| Ir.Litcomp(Identifier(s), slist) ->
+		let the_slide = StringMap.find s lookup.slides_out in
+		let the_comp = 
+			try StringMap.find (List.hd slist) the_slide.elements 
+			with Not_found -> raise (Failure ("Cannot find the following component: " ^ s ^ "->" ^ (List.hd slist)))
+		in
+		(* e is the element, p is the full path for error printing, last param is the partial path *)
+		(* returns the element represented by the path *)
+		let rec get_comp (e : Element.element) p = function
+			[] -> e
+			| hd::tl -> 
+				try get_comp (StringMap.find hd e.elements) p tl
+  				with Not_found -> raise (Failure ("Cannot find the following component: " ^ String.concat "->" p))
+		in
+		let parent_comp = get_comp the_comp (s::slist) (List.tl (List.rev (List.tl (List.rev slist)))) in
+		let child_comp = 
+			try StringMap.find (List.hd slist) the_slide.elements 
+			with Not_found -> raise (Failure ("Cannot find the following component: " ^ s ^ "->" ^ (List.hd slist)))
+		in
+		let child_comp = ir_bind_css_element attribute avalue child_comp in
+		(parent_comp.elements <- (StringMap.add child_comp.id child_comp child_comp.elements); lookup;)
+	| _ -> raise (Failure ("The first parameter of set() must be a slide or component."))
+	)
+
 (* 
 This code might be useful, may not be, we'll see
 (* Binds something to the given slide or element
@@ -384,8 +431,7 @@ let generate (vars, funcs) =
 				in 
 				(Ir.Litcomp(i, slist), loclookp)
 			| Sast.Call(f) ->
-				(* TODO: Check for built-in functions 
-				 * Left: get set *)
+				(* TODO: Semantic analyzer should check this, but will crash if num arguments not correct *)
 				let process_built_in_attr built_in_name =
 					let (actual, loclook) = eval loclook (fst (List.hd f.actuals)) in
 					let (locals, lookup) = loclook in
@@ -478,6 +524,17 @@ let generate (vars, funcs) =
 							Ir.Litstr(s) ->  (ir_get_css s param1 (snd loclook), loclook)
 							| _ ->  raise (Failure ("You must pass in a string as attribute name as 2nd parameter to get()"))
 						)
+					| Identifier("set") ->
+						let (param1, loclook) = eval loclook (fst (List.hd f.actuals)) in
+						let (param2, loclook) = eval loclook (fst (List.nth f.actuals 1)) in
+						let param2 = 
+							(match param2 with
+								Ir.Litstr(s) -> s
+								| _ ->  raise (Failure ("You must pass in a string as attribute name as 2nd parameter to set()"))
+							)
+						in
+						let (param3, loclook) = eval loclook (fst (List.nth f.actuals 2)) in
+						(param3, (fst loclook, ir_set_css param2 param3 param1 (snd loclook))) 
 					| Identifier(_) -> 
 				(* The rest of these lines are for non-built-in functions *)
 				let fdecl = 
