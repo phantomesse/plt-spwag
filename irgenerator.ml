@@ -66,28 +66,40 @@ let create_blank_element =
 let ir_bind_css_element attribute value (elementp:Element.element) = (match (attribute, value) with
 	("display", Ir.Litbool(b)) -> {elementp with style= {elementp.style with display=b}}
     | ("position_x", Ir.Litint(i)) -> {elementp with style= {elementp.style with position_x=(string_of_int i)}}
-    | ("position_y", Ir.Litstr(s)) -> {elementp with style= {elementp.style with position_y=s}}
-    | ("margin_top", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_top=s}}
-    | ("margin_bottom", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_bottom=s}}
-    | ("margin_left", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_left=s}}
-    | ("margin_right", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_right=s}}
-    | ("padding_top", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_top=s}}
-    | ("padding_bottom", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_bottom=s}}
-    | ("padding_left", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_left=s}}
-    | ("padding_right", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_right=s}}
+    | ("position_x", Ir.Litper(i)) -> {elementp with style= {elementp.style with position_x=(string_of_int i)}}
+    | ("position_y", Ir.Litint(i)) -> {elementp with style= {elementp.style with position_y=(string_of_int i)}}
+    | ("position_y", Ir.Litper(i)) -> {elementp with style= {elementp.style with position_y=(string_of_int i)}}
+    | ("margin_top", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_top=(string_of_int i)}}
+    | ("margin_top", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_top=(string_of_int i)}}
+    | ("margin_bottom", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_bottom=(string_of_int i)}}
+    | ("margin_bottom", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_bottom=(string_of_int i)}}
+    | ("margin_left", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_left=(string_of_int i)}}
+    | ("margin_left", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_left=(string_of_int i)}}
+    | ("margin_right", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_right=(string_of_int i)}}
+    | ("margin_right", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_right=(string_of_int i)}}
+    | ("padding_top", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_top=(string_of_int i)}}
+    | ("padding_top", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_top=(string_of_int i)}}
+    | ("padding_bottom", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_bottom=(string_of_int i)}}
+    | ("padding_bottom", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_bottom=(string_of_int i)}}
+    | ("padding_left", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_left=(string_of_int i)}}
+    | ("padding_left", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_left=(string_of_int i)}}
+    | ("padding_right", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_right=(string_of_int i)}}
+    | ("padding_right", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_right=(string_of_int i)}}
     | ("text_color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with text_color=s}}
     | ("background_color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with background_color=s}}
     | ("font", Ir.Litstr(s)) -> {elementp with style= {elementp.style with font=s}}
-    | ("font_size", Ir.Litstr(s)) -> {elementp with style= {elementp.style with font_size=s}}
+    | ("font_size", Ir.Litint(i)) -> {elementp with style= {elementp.style with font_size=(string_of_int i)}}
     | ("font_decoration", Ir.Litstr(s)) -> {elementp with style= {elementp.style with font_decoration=s}}
-    | ("border", Ir.Litstr(s)) -> {elementp with style= {elementp.style with border=s}}
+    | ("border", Ir.Litint(i)) -> {elementp with style= {elementp.style with border=(string_of_int i)}}
     | ("border_color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with border_color=s}}
-    | ("width", Ir.Litstr(s)) -> {elementp with style= {elementp.style with width=s}}
-    | ("height", Ir.Litstr(s)) -> {elementp with style= {elementp.style with height=s}}
+    | ("width", Ir.Litint(i)) -> {elementp with style= {elementp.style with width=(string_of_int i)}}
+    | ("width", Ir.Litper(i)) -> {elementp with style= {elementp.style with width=(string_of_int i)}}
+    | ("height", Ir.Litint(i)) -> {elementp with style= {elementp.style with height=(string_of_int i)}}
+    | ("height", Ir.Litper(i)) -> {elementp with style= {elementp.style with height=(string_of_int i)}}
     | ("id", Ir.Litstr(s)) -> {elementp with id=s}
     | ("image", Ir.Litstr(s)) -> {elementp with image=s}
     | ("text", Ir.Litstr(s)) -> {elementp with text=s}
-	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly: " ^ attribute))
+	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly on component: " ^ attribute))
 	)	
 
 (* Binds css to a slide 
@@ -98,7 +110,7 @@ let ir_bind_css_element attribute value (elementp:Element.element) = (match (att
  *)
 let ir_bind_css_slide attribute value (slidep:Slide.slide) = (match (attribute, value) with
 	("padding_top", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_top=(string_of_int i)}}
-	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly: " ^ attribute))
+	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly on slide: " ^ attribute))
 	)
 
 
@@ -241,8 +253,30 @@ let generate (vars, funcs) =
 					)
 				in
 				(match f.cname with
-					Identifier("position-x") -> process_built_in_attr "position-x"
-					| Identifier(_) -> 
+					Identifier("display") -> process_built_in_attr "display"
+					| Identifier("position-x") -> process_built_in_attr "position-x"
+   					| Identifier("position_y") -> process_built_in_attr "position_y" 
+   					| Identifier("margin_top") -> process_built_in_attr "margin_top"
+   					| Identifier("margin_bottom") -> process_built_in_attr "margin_bottom"
+   					| Identifier("margin_left") -> process_built_in_attr "margin_left"
+   					| Identifier("margin_right") -> process_built_in_attr "margin_right"
+   					| Identifier("padding_top") -> process_built_in_attr "padding_top"
+   					| Identifier("padding_bottom") -> process_built_in_attr "padding_bottom"
+   					| Identifier("padding_left") -> process_built_in_attr "padding_left"
+   					| Identifier("padding_right") -> process_built_in_attr "padding_right"
+   					| Identifier("text_color") -> process_built_in_attr "text_color"
+   					| Identifier("background_color") -> process_built_in_attr "background_color"
+   					| Identifier("font") -> process_built_in_attr "font"
+   					| Identifier("font_size") -> process_built_in_attr "font_size"
+   					| Identifier("font_decoration") -> process_built_in_attr "font_decoration"
+   					| Identifier("border") -> process_built_in_attr "border"
+   					| Identifier("border_color") -> process_built_in_attr "border_color"
+   					| Identifier("width") -> process_built_in_attr "width"
+   					| Identifier("height") -> process_built_in_attr "height"
+   					| Identifier("id") -> process_built_in_attr "id"
+   					| Identifier("image") -> process_built_in_attr "image"
+   					| Identifier("text") -> process_built_in_attr "text"
+ 					| Identifier(_) -> 
 				(* The rest of these lines are for non-built-in functions *)
 				let fdecl = 
 					(match f.cname with
