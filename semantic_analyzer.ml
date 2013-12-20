@@ -195,7 +195,7 @@ let rec expr env = function
 	
 	(* let string_of_identifier = function
     Identifier(s) -> s *)
-  | Ast.Call(funccall) -> (
+(*  | Ast.Call(funccall) -> (
 		let fc = functioncall env funccall in		(* Evaluate if this is a valid func_call *)
 		let funct = find_function env fc.cname in	(* Check to see if said function exists *)
 		(* We need to now check that the arguments are valid *)
@@ -210,7 +210,7 @@ let rec expr env = function
 		let actuallist = List.map (identify env) stringstoids in
 		(*let actualtypes = List.map fst(actuallist) in*)
 		
-		(* compare the forms and actuals *)
+		(* compare the formals and actuals *)
 		let rec checktypes list1 list2 = match list1, list2 with
 		| [], [] -> true
 		| [], _ -> raise(Failure(" there should be no parameters "))
@@ -219,31 +219,44 @@ let rec expr env = function
 		  ( types_equal (List.hd(list1)) (List.hd(list2)) ) && types_equal (List.tl(list1)) (List.tl(list2))
 			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
-		if (checktypes formallist actuallist)
-		then Sast.Call (fc), funct.t	(*Problematic Code*)
+		if (checktypes formallist actuallist) then 
+			Sast.Call (fc), funct.t	(*Problematic Code*)
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
-
+*)
   (* Component of identifier: identifier has to be slide or variable (component or slide) *)
   | Ast.Component (v, exprlist) ->
-		let id = identify env v in
-		(* How are we going to get the type of the identifier? *)
-		
-		(* We need to do recursion. Here's the general idea:
-		Base step: currentobject = id
-		Step 1: currentobject = id[exprlist[0]]
-		Step 2: remove exprlist[0]
-		Step 3: Go to step 1, break from loop when exprlist has been parsed through
-		Hardest part is the error checking, but the recursive function will be annoying as well... *)
-
-		(*let rec returncomp currentcomp exprlist = match exprlist with
-		| [] -> (* run some code *)
-		
-		| _ ->*)
+  
 		let checkedexprs = List.map (expr env) exprlist in
-		Sast.Component (id, checkedexprs), Sast.Varidentifier
+		let id = identify env v in 					(* How are we going to get the type of the identifier? *)
+		let funct = find_function env v in
+		let typ = funct.t in
+		let strings = List.map(string_of_expr) exprlist in
+		let ids = List.map(identifier_of_string) strings in
+
+		if ((types_equal typ Comp) || (types_equal typ Slide)) then	
+			(* We need to do recursion. Here's the general idea:
+			Base step: currentobject = id
+			Step 1: currentobject = id[exprlist[0]]
+			Step 2: remove exprlist[0]
+			Step 3: Go to step 1, break from loop when exprlist has been parsed through *)		
+			let rec compfind v exprs comptype = match exprs with
+		  | [] -> Sast.Component(id, checkedexprs), Sast.Comptype
+		  | x -> 
+				let innercomp = List.hd exprs
+				and newlist = List.tl exprs in
+				let compfunct = find_function env innercomp in
+				let comptyp = compfunct.t in
+				if ((types_equal comptyp Comp) || (types_equal comptyp Slide)) then
+					compfind innercomp newlist comptyp
+				else 
+					raise(Failure("Can only take component of slide or other components"))
+				in compfind v ids typ 
 			
+		else 
+			raise(Failure("Can only take component of slide or other components"))
+				
   (*Below code is old
   
   | Ast.Assign(id, e1) -> (* General idea is to make sure the arguments are valid; code may not work though *)
@@ -274,7 +287,7 @@ let rec stmts (env, stmtlist) stmt =
     | Ast.Expr(e) ->  env, Sast.Expr(expr env e)::stmtlist
     (*| Ast.Return(e1) -> Sast.Return(expr env e1) (* I have not written checking for e1 yet *)*)
     | Ast.Block(b) -> env, Sast.Block(snd(List.fold_left stmts(newscope,[]) b))::stmtlist
-	| Ast.Return(e) -> 		(* We need to figure out how to match return types since identifiers aren't associated with types *)
+	| Ast.Return(e) -> 		(* Only funcs can call return, so no error-checking should be fine *)
 		let e1 = expr env e in
 		(*let _, t1 = e1 in
 		if (typeEq t1 returntype )
