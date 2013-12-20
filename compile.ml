@@ -12,46 +12,76 @@ let string_of_property property value =
         ""
 ;;
 
-let string_of_css elem =
-    (*"        ." ^ elem.cclass ^ " {\n" ^*)
+let string_of_css style classname =
+    "        ." ^ classname ^ " {\n" ^
 
     (*string_of_property "display", string_of_bool elem.display ^*)
     
-    string_of_property "left" elem.position_x ^
-    string_of_property "top" elem.position_y ^
+    string_of_property "left" style.position_x ^
+    string_of_property "top" style.position_y ^
 
-    string_of_property "margin-top" elem.margin_top ^
-    string_of_property "margin-bottom" elem.margin_bottom ^
-    string_of_property "margin-left" elem.margin_left ^
-    string_of_property "margin-right" elem.margin_right ^
+    string_of_property "margin-top" style.margin_top ^
+    string_of_property "margin-bottom" style.margin_bottom ^
+    string_of_property "margin-left" style.margin_left ^
+    string_of_property "margin-right" style.margin_right ^
 
-    string_of_property "padding-top" elem.padding_top ^
-    string_of_property "padding-bottom" elem.padding_bottom ^
-    string_of_property "padding-left" elem.padding_left ^
-    string_of_property "padding-right" elem.padding_right ^
+    string_of_property "padding-top" style.padding_top ^
+    string_of_property "padding-bottom" style.padding_bottom ^
+    string_of_property "padding-left" style.padding_left ^
+    string_of_property "padding-right" style.padding_right ^
 
-    string_of_property "color" elem.text_color ^
-    string_of_property "background-color" elem.background_color ^
+    string_of_property "color" style.text_color ^
+    string_of_property "background-color" style.background_color ^
 
-    string_of_property "font-family" elem.font ^
-    string_of_property "font-size" elem.font_size ^
+    string_of_property "font-family" style.font ^
+    string_of_property "font-size" style.font_size ^
     (* Need to handle font decoration with italics, bold, and underline *)
 
-    string_of_property "border-width" elem.border ^
-    string_of_property "border-color" elem.border_color ^
+    string_of_property "border-width" style.border ^
+    string_of_property "border-color" style.border_color ^
 
-    string_of_property "width" elem.width ^
-    string_of_property "height" elem.height ^
+    string_of_property "width" style.width ^
+    string_of_property "height" style.height ^
 
     "        }"
 ;;
 
-let get_css_from_element element =
-    "this is an element" ^ element.Element.id
+let string_of_slide_css style classname =
+    "        ." ^ classname ^ " {\n" ^
+
+    (*string_of_property "display", string_of_bool elem.display ^*)
+    
+    string_of_property "padding-top" style.padding_top ^
+    string_of_property "padding-bottom" style.padding_bottom ^
+    string_of_property "padding-left" style.padding_left ^
+    string_of_property "padding-right" style.padding_right ^
+
+    string_of_property "color" style.text_color ^
+    string_of_property "background-color" style.background_color ^
+
+    string_of_property "font-family" style.font ^
+    string_of_property "font-size" style.font_size ^
+    (* Need to handle font decoration with italics, bold, and underline *)
+
+    string_of_property "border-width" style.border ^
+    string_of_property "border-color" style.border_color ^
+
+    "        }"
+;;
+
+let rec get_css_from_element (element, element_id) =
+    string_of_css element.Element.style element_id ^
+
+    (* Get the CSS from the elements of this element *)
+    String.concat "" (List.map get_css_from_element (StringMap.fold (fun id element l -> (element, element_id ^ "-" ^ id)::l) element.Element.elements []))
 ;;
 
 let get_css_from_slide slide =
-    String.concat "" (List.map get_css_from_element (StringMap.fold (fun id element l -> element::l) slide.Slide.elements []))
+    (* Get the CSS from the slide *)
+    string_of_slide_css slide.Slide.style slide.Slide.id ^ "\n\n" ^
+
+    (* Get the CSS from the elements of this slide *)
+    String.concat "\n\n" (List.map get_css_from_element (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^ id)::l) slide.Slide.elements []))
 ;;
 
 let compile (slides, identifiers, scripts) =
