@@ -1,0 +1,66 @@
+define slide main()
+{
+    background-color(bgcolor())
+
+    heading("SPWAG") {
+        id("title")
+        padding-top(100)
+        font-size(150)
+        width(900)
+    }
+
+    heading("Simple Presentation Web App Generator") {
+        id("subtitle")
+        padding-top(10)
+        padding-bottom(50)
+        font-size(40)
+        font-decoration("bold")
+        text-color(accentcolor())
+        width(960)
+    }
+
+    heading("Lauren Zou (ljz2112), Aftab Khan (ajk2194), Richard Chiou (rc2758),<br />Yunhe (John) Wang (yw2439), Aditya Majumdar (am3713)") {
+        id("authors")
+        font-size(24)
+    }
+
+    next(overview)
+}
+
+define slide overview()
+{
+    background-color(bgcolor())
+
+    slide-heading("What is SPWAG?") {
+        id("title")
+    }
+}
+
+define comp heading(headingtext) isa box()
+{
+    text(headingtext)
+    text-color(fgcolor())
+    font("'Josefin Slab', serif")
+}
+
+define comp slide-heading(headingtext) isa heading(headingtext)
+{
+    background-color("pink")
+}
+
+# Define some colors
+define func bgcolor()
+{
+    return "#DACFA6" # Beige
+}
+
+define func fgcolor()
+{
+    return "#2B1A0A" # Dark brown
+}
+
+define func accentcolor()
+{
+    return "#60222B" # Maroon
+}
+

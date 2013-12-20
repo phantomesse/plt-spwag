@@ -12,6 +12,14 @@ let rec tab number =
     if number == 0 then ""
     else "    " ^ tab (number - 1)
 
+(* Returns a pixel or a percent based on the string*)
+let string_pixel_percent integer =
+    if String.length integer == 0 then ""
+    else 
+        if (String.get integer ((String.length integer)-1)) == '%' then integer
+        else integer ^ "px"
+;;
+
 (* Translates a CSS property given the property and its value *)
 let string_of_css_property property value =
     if String.length value > 0 then
@@ -23,6 +31,7 @@ let string_of_css_property property value =
 let string_of_css_display_property display = match display with
     | true -> ""
     | false -> tab 3 ^ "display: hidden;\n"
+;;
 
 (* Translates a CSS font decoration property *)
 let string_of_css_font_decoration decoration = match decoration with
@@ -31,6 +40,12 @@ let string_of_css_font_decoration decoration = match decoration with
     | "bold" -> tab 3 ^ "font-weight: bold;\n"
     | "underline" -> tab 3 ^ "text-decoration: underline;\n"
     | _ -> ""
+;;
+
+let string_of_css_position_property left top =
+    if String.length top > 0 || String.length left > 0 then
+        tab 3^ "position: absolute;\n"
+    else ""
 
 (* Translates the CSS of an element given the CSS style and id *)
 let string_of_element_css (style:Element.css) id =
@@ -38,31 +53,32 @@ let string_of_element_css (style:Element.css) id =
 
     string_of_css_display_property style.display ^
     
+    string_of_css_position_property style.position_x style.position_y ^
     string_of_css_property "left" style.position_x ^
     string_of_css_property "top" style.position_y ^
 
-    string_of_css_property "margin-top" style.margin_top ^
-    string_of_css_property "margin-bottom" style.margin_bottom ^
-    string_of_css_property "margin-left" style.margin_left ^
-    string_of_css_property "margin-right" style.margin_right ^
+    string_of_css_property "margin-top" (string_pixel_percent style.margin_top) ^
+    string_of_css_property "margin-bottom" (string_pixel_percent style.margin_bottom) ^
+    string_of_css_property "margin-left" (string_pixel_percent style.margin_left) ^
+    string_of_css_property "margin-right" (string_pixel_percent style.margin_right) ^
 
-    string_of_css_property "padding-top" style.padding_top ^
-    string_of_css_property "padding-bottom" style.padding_bottom ^
-    string_of_css_property "padding-left" style.padding_left ^
-    string_of_css_property "padding-right" style.padding_right ^
+    string_of_css_property "padding-top" (string_pixel_percent style.padding_top) ^
+    string_of_css_property "padding-bottom" (string_pixel_percent style.padding_bottom) ^
+    string_of_css_property "padding-left" (string_pixel_percent style.padding_left) ^
+    string_of_css_property "padding-right" (string_pixel_percent style.padding_right) ^
 
     string_of_css_property "color" style.text_color ^
     string_of_css_property "background-color" style.background_color ^
 
     string_of_css_property "font-family" style.font ^
-    string_of_css_property "font-size" style.font_size ^
+    string_of_css_property "font-size" (string_pixel_percent style.font_size) ^
     string_of_css_font_decoration style.font_decoration ^
 
-    string_of_css_property "border-width" style.border ^
+    string_of_css_property "border-width" (string_pixel_percent style.border) ^
     string_of_css_property "border-color" style.border_color ^
 
-    string_of_css_property "width" style.width ^
-    string_of_css_property "height" style.height ^
+    string_of_css_property "width" (string_pixel_percent style.width) ^
+    string_of_css_property "height" (string_pixel_percent style.height) ^
 
     tab 2 ^ "}\n"
 ;;
@@ -71,19 +87,19 @@ let string_of_element_css (style:Element.css) id =
 let string_of_slide_css (style:Slide.slide_css) classname =
     tab 2 ^ "#" ^ classname ^ " {\n" ^
     
-    string_of_css_property "padding-top" style.padding_top ^
-    string_of_css_property "padding-bottom" style.padding_bottom ^
-    string_of_css_property "padding-left" style.padding_left ^
-    string_of_css_property "padding-right" style.padding_right ^
+    string_of_css_property "padding-top" (string_pixel_percent style.padding_top) ^
+    string_of_css_property "padding-bottom" (string_pixel_percent style.padding_bottom) ^
+    string_of_css_property "padding-left" (string_pixel_percent style.padding_left) ^
+    string_of_css_property "padding-right" (string_pixel_percent style.padding_right) ^
 
     string_of_css_property "color" style.text_color ^
     string_of_css_property "background-color" style.background_color ^
 
     string_of_css_property "font-family" style.font ^
-    string_of_css_property "font-size" style.font_size ^
+    string_of_css_property "font-size" (string_pixel_percent style.font_size) ^
     string_of_css_font_decoration style.font_decoration ^
 
-    string_of_css_property "border-width" style.border ^
+    string_of_css_property "border-width" (string_pixel_percent style.border) ^
     string_of_css_property "border-color" style.border_color ^
 
     tab 2 ^ "}\n"

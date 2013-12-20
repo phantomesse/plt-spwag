@@ -27,10 +27,10 @@ define slide main()
 define slide slide1()
 {
     poem-text-box("one fish") {
-        id("text1")
+        id("text")
     }
     fish-box("#EEE") {
-        id("one-fish")
+        id("image")
     }
 
     prev(main)
@@ -40,17 +40,17 @@ define slide slide1()
 define slide slide2()
 {
     poem-text-box("two fish") {
-        id("text2")
+        id("text")
     }
     
     fish-box("#1DC917") {
-        id("two-fish1")
+        id("image1")
         width(350)
         height(350)
     }
 
     fish-box("#1DC917") {
-        id("two-fish2")
+        id("image2")
         width(350)
         height(350)
     }
@@ -62,23 +62,27 @@ define slide slide2()
 define slide slide3()
 {
     poem-text-box("red fish") {
-        id("text3")
+        id("text")
     }
     fish-box("#E72E28") {
-        id("red-fish")
+        id("image")
     }
 
-    prev(slide3)
+    prev(slide2)
     next(slide4)
 }
 
 define slide slide4()
 {
-    poem-text-box("text4", "blue fish")
-    fish-box("blue-fish", "#E72E28")
+    poem-text-box("blue fish") {
+        id("text")
+    }
+    fish-box("blue") {
+        id("image")
+    }
 
     prev(slide3)
-    next(slide5)
+    next(main)
 }
 
 

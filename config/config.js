@@ -19,14 +19,14 @@ $(document).ready(function() {
 
         function prev() {
             var currentSlide = $('.slide:visible');
-            if (currentSlide.has('a.prev')) {
+            if (currentSlide.children('a.prev').length == 1) {
                 window.location.hash = currentSlide.children('a.prev').attr('href');
             }
         }
 
         function next() {
             var currentSlide = $('.slide:visible');
-            if (currentSlide.has('a.prev')) {
+            if (currentSlide.children('a.next').length == 1) {
                 window.location.hash = currentSlide.children('a.next').attr('href');
             }
         }
@@ -44,8 +44,3 @@ function displaySlide(slideId) {
     $('.slide:visible:not(#' + slideId + ')').hide();
     $('#' + slideId).show();
 }
-
-$('a.prev').click(function() {
-    var prev_slide = $(this).attr('href');
-    console.log(prev_slide);
-});
