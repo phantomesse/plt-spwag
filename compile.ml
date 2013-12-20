@@ -116,7 +116,7 @@ let string_of_text text tab_level =
 (* Translates an image url to an <img> tag *)
 let string_of_image image tab_level = 
     if String.length image > 0 then
-        tab (tab_level + 1) ^ "<img src=\"" ^ image ^ " />\n"
+        tab (tab_level + 1) ^ "<img src=\"" ^ image ^ "\" />\n"
     else ""
 ;;
 
