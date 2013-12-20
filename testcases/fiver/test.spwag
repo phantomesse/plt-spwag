@@ -1,0 +1,33 @@
+var numclicks
+
+define slide main()
+{
+    # Set background color
+    background-color("#333")
+
+    var rows = 5
+    var columns = 5
+
+    var r = 0
+    var c = 0
+
+    while (r < rows)
+    {
+        while (c < columns)
+        {
+            square(r, c)
+            c = c + 1
+        }
+        r = r + 1
+    }
+}
+
+define comp square(x, y) isa box()
+{
+    var box-size = 100
+
+    id(x + "" + y)
+    background-color("white")
+    width(box-size)
+    height(box-size)
+}

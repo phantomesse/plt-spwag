@@ -1,4 +1,4 @@
-OBJS = preprocessor.o linecounter.cmo ast.cmo sast.cmo ir.cmo semantic_analyzer.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo 
+OBJS = preprocessor.o linecounter.cmo ast.cmo sast.cmo ir.cmo sastinjector.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo 
 #sastinjector.cmo
 
 spwag: $(OBJS)
@@ -48,19 +48,19 @@ parser.cmo : linecounter.cmo ast.cmo parser.cmi
 parser.cmx : linecounter.cmx ast.cmx parser.cmi
 sast.cmo : ast.cmo
 sast.cmx : ast.cmx
-#sastinjector.cmo : sast.cmo ast.cmo
-#sastinjector.cmx : sast.cmx ast.cmx
+sastinjector.cmo : sast.cmo ast.cmo
+sastinjector.cmx : sast.cmx ast.cmx
 scanner.cmo : parser.cmi linecounter.cmo
 scanner.cmx : parser.cmx linecounter.cmx
 semantic_analyzer.cmo : sast.cmo ast.cmo
 semantic_analyzer.cmx : sast.cmx ast.cmx
-#spwag.cmo : scanner.cmo sastinjector.cmo parser.cmi irgenerator.cmo \
-#    compile.cmo ast.cmo
-#spwag.cmx : scanner.cmx sastinjector.cmx parser.cmx irgenerator.cmx \
-#    compile.cmx ast.cmx
-
-spwag.cmo : scanner.cmo semantic_analyzer.cmo parser.cmi irgenerator.cmo \
+spwag.cmo : scanner.cmo sastinjector.cmo parser.cmi irgenerator.cmo \
     compile.cmo ast.cmo
-spwag.cmx : scanner.cmx semantic_analyzer.cmx parser.cmx irgenerator.cmx \
+spwag.cmx : scanner.cmx sastinjector.cmx parser.cmx irgenerator.cmx \
+    compile.cmx ast.cmx
+
+#spwag.cmo : scanner.cmo semantic_analyzer.cmo parser.cmi irgenerator.cmo \
+    compile.cmo ast.cmo
+#spwag.cmx : scanner.cmx semantic_analyzer.cmx parser.cmx irgenerator.cmx \
     compile.cmx ast.cmx
 parser.cmi : ast.cmo
