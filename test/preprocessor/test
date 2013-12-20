@@ -1,0 +1,5 @@
+define slide main()
+    box()
+    box()
+    box()
+    next(slide1)
