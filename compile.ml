@@ -174,42 +174,109 @@ let string_of_operator operator = match operator with
 
 (* Translates an expression into a string *)
 let rec string_of_expression (expression_detail, expression_type) = match expression_detail with
-    | Binop (expr1, operator, expr2) -> string_of_expression expr1 ^ " " ^ string_of_operator operator ^ " " ^ string_of_expression expr2
+    | Binop (expr1, operator, expr2) ->
+        string_of_expression expr1 ^ " " ^ string_of_operator operator ^ " " ^ string_of_expression expr2
     | Notop expr -> "!(" ^ string_of_expression expr ^ ")"
     | Litint integer -> string_of_int integer
     | Litper integer -> string_of_int integer ^ "%"
     | Litbool boolean -> string_of_bool boolean
     | Litstr str -> str
     | Litnull -> "null"
-    | Assign (identifier, expr) -> string_of_identifier identifier ^ " = " ^ string_of_expression expr
+    | Assign (identifier, expr) ->
+        string_of_identifier identifier ^ " = " ^ string_of_expression expr
     | Variable identifier -> string_of_identifier identifier
-    | Component (identifier, exprlist) -> "TODO" (* identifier["child"]["child"] etc. to fetch component *)
-    | Call func_call -> string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
+    | Component (parent, children) ->
+        "$('#" ^ string_of_identifier parent ^ " " ^
+        String.concat " " (List.map (fun child -> "#" ^ string_of_expression child) children) ^ "')"
+    | Call func_call ->
+        string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
 ;;
 
 (* Translates a statement into a string *)
-let rec string_of_statement statement = match statement with
-    | Block stmt -> String.concat "\n            " (List.map string_of_statement stmt)
-    | Expr expr -> string_of_expression expr
-    | Return expr -> "return " ^ string_of_expression expr ^ ";"
-    | If (expr, stmt1, stmt2) -> "if (" ^ string_of_expression expr ^ ") {\n" ^ string_of_statement stmt1 ^ "\n} else {\n" ^ string_of_statement stmt2 ^ "\n}\n" (* if (foo == 42) stmt1 else stmt2 end *)
-    | While (expr, stmt) -> "while (" ^ string_of_expression expr ^ ") {\n" ^ string_of_statement stmt ^ "\n}\n"
-    | Declaration identifier -> "var " ^ string_of_identifier identifier ^ ";"
-    | Decassign (identifier, expr) -> "var " ^ string_of_identifier identifier ^ " = " ^ string_of_expression expr ^ ";"
+let rec string_of_statement statement tab_level = match statement with
+    | Block stmt ->
+        String.concat "\n" (List.map (fun statement -> string_of_statement statement tab_level) stmt)
+    | Expr expr ->
+        tab tab_level ^ string_of_expression expr ^ ";"
+    | Return expr ->
+        tab tab_level ^ "return " ^ string_of_expression expr ^ ";"
+    | If (expr, stmt1, stmt2) ->
+        tab tab_level ^ "if (" ^ string_of_expression expr ^ ") {\n" ^ (string_of_statement stmt1 (tab_level + 1)) ^ "\n" ^
+        tab tab_level ^ "} else {\n" ^ (string_of_statement stmt2 (tab_level + 1)) ^ "\n" ^
+        tab tab_level ^ "}\n"
+    | While (expr, stmt) ->
+        tab tab_level ^ "while (" ^ string_of_expression expr ^ ") {\n" ^ (string_of_statement stmt (tab_level + 1)) ^ "\n" ^
+        tab tab_level ^ "}\n"
+    | Declaration identifier ->
+        tab tab_level ^ "var " ^ string_of_identifier identifier ^ ";"
+    | Decassign (identifier, expr) ->
+        tab tab_level ^ "var " ^ string_of_identifier identifier ^ " = " ^ string_of_expression expr ^ ";"
 ;;
 
 (* Translates the script into JavaScript *)
 let get_javascript script =
     (* Function definition *)
-    "function " ^ string_of_identifier script.name ^ "(" ^
+    tab 2 ^ "function " ^ string_of_identifier script.name ^ "(" ^
 
     (* Formals *)
     String.concat ", " (List.map (fun identifier -> string_of_identifier identifier) script.formals) ^ ") {\n"^
 
     (* Statements *)
-    String.concat "\n" (List.map string_of_statement script.body) ^ "\n" ^
+    String.concat "\n" (List.map (fun statement -> string_of_statement statement 3) script.body) ^ "\n" ^
 
-    "}"
+    tab 2 ^ "}"
+;;
+
+(* Translates literals into strings *)
+let string_of_literal literal = match literal with
+    | Litint integer -> string_of_int integer
+    | Litper integer -> string_of_int integer ^ "%"
+    | Litstr str -> str
+    | Litbool boolean -> string_of_bool boolean
+    | Litcomp (parent, children) ->
+        "$('#" ^ string_of_identifier parent ^ " " ^
+        String.concat " " (List.map (fun child -> "#" ^ child) children) ^ "')"
+    | Litslide identifier -> string_of_identifier identifier
+    | Litnull -> "null"
+;;
+
+(* Translates onclick functionality *)
+let string_of_onclick js_call id = match js_call with
+    | None -> ""
+    | Some(onclick) -> 
+        tab 2 ^ "$('#" ^ id ^ "').bind('click', " ^ string_of_identifier onclick.cname ^ "(" ^
+        String.concat ", " (List.map string_of_literal onclick.actuals) ^
+        "));\n"
+;;
+
+(* Translates onpress functionality *)
+let string_of_onpress js_call id = match js_call with
+    | None -> ""
+    | Some(onpress) ->
+        tab 2 ^ "$('#" ^ id ^ "').keypress(function(e) {\n" ^
+        tab 3 ^ "if (e.keycode == '" ^ fst onpress ^ "') {\n" ^
+        tab 4 ^ string_of_identifier (snd onpress).cname ^ "(" ^
+        String.concat ", " (List.map string_of_literal (snd onpress).actuals) ^
+        ");\n" ^
+        tab 3 ^ "}\n" ^
+        tab 2 ^ "});\n"
+;;
+
+(* Gets the onclick of an element *)
+let rec get_element_onclick (element, element_id) =
+    string_of_onclick element.Element.onclick element_id ^
+
+    (* Get onclick of children elements *)
+    String.concat "\n\n" (List.map get_element_onclick (StringMap.fold (fun id element l -> (element, element_id ^ "-" ^ id)::l) element.Element.elements []))
+;;
+
+(* Gets the onclick and onpress of a slide *)
+let get_slide_onclick_onpress slide =
+    string_of_onclick slide.Slide.onclick slide.Slide.id ^
+    string_of_onpress slide.Slide.onpress slide.Slide.id ^
+
+    (* Get onclick of children elements *)
+    String.concat "\n\n" (List.map get_element_onclick (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^id)::l) slide.Slide.elements []))
 ;;
 
 let compile (slides, identifiers, scripts) =
@@ -238,10 +305,13 @@ let compile (slides, identifiers, scripts) =
 
     tab 1 ^ "<script>\n" ^
 
-    (* Javascript goes here *)
+    (* Handle onclicks and onpresses *)
+    String.concat "\n" (List.map get_slide_onclick_onpress slides) ^ "\n" ^
+
+    (* Javascript functions *)
     String.concat "\n" (List.map get_javascript scripts) ^ "\n" ^
     
     tab 1 ^ "</script>\n\n" ^
 
     "</body>\n\n" ^
-    "</html>"
+    "</html>\n"

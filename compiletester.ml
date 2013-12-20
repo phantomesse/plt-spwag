@@ -80,7 +80,21 @@ let myjs = {
         Return(expression);
         If(expression, stmt, stmt);
         While(expression, stmt);
+        Expr(Component(Identifier("parent"), [
+             (Variable(Identifier("child1")), Varidentifier);
+             (Variable(Identifier("child2")), Varidentifier);
+             (Variable(Identifier("child3")), Varidentifier);
+         ]), Varidentifier)
         ];  (* Body of javascript definition *)
+} in
+
+let call= {
+    cname=Identifier("mycallyeah");    (* Name of function passed to javascript, can only be of func type *)
+    actuals=[
+        Litint(32);
+        Litint(52);
+        Litint(10)
+    ] (* The actual parameters of the function passed, can only be literals *)
 } in
 
 let main_slide = {
@@ -89,8 +103,8 @@ let main_slide = {
     prev="";
     image="";
     style=main_slide_css;
-    onclick=None;
-    onpress=None;
+    onclick=Some(call);
+    onpress=Some(("A", call));
     elements=element_map
 } in
 
