@@ -1,5 +1,6 @@
 (* Author: Lauren Zou *)
 
+open Ast
 open Sast
 open Ir
 open Ir.Element
@@ -135,8 +136,30 @@ let string_of_identifier = function
     Identifier(s) -> s
 ;;
 
-let string_of_expression expr =
-    "hello world"
+let string_of_operator operator = match operator with
+    | Plus -> "+"
+    | Minus -> "-"
+    | Times -> "*"
+    | Divide -> "/"
+    | Equals -> "=="
+    | Notequals -> "!="
+    | Lessthan -> "<"
+    | Greaterthan -> ">"
+    | Or -> "||"
+    | And -> "&&"
+
+let rec string_of_expression (expression_detail, expression_type) = match expression_detail with
+    | Binop (expr1, operator, expr2) -> string_of_expression expr1 ^ " " ^ string_of_operator operator ^ " " ^ string_of_expression expr2
+    | Notop expr -> "!(" ^ string_of_expression expr ^ ")"
+    | Litint integer -> string_of_int integer
+    | Litper integer -> string_of_int integer ^ "%"
+    | Litbool boolean -> string_of_bool boolean
+    | Litstr str -> str
+    | Litnull -> "null"
+    | Assign (identifier, expr) -> string_of_identifier identifier ^ " = " ^ string_of_expression expr
+    | Variable identifier -> string_of_identifier identifier
+    | Component (identifier, exprlist) -> "TODO" (* identifier["child"]["child"] etc. to fetch component *)
+    | Call func_call -> string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
 ;;
 
 let rec translate_statements_to_javascript statement = match statement with
@@ -150,11 +173,6 @@ let rec translate_statements_to_javascript statement = match statement with
 ;;
 
 let translate_to_javascript script =
-(*    type js_definition = {
-    name : Sast.identifier; (* Name of the function *)
-    formals : Sast.identifier list; (* Formal parameters *)
-    body : Sast.stmt list;  (* Body of javascript definition *)
-}*)
     (* Function definition *)
     "        function " ^ string_of_identifier script.name ^ "(" ^
 
