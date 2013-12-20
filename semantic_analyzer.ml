@@ -1,14 +1,14 @@
 (*  Author: Richard Chiou
     Contributor: Aditya Majumdar
     Quick to do list, order by priority:
-   	program: take in an Ast.program and output an Sast.program
+   	program: take in an Ast.program and output an Sast.program (compiles)
 		helper function that parses identifier list and adds to symbol table (compiles)
 		helper function that parses func_definition list and adds to symbol table (compiles)
 	Return (how do we return the correct type?)
 	check_function: see if function definition is valid (Compiles)
-	functioncall: Prototype written, but needs working func_definition
-	Declaration of identifier: this should be fine, though I haven't tested it
-	Decassign of identifier * expr: this should be fine, though I haven't tested it
+	check_func_call: see if function call is valid (Compiles)
+	Declaration of identifier: Compiles
+	Decassign of identifier * expr: Compiles
 	Call of func_call: Prototype is written, but still needs to be debugged
 	Component of identifier: This is hard to write, save this for last
 *)
@@ -92,16 +92,8 @@ let rec find_function scope name = (* name is an identifier *)
 		raise(Failure("Function not found in global scope"))
 
 (*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements  *)
-
-(* let functioncall env call = function
-	let actuallist = expr env call.actuals 
-	and id = identify env call.cname
-	and mods = sttmt env call.mods in
 	
-	(* Need the func_definition code! *)
-	
-	(* List.find (fun {cname=c; value=_; mods = _} -> c = call) scope.functions Code to check if func call is in symbol table *)
-*)	
+	(* List.find (fun {cname=c; value=_; mods = _} -> c = call) scope.functions Code to check if func call is in symbol table *)	
 
 (* Check if valid identifier *)
 let identify env = function
@@ -109,6 +101,25 @@ let identify env = function
     (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
 	Sast.Identifier(vdecl), Sast.Varidentifier*)
 
+(* check to see if valid function call *)
+let functioncall env call = 
+	(*let actuallist = List.map (expr env) call.actuals 
+	and id = identify env call.cname in*)
+	let funct = find_function env call.cname in
+
+	(*let parentscope = {
+		parent = env.parent;
+		functions = env.functions;
+		variables = env.variables;
+    } in*)
+	
+	let checked_func_call = {
+		cname = funct.name;
+		actuals = call.actuals; 	
+		mods = call.mods;  
+      } in
+	checked_func_call	
+	
 (* Check if valid expression*)
 let rec expr env = function
 
@@ -173,19 +184,19 @@ let rec expr env = function
 	(*let _, t1 = id (* type of rhs *) in*)
 	Sast.Variable(id), Sast.Varidentifier
 	
-(* | Ast.Call(funccall) -> (
+  | Ast.Call(funccall) -> (
 	 (* Evaluate if this is a valid func_call: 
 		cname : identifier; (* Name of the function *)
 		actuals : expr list; (* Evaluated actual parameters *)
 		mods : stmt; (* Additional statements, which could be a block *) *)
-		(*let id = functioncall env funccall in *)
-		let funct = find_function env funccall.cname in	(* Check to see if said function exists *)
+		let fc = functioncall env funccall in
+		let funct = find_function env fc.cname in	(* Check to see if said function exists *)
 		(* We need to now check that the arguments are valid *)
 		(* Do we need to getting types from identifiers somehow? *)
 		let formallist = List.map (identify env) funct.formals in
 		(*let formalTypes = List.map fst(formallist) in*)
 		(* Get the list of actuals and their types *)
-		let actualstoidentifiers = List.map (Identifier) funccall.actuals in
+		let actualstoidentifiers = List.map (Identifier) funccall.actuals in (*problematic line*)
 		let actuallist = List.map (identify env) actualstoidentifiers in
 		(*let actualtypes = List.map fst(actuallist) in*)
 		
@@ -203,9 +214,9 @@ let rec expr env = function
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
-*)
+
   (* Component of identifier: identifier has to be slide or variable (component or slide) *)
-(*  | Ast.Component (v, exprlist) ->
+  | Ast.Component (v, exprlist) ->
 		let id = identify env v in
 		(* How are we going to get the type of the identifier? *)
 		
@@ -219,7 +230,6 @@ let rec expr env = function
 		(*let rec returncomp currentcomp exprlist = match exprlist with
 		| [] -> (* run some code *)
 		| _ ->*)  Sast.Component (id, (expr env exprlist)), Sast.Varidentifier
-*)
 			
   (*Below code is old
   
@@ -265,13 +275,13 @@ let rec stmts (env, stmtlist) stmt =
     | Ast.Expr(e) ->  env, Sast.Expr(expr env e)::stmtlist
     (*| Ast.Return(e1) -> Sast.Return(expr env e1) (* I have not written checking for e1 yet *)*)
     | Ast.Block(b) -> env, Sast.Block(snd(List.fold_left stmts(newscope,[]) b))::stmtlist
-(*	| Ast.Return(e) -> 		(* We need to figure out how to match return types since identifiers aren't associated with types *)
+	| Ast.Return(e) -> 		(* We need to figure out how to match return types since identifiers aren't associated with types *)
 		let e1 = expr env e in
-		let _, t1 = ec in
-		if (typeEq t1 returntype )
-		  then env, Sast.Return(e1)::stmtList
-		else raise(Failure("Return type of function body doesn't match: found"^(string_of_datatype t1)^" but expected "^(string_of_datatype returntype)))
-*)	
+		let _, t1 = e1 in
+		(*if (typeEq t1 returntype )
+		  then*) env, Sast.Return(e1)::stmtlist
+		(*else raise(Failure("Return type of function body doesn't match: found"^(string_of_datatype t1)^" but expected "^(string_of_datatype returntype)))*)
+	
 (*	| Ast.Block(s1) ->  (* This block code is modified from Edwards' slides and does not work *)
 		let newscope = { S.parent = Some(env.scope); S.variables = []; S.functions = [] } in
          (* New environment: same, but with new symbol tables *)
@@ -337,22 +347,11 @@ let rec stmts (env, stmtlist) stmt =
 			let e = expr env e in
 			env, Sast.Decassign(id, e)::stmtlist
 		(*let _, t2 = e in
-		if (types_equal t1 t2) then	(* variable types need to match *)
+		if (types_equal t1 t2) then	(* do variable types need to match? *)
 							(* we have to add the variable declaration to the symbol table; I'll write this later *)
 			Sast.Decassign(v, e), t1 (* Declaring a variable and then assigning it something*)
 		else	
 			raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))	*)
-
-(* Removed parent declaration
-let rec parent env = function
-    | Ast.Parent(id) -> (* This code is bugged *)
-		let vdecl = try find_variable env.scope id
-            with Not_found ->
-                raise (Failure("undeclared identifier " ^ id))
-            in
-			let (_, id_type) = vdecl in (* get the variable's type *)
-                Sast.Parent(id), id_type
-    | Ast.Noparent(v) -> Sast.Noparent(v), Sast.null*)
 
 (* Basing this off CGL language
 
@@ -462,11 +461,11 @@ let add_identifiers env identifiers =
 (* Run our program *)
 (* Input: Ast.Program, Symbol_Table *)
 (* Output: Sast.Program *)
-(* This is WIP *)
-
 (* type program = identifier list * func_definition list (* global vars, funcs*) *)
 (* Add the identifiers (variables) and function definitions to global scope *)
-
-(*let evalprogram program globalTable =
-	let run, _ = List.fold_left processBdecl(globalTable, []) program in
-	run*)
+let evalprogram program globalTable =
+    let identifiers, funcdefs = program in	(*Get the identifier list and the func_definition list*)
+	let ids = add_identifiers globalTable identifiers
+	and funcs = add_func_definitions globalTable funcdefs in
+	let output = ids, funcs in
+	output
