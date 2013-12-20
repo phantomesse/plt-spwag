@@ -3,11 +3,12 @@
    	program: take in an Ast.program and output an Sast.program
 		add_identifier: adds identifier to symbol table
 		add_function: adds function to symbol table
-	Debug func_definition
-	Declaration of identifier: need to write add identifier to symbol table
-	Decassign of identifier * expr: need to write add to symbol table
-	functioncall: checks if function call has correct structure
-	Call of func_call: Easier to write but still annoying
+	Block
+	func_definition: Aditya really needs to get this working
+	functioncall: Prototype written, need func_definition
+	Declaration of identifier: this should be fine
+	Decassign of identifier * expr: this should be fine
+	Call of func_call: Prototype needs to be debugged
 	Component of identifier: This is hard to write
 *)
 
@@ -17,7 +18,7 @@ module StringMap = Map.Make(String)
 type symbol_table = {
     parent : symbol_table option;
     functions : Ast.func_definition list;
-    variables : Ast.identifier list;
+    variables : Sast.identifier list;
 }
 
 type translation_environment = {
@@ -94,13 +95,17 @@ let rec find_function scope name = (* name is an identifier *)
 	expr list are strings
 *)
 
-(* Handles calls of functions and components 
-type func_call = { 
-    cname : identifier; (* Name of the function *)
-    actuals : expr list; (* Evaluated actual parameters *)
-    mods : stmt; (* Additional statements, which could be a block *)
-}  *)
-(*let functioncall env = function*)
+(* Check if valid func call  *)
+
+(* let functioncall env call = function
+	let actuallist = expr env call.actuals 
+	and id = identify env call.cname
+	and mods = sttmt env call.mods in
+	
+	(* Need the func_definition code! *)
+	
+	(* List.find (fun {cname=c; value=_; mods = _} -> c = call) scope.functions Code to check if func call is in symbol table *)
+*)	
 
 (* Check if valid identifier *)
 let identify env = function
@@ -172,7 +177,7 @@ let rec expr env = function
 	(*let _, t1 = id (* type of rhs *) in*)
 	Sast.Variable(id), Sast.Varidentifier
 	
-(*  | Ast.Call(funccall) -> (
+(* | Ast.Call(funccall) -> (
 	 (* Evaluate if this is a valid func_call: 
 		cname : identifier; (* Name of the function *)
 		actuals : expr list; (* Evaluated actual parameters *)
@@ -197,7 +202,7 @@ let rec expr env = function
 		  ( types_equal (List.hd(list1)) (List.hd(list2)) ) && types_equal (List.tl(list1)) (List.tl(list2))
 			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
-		if (checktypes formallist checkedlist)
+		if (checktypes formallist actuallist)
 			then Sast.Call (id), funct.t
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
@@ -282,19 +287,22 @@ let rec stmt env = function
 	  )
 	  
 	| Ast.Declaration(v) ->
-		if (find_variable env v = v) then (* If declaration exists, don't allow duplicate *)
-			raise(Failure("Existing variable declaration for "^string_of_expr v))	(* We need to write a identifier to string function *)
-		(* else we have to add the variable declaration to the symbol table; I'll write this later *)
+		let id = identify env v in
+		if (find_variable env id = id) then (* If declaration exists, don't allow duplicate *)
+			raise(Failure("Variable already exists"))	(* We could use an identifier to string function *)
+		(* else we have to add the variable declaration to the symbol table*)
 		else
-			let id = identify env v in Sast.Declaration(id)
+			ignore (id::(env.variables));			
+			Sast.Declaration(id)
                 
 	| Ast.Decassign(v, e) ->
-		if (find_variable env v = v) then (* If declaration exists, don't allow duplicate *)
-			raise(Failure("Existing variable declaration for "^string_of_expr v))	(* We need to write a identifier to string function *)	
+		let id = identify env v in
+		if (find_variable env id = id) then (* If declaration exists, don't allow duplicate *)
+			raise(Failure("Variable already exists"))	(* We could use an identifier to string function *)	
 		else
-		let id = identify env v 
-		and e = expr env e in
-		Sast.Decassign(id, e)
+			ignore (id::(env.variables)); 
+			let e = expr env e in
+			Sast.Decassign(id, e)
 		(*let _, t2 = e in
 		if (types_equal t1 t2) then	(* variable types need to match *)
 							(* we have to add the variable declaration to the symbol table; I'll write this later *)
@@ -367,21 +375,27 @@ let checkFunc scope func_definition = match func_definition.body with
 } in
   let retScope = {
       parent = scope.parent;
-      functionsons = scope.functions;
-      variables = (List.map formalToVdecl (func_definition.formals)
-      )@(returnidentifier::scope.variables);
+      functions = scope.functions;
+      variables = scope.variables;
           } in
   let checkedFunc_Definition = 
       {
             t = func_definition.t;
               name = func_definition.name;
                 formals = func_definition.formals;
-                  body = List.fold_left func_definition.body;
+                 (* body = List.fold_left func_definition.body; *)
+                 body = func_definition.body;
+                 (* inheritance = retScope.parent; *)
+                 inheritance = func_definition.inheritance;
+				(* parent is a symbol table option *)
+				(* inheritance is an identifier option *)
+
+                 paractuals = func_definition.paractuals;
 
       } in
   checkedFunc_Definition
+  
 (*let add_func_definition scope func = 
-| "SETUP", fdecl_list ->
 	(
 	  (* LOAD all funcs in list into symbol table (b/c all funcs should be able to "find" i.e. call each other) *)
 	    let addFunc scope fdecl =  
@@ -403,7 +417,6 @@ let checkFunc scope func_definition = match func_definition.body with
 | _ , [] ->   [], scope  (* Non-"SETUP" bname should have empty fdecls list *)
 | _ , _  ->   raise(Failure("Functions can only be declared in SETUP (at beginning)")) 
 *)
-
 
 
 (* Run our program *)
