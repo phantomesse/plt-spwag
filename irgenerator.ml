@@ -403,7 +403,6 @@ let generate (vars, funcs) =
 				in 
 				(Ir.Litcomp(i, slist), loclookp)
 			| Sast.Call(f) ->
-				(* TODO: Semantic analyzer should check this, but will crash if num arguments not correct *)
 				let process_built_in_attr built_in_name =
 					let (actual, loclook) = eval loclook (fst (List.hd f.actuals)) in
 					let (locals, lookup) = loclook in
@@ -549,6 +548,9 @@ let generate (vars, funcs) =
 									None -> raise (Failure ("Element binding error"))
 									| Some(x) -> x)
 								in
+								if (StringMap.mem the_element.id the_slide.elements)
+								then raise (Failure ("The following element already exists in slide->comp: " ^ the_slide.id ^ "->" ^ the_element.id)) 
+								else
 								(the_slide.elements <- (StringMap.add the_element.id the_element the_slide.elements)); 
 								(Ir.Litnull, (locals, {returned_lookup with cur_element=None}))
 							(* Bind to another element *)
@@ -557,6 +559,9 @@ let generate (vars, funcs) =
 									None -> raise (Failure ("Element binding error"))
 									| Some(x) -> x)
 								in
+								if (StringMap.mem the_element.id par_element.elements)
+								then raise (Failure ("The following element already exists in definition " ^ (id_to_str fdef.name) ^ ": " ^ the_element.id)) 
+								else
 								(par_element.elements <- (StringMap.add the_element.id the_element par_element.elements));  
 								(Ir.Litnull, (locals, {returned_lookup with cur_element=Some(par_element)}))
 						)
