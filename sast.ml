@@ -1,8 +1,10 @@
 (* Author: Richard Chiou *)
 
-open Ast (* We need to import the operators over, the semantic_analyzer is really confused otherwise. *)
+open Ast (* We need to import the operators and other type definitions over, the semantic_analyzer is really confused otherwise. *)
 
-(* All objects must be one of these types *)
+(* 	All objects must be one of these types 
+	Varidentifier is incredibly problematic *)
+	
 type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier | Null
 
 (* Identifiers *)

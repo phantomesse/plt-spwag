@@ -1,5 +1,6 @@
-(* Authors: Richard Chiou and Aditya Majumdar *)
-(* Quick to do list:
+(* Author: Richard Chiou
+   Contributor: Aditya Majumdar
+   Quick to do list:
 	func_call
 	Component of identifier
 	Call of func_call
@@ -185,29 +186,38 @@ let rec expr env = function
 		let actualtypes = List.map snd(actuallist) in
 		
 		(* check each type from checked list against fdecl param types in scope's function list *)
-		let rec checktypes list1 list2 = match list1,list2 with
+		let rec checktypes list1 list2 = match list1, list2 with
 		| [], [] -> true
 		| [], _ -> raise(Failure(" there should be no parameters "))
-		| _ , [] -> raise(Failure(" there are missing parameters"))
-		| _ , _ -> 
-			try
+		| _ , [] -> raise(Failure(" there are missing parameters "))
+		| _ , _ -> try
 		  ( types_equal (List.hd(list1)) (List.hd(list2)) ) && types_equal (List.tl(list1)) (List.tl(list2))
-			with Failure("hd") ->
-				raise(Failure(" mismatched types "))
+			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
-		if (types_equal formalTypes checkedTypes)
-		  then Sast.Call (id) , Sast.funccall
+		if (checktypes formalTypes checkedTypes)
+			then Sast.Call (id), funct.t
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
   
   (* Component of identifier: identifier has to be slide or variable (component or slide) *)
-	  
-  (* Following are problematic: 
-  | Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
-  | Call of func_call (* Calling a function, unique in that it can contain statements *)
+  | Ast.Component (v, exprlist) ->
+		let id = identify env v in
+		(* How are we going to get the type of the identifier? *)
+		
+		(* We need to do recursion. Here's the general idea:
+		Base step: currentobject = id
+		Step 1: currentobject = id[exprlist[0]]
+		Step 2: remove exprlist[0]
+		Step 3: Go to step 1, break from loop when exprlist has been parsed through
+		Hardest part is the error checking, but the recursive function will be annoying as well... *)
 
-	Below code is old
+		let rec returncomp currentcomp exprlist = match exprlist with
+		| [] -> (* run some code *)
+		| _ ->  Sast.Component (id, (expr env exprlist)
+
+			
+  (*Below code is old
   
   | Ast.Assign(id, e1) -> (* General idea is to make sure the arguments are valid; code may not work though *)
     let vdecl = try
@@ -235,7 +245,6 @@ let rec expr env = function
     | Declaration of identifier (* Declaring a variable *) Partially complete
     | Decassign of identifier * expr (* Declaring a variable and then assigning it something *) Partially complete
 	*)
-
 
 let rec stmt env = function
     | Ast.Expr(e) ->    Sast.Expr(expr env e)
