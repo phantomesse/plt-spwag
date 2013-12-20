@@ -77,7 +77,7 @@ define slide slide4()
     poem-text-box("blue fish") {
         id("text")
     }
-    fish-box("blue") {
+    fish-box("#70C1F8") {
         id("image")
     }
 

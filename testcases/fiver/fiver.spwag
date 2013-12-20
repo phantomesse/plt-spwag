@@ -1,0 +1,38 @@
+var rows = 5
+var columns = 5
+
+var 
+
+var numclicks = 0
+
+define slide main()
+{
+    var r = 0
+    var c = 0
+
+    while (r < rows)
+
+        r = r + 1
+        while (c < columns)
+
+        c = c + 1
+
+    square(0,0)
+}
+
+define comp square(x, y) isa box()
+{
+    var size = 20
+    var start = 40
+
+    id(("square"+x)+y)
+    position-x(x * size + start)
+    position-y(y * size + start)
+    width(size)
+    height(size)
+    border(1)
+    border-color("#000000")
+    background-color("#FFFFFF")
+}
+
+define comp square(x, y) isa box()

@@ -62,7 +62,7 @@ define slide overview()
 
 ##        box() {
             id("spwag-box")
-            padding-top(10)
+            padding-top(30)
             padding-bottom(10)
             background-color(cyan())
             text("SPWAG")
@@ -89,20 +89,26 @@ define slide motivation()
     content() {
         id("content")
 
-        content-text("Cross-Compatibility, Portability, Distributability"){
-            id("content3")
+        content-text("Cross-Compatibility, Distributability, Interactivity"){
+            id("content4")
             padding-top(30)
             font-size(36)
         }
 
         content-text("SPWAG presentations are accessible on any web-connected Desktop or Mobile platform, regardless of operating system"){
-            id("content2")
+            id("content3")
             padding-top(52)
             font-size(26)
             text-color("#CCC")
         }
 
         content-text("Compiled SPWAG may be integrated with existing web content, increasing content visibility"){
+            id("content2")
+            padding-top(30)
+            font-size(26)
+        }
+
+        content-text("SPWAG allows for interactive, real-time content manipulation"){
             id("content1")
             padding-top(30)
             font-size(26)
@@ -293,6 +299,26 @@ define slide demo()
 
     prev(implementation) 
     # prev(workflow)
+    next(demo-explanation)
+}
+
+define slide demo-explanation()
+{
+    background-color(bgcolor())
+
+    title("Demo") {
+        id("title")
+    }
+    title-underline() {
+        id("title-underline")
+    }
+
+    content() {
+        id("content")
+        image("../resources/demo.png")
+    }
+
+    prev(demo) 
     next(lessons-learned)
 }
 
@@ -397,7 +423,7 @@ define comp arrow(direction) isa box()
 # DEFINE SOME COLORS
 define func bgcolor()
 {
-    return "#373B44" # Charcoal Gray
+    return "#2d2d2d" # Charcoal Gray
 }
 
 define func fgcolor()
