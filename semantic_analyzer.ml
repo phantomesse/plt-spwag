@@ -9,6 +9,8 @@
 	check_func_call: see if function call is valid (Compiles)
 	Declaration of identifier: Compiles
 	Decassign of identifier * expr: Compiles
+	
+	Problematic code:
 	Call of func_call: Prototype is written, but still needs to be debugged
 	Component of identifier: This is hard to write, save this for last
 *)
@@ -218,7 +220,7 @@ let rec expr env = function
 			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
 		if (checktypes formallist actuallist)
-		then Sast.Call (fc), funct.t
+		then Sast.Call (fc), funct.t	(*Problematic Code*)
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
@@ -377,10 +379,6 @@ let check_function env func_definition = match func_definition.body with
 		inheritance = func_definition.inheritance; 	(* how are we going to deal with inheritance? *)
 	    paractuals = func_definition.paractuals;
         body = fst(x, (List.fold_left stmts(parentscope, []) func_definition.body ));  
-                (* inheritance = retScope.parent; *)
-
-				(* parent is a symbol table option *)
-				(* inheritance is an identifier option *)
       } in
 	checked_func_definition
 
@@ -421,9 +419,7 @@ let add_identifiers env identifiers =
 		identifier
 	in (List.map (check_identifier subscope) identifiers), global  (* newFdecls, newScope *)
 
-(* Run our program *)
-(* Input: Ast.Program, Symbol_Table *)
-(* Output: Sast.Program *)
+(* Run program with input: Ast.Program, Symbol_Table and output: Sast.Program *)
 (* type program = identifier list * func_definition list (* global vars, funcs*) *)
 (* Add the identifiers (variables) and function definitions to global scope *)
 let evalprogram program globalTable =
