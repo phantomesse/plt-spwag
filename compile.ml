@@ -1,5 +1,6 @@
 (* Author: Lauren Zou *)
 
+open Sast
 open Ir
 open Ir.Element
 open Ir.Slide
@@ -86,14 +87,21 @@ let get_css_from_slide slide =
 
 let string_of_text text = 
     if String.length text > 0 then
-        "            " ^ text
+        "            " ^ text ^ "\n"
     else
         ""
 ;;
 
 let string_of_image image = 
     if String.length image > 0 then
-        "            <img src=\"" ^ image ^ " />"
+        "            <img src=\"" ^ image ^ " />\n"
+    else
+        ""
+;;
+
+let string_of_next_prev next_prev slide =
+    if String.length slide > 0 then
+        "        <a class=\"" ^ next_prev ^ "\" href=\"#" ^ slide ^ "\"></a>\n"
     else
         ""
 ;;
@@ -114,20 +122,34 @@ let get_html_from_slide slide =
     "    <div id=\"" ^ slide.Slide.id ^ "\" class=\"slide\">\n" ^
 
     (* Get the HTML from each element of this slide *)
-    String.concat "\n\n" (List.map get_html_from_element (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^id)::l) slide.Slide.elements [])) ^ "\n" ^
+    String.concat "\n\n" (List.map get_html_from_element (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^id)::l) slide.Slide.elements [])) ^ "\n\n" ^
+
+    (* Next and prev *)
+    string_of_next_prev "prev" slide.Slide.prev ^
+    string_of_next_prev "next" slide.Slide.next ^
 
     "    </div>"
+;;
 
-(* <div id="main" class="slide">
-        <div id="hello-world-text" class="box">
-            Hello World!
-        </div>
+let string_of_identifier = function
+    Identifier(s) -> s
 
-        <div id="hello-world-image" class="box">
-            <img src="cat.jpg" />
-        </div>
-    </div>*)
+let translate_to_javascript script =
+(*    type js_definition = {
+    name : Sast.identifier; (* Name of the function *)
+    formals : Sast.identifier list; (* Formal parameters *)
+    body : Sast.stmt list;  (* Body of javascript definition *)
+}*)
+    (* Function definition *)
+    "        function " ^ string_of_identifier script.name ^ "(" ^
 
+    (* Formals *)
+    String.concat ", " (List.map (fun identifier -> string_of_identifier identifier) script.formals) ^ ") {\n"^
+
+    (* Statements *)
+    
+
+    "        }"
 ;;
 
 let compile (slides, identifiers, scripts) =
@@ -136,7 +158,7 @@ let compile (slides, identifiers, scripts) =
     "<head>\n" ^
 
     (* If we have time, we should abstract out the config paths *)
-    "    <link rel=\"stylesheet\" type=\"text/less\" href=\"../../../config/config.css\">\n" ^
+    "    <link rel=\"stylesheet\" type=\"text/less\" href=\"../../config/config.css\">\n" ^
 
     "    <style type=\"text/css\">\n" ^
 
@@ -148,17 +170,18 @@ let compile (slides, identifiers, scripts) =
     "</head>\n\n" ^
     "<body>\n" ^
 
-    (* HTML components such as slides and elements go here *)
+    (* HTML components such as slides and elements *)
     String.concat "\n" (List.map get_html_from_slide slides) ^ "\n\n" ^
 
     "    <script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js\"></script>\n" ^
-    "    <script type=\"text/javascript\" src=\"../../../config/config.js\"></script>\n" ^
+    "    <script type=\"text/javascript\" src=\"../../config/config.js\"></script>\n\n" ^
 
     "    <script>\n" ^
 
     (* Javascript goes here *)
+    String.concat "\n" (List.map translate_to_javascript scripts) ^ "\n" ^
     
-    "    </script>\n" ^
+    "    </script>\n\n" ^
 
     "</body>\n\n" ^
     "</html>"

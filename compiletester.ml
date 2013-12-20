@@ -1,5 +1,7 @@
 (* Authors: Lauren Zou *)
 
+open Ast
+open Sast
 open Ir
 open Ir.Element
 open Ir.Slide
@@ -64,6 +66,12 @@ let main_slide_css = {
 let element_map = StringMap.empty in
 let element_map = StringMap.add "hello-world-text" hw_text element_map in
 
+let myjs = {
+    name=Sast.Identifier("a_js_function"); (* Name of the function *)
+    formals=[ Sast.Identifier("hello"); Sast.Identifier("cool"); Sast.Identifier("awesome") ]; (* Formal parameters *)
+    body=[Sast.Declaration(Sast.Identifier("foo"))];  (* Body of javascript definition *)
+} in
+
 let main_slide = {
     id="main";
     next="";
@@ -75,7 +83,7 @@ let main_slide = {
     elements=element_map
 } in
 
-let program = ([ main_slide ], [], []) in
+let program = ([ main_slide ], [], [myjs]) in
 
 let html = Compile.compile program in
 print_string html
