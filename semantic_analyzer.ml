@@ -1,10 +1,9 @@
-(* Author: Richard Chiou
-   Contributor: Aditya Majumdar
+(* Authors: Richard Chiou, Aditya Majumdar
    Quick to do list, order by priority:
    	program: take in an Ast.program and output an Sast.program
 		add_identifier: adds identifier to symbol table
 		add_function: adds function to symbol table
-	func_def: checks if function definition has valid table
+	Debug func_definition
 	Declaration of identifier: need to write add identifier to symbol table
 	Decassign of identifier * expr: need to write add to symbol table
 	functioncall: checks if function call has correct structure
@@ -25,22 +24,25 @@ type translation_environment = {
     scope : symbol_table;
 }
 
+(* We need the types from SAST because of an oversight *)
+type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier | Null
+
 (* See if t1 and t2 have the same types *)
 let types_equal t1 t2 = match t1,t2 with _, _ -> if (t1 = t2)
     then true
 		else false
 
 let string_of_type_t = function
-      Int -> "Int"
-    | Bool -> "Bool"
-    | Str -> "Str"
-    | Per -> "Per"
-	| Slidetype -> "Slidetype"
-	| Comptype -> "Comptype"
-	| Attrtype -> "Attrtype"
-	| Functype -> "Functype"
-	| Varidentifier -> "Varidentifier"
-	| Null -> ""
+      Sast.Int -> "Int"
+    | Sast.Bool -> "Bool"
+    | Sast.Str -> "Str"
+    | Sast.Per -> "Per"
+	| Sast.Slidetype -> "Slidetype"
+	| Sast.Comptype -> "Comptype"
+	| Sast.Attrtype -> "Attrtype"
+	| Sast.Functype -> "Functype"
+	| Sast.Varidentifier -> "Varidentifier"
+	| Sast.Null -> ""
 
 let string_of_func_type = function
 	  Slide -> "Slide"
@@ -110,11 +112,11 @@ let identify env = function
 let rec expr env = function
 
     (* Simple evaluation of primitives *)
-    Ast.Litint(v) -> Sast.Litint(v), Ast.Int
-  | Ast.Litper(v) -> Sast.Litper(v), Ast.Per
-  | Ast.Litstr(v) -> Sast.Litstr(v), Ast.Str
-  | Ast.Litbool(v) -> Sast.Litbool(v), Ast.Bool
-  | Ast.Litnull -> Sast.Litnull, Ast.Null
+    Ast.Litint(v) -> Sast.Litint(v), Sast.Int
+  | Ast.Litper(v) -> Sast.Litper(v), Sast.Per
+  | Ast.Litstr(v) -> Sast.Litstr(v), Sast.Str
+  | Ast.Litbool(v) -> Sast.Litbool(v), Sast.Bool
+  | Ast.Litnull -> Sast.Litnull, Sast.Null
   
   | Ast.Binop (expr1, op, expr2) ->  (* evaluate operators *)
     (
@@ -125,26 +127,26 @@ let rec expr env = function
     and _, t2 = e2 in
 	
 	match t1, op, t2 with
-	  | (Bool), (And | Or), (Bool) ->  (* And/or operators *)
+	  | (Sast.Bool), (And | Or), (Sast.Bool) ->  (* And/or operators *)
 		Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
 				
-      | (Int), (Lessthan | Greaterthan), (Int) ->  (* > , < *)
-			Sast.Binop(e1, op, e2), Ast.Bool
+      | (Sast.Int), (Lessthan | Greaterthan), (Sast.Int) ->  (* > , < *)
+			Sast.Binop(e1, op, e2), Sast.Bool
 					
-	  | (Int), (Plus | Minus | Times | Divide), (Int) ->  (* Arithmetic on ints *)
-			Sast.Binop(e1, op, e2), Ast.Int   
+	  | (Sast.Int), (Plus | Minus | Times | Divide), (Sast.Int) ->  (* Arithmetic on ints *)
+			Sast.Binop(e1, op, e2), Sast.Int   
 
-	  | (Per), (Plus | Minus | Times | Divide), (Per) ->  (* Arithmetic on percents *)
-			Sast.Binop(e1, op, e2), Ast.Per   
+	  | (Sast.Per), (Plus | Minus | Times | Divide), (Sast.Per) ->  (* Arithmetic on percents *)
+			Sast.Binop(e1, op, e2), Sast.Per   
 			
       | _, (Equals | Notequals), _  ->   (* Compare Anything *)
-			Sast.Binop(e1, op, e2), Ast.Bool
+			Sast.Binop(e1, op, e2), Sast.Bool
 					
-	  | (Str), Plus, (Str | Int) ->  (* String Concatenation *) 
-			Sast.Binop(e1, op, e2), Ast.Str		
+	  | (Sast.Str), Plus, (Sast.Str | Sast.Int) ->  (* String Concatenation *) 
+			Sast.Binop(e1, op, e2), Sast.Str		
 					
 	 (* Otherwise Invalid *)
-	  | a, op, b -> raise(Failure("Binop "^ (string_of_binop op) ^" does not work with operands "^ (string_of_type_t a) ^", "^ (string_of_type_t b) ^ "\n"))
+	  | a, op, b -> raise(Failure("Binop "^ (string_of_binop op) ^" has invalid operands "))
 	)
 	
   | Ast.Notop(v) -> (* check if negate = ! and e1 is a boolean *)
@@ -152,8 +154,8 @@ let rec expr env = function
 	let e1 = expr env v in
 	let _, t1 = e1 in (* Get the type of e1 *)
 	match t1 with 
-	  | Bool -> Sast.Notop(e1), Ast.Bool
-	  | _ -> raise(Failure("Invalid operand ("^string_of_type_t t1^") for not operator"))
+	  | Sast.Bool -> Sast.Notop(e1), Sast.Bool
+	  | _ -> raise(Failure("Not operator requires bool operand"))
 	)
 	
   | Ast.Assign(lhs, rhs) -> 		
@@ -161,16 +163,16 @@ let rec expr env = function
 	and id = identify env lhs in	(* check if identifier *)
     (* let _, t1 = e1 (* type of rhs *) in *)
 	(*if (types_equal t1 t2) then *)			(* the types need to match? *)
-		Sast.Assign(id, e1), Ast.Varidentifier
+		Sast.Assign(id, e1), Sast.Varidentifier
 	(*else
 		raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))*)
 	
   | Ast.Variable(v) -> 				(* If identify function works, this will work *)
 	let id = identify env v in
 	(*let _, t1 = id (* type of rhs *) in*)
-	Sast.Variable(id), Ast.Varidentifier
+	Sast.Variable(id), Sast.Varidentifier
 	
-  | Ast.Call(funccall) -> (
+(*  | Ast.Call(funccall) -> (
 	 (* Evaluate if this is a valid func_call: 
 		cname : identifier; (* Name of the function *)
 		actuals : expr list; (* Evaluated actual parameters *)
@@ -182,7 +184,8 @@ let rec expr env = function
 		let formallist = List.map (identify env) funct.formals in
 		(*let formalTypes = List.map fst(formallist) in*)
 		(* Get the list of actuals and their types *)
-		let actuallist = List.map (identify env) funccall.actuals in
+		let actualstoidentifiers = List.map (Identifier) funccall.actuals in
+		let actuallist = List.map (identify env) actualstoidentifiers in
 		(*let actualtypes = List.map fst(actuallist) in*)
 		
 		(* check each type from checked list against fdecl param types in scope's function list *)
@@ -199,9 +202,9 @@ let rec expr env = function
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
-  
+*)
   (* Component of identifier: identifier has to be slide or variable (component or slide) *)
-  | Ast.Component (v, exprlist) ->
+(*  | Ast.Component (v, exprlist) ->
 		let id = identify env v in
 		(* How are we going to get the type of the identifier? *)
 		
@@ -214,8 +217,8 @@ let rec expr env = function
 
 		(*let rec returncomp currentcomp exprlist = match exprlist with
 		| [] -> (* run some code *)
-		| _ ->*)  Sast.Component (id, (expr env exprlist)), Ast.Varidentifier
-
+		| _ ->*)  Sast.Component (id, (expr env exprlist)), Sast.Varidentifier
+*)
 			
   (*Below code is old
   
@@ -263,17 +266,19 @@ let rec stmt env = function
     | Ast.If(e, s1, s2) ->  (
         let e1 = expr env e in
 		let _, t1 = e1 in 	(* Get the type of e1 *)
-		match t1 with 
-	  | Bool -> Sast.If (e1, stmt env s1, stmt env s2) (* Check then, else *)
-	  | _ -> raise(Failure(string_of_type_t t1^"type must be bool"))
+		if (types_equal t1 Sast.Bool) then 
+			Sast.If (e1, stmt env s1, stmt env s2) (* Check then, else *)
+		else
+			raise(Failure(string_of_type_t t1^"type must be bool"))
 	  )
 	  
 	| Ast.While(e, s1) ->  (
 		let e1 = expr env e in
 		let _, t1 = e1 in 	(* Get the type of e1 *)
-		match t1 with 
-	  | Bool ->	Sast.While (e1, stmt env s1) (* Check body *)
-	  | _ -> raise(Failure(string_of_type_t t1^"type must be bool"))
+		if (types_equal t1 Sast.Bool) then
+			Sast.While (e1, stmt env s1) (* Check body *)
+		else
+			raise(Failure(string_of_type_t t1^"type must be bool"))
 	  )
 	  
 	| Ast.Declaration(v) ->
@@ -308,36 +313,80 @@ let rec parent env = function
                 Sast.Parent(id), id_type
     | Ast.Noparent(v) -> Sast.Noparent(v), Sast.null*)
 
-(* Taken from CGL programming language, modify this to fit ours
-let checkFunc scope func_def = match func_def.fbody with
-	| [] -> raise(Failure("Empty functions are invalid"))
-    | x ->
-		let return_type = fdecl.t (* What the function returns *)
-		let returnidentifier = {
-			vdt = fdecl.t;
-			vname = "return";
-			value = Ast.Noexpr;
-		} in
-		let formalToVdecl = function
-			| frml -> { vdt = frml.pdt;
-				          vname = frml.pname;
-									value = Ast.Noexpr }
-		in
-	  let retScope = {
-			parent = curScope.parent;
-			functions = curScope.functions;
-			variables = (List.map formalToVdecl (fdecl.formals) )@(retVdecl::curScope.variables);
-    } in
-		let checkedFdecl = 
-		{
-		  fdt = fdecl.fdt;
-		  fname = fdecl.fname;
-		  formals = fdecl.formals;
-		  fbody = fst(x, (List.fold_left processStatement(retScope, []) fdecl.fbody ));   (* UGLY HACK (x) *)
-		} in
-		checkedFdecl
+(* Basing this off CGL language
+
+They have:
+
+type datatype = IntType | DoubleType | BoolType | StringType | CardType |
+    ListType | PlayerType | AnytypeType
+
+type formal =
+{
+    pdt : datatype;
+    pname : string;
+}    
+
+type fdecl =
+{
+    fdt : Ast.datatype;       || Our equivalent is t : func_type
+    fname : string;         || Our equivalent is name : identifier
+    formals : Ast.formal list;    || Our equivalent is formals : identifier list
+    fbody : stmt list;        || Our equivalent is body : stmt list;
+}
+
+Ours:
+
+type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
+    t: func_type; (* e.g. slide, component, attribute, func *)
+    name : identifier; (* Name of the function *)
+    formals : identifier list; (* Name of the formal parameters *)
+    inheritance : identifier option; (* Name of any parent components, ie box, or null *)
+    paractuals: expr list; (* This represents the actuals passed to the parent *)
+    body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
+}
+
 *)
 
+
+(* func_def stuff *)
+
+let checkFunc scope func_definition = match func_definition.body with
+[] -> raise(Failure("Empty functions are invalid"))
+(* Not sure if you need a | before  the [] case ... anyway, empty functions not allowed *)
+    | x ->
+             (*let return_type = func_definition.t *)(* Which type the function returns *)
+        let returnidentifier = {
+          t = func_definition.t;
+          body = func_definition.body; (* "return" ?*)
+          name = func_definition.name;
+          formals = func_definition.formals;
+          paractuals = func_definition.paractuals;
+          inheritance = func_defintion.inheritance;
+          
+          (*body = Ast.Litnull; *)(* no expression? *)
+} in
+let formalToVdecl = function
+    | frml -> { 
+                vnamedt = frml.pdt;
+                vname = frml.pname;
+                value = Ast.Noexpr
+              }
+      in
+  let retScope = {
+      parent = scope.parent;
+      functionsons = scope.functions;
+      variables = (List.map formalToVdecl (func_definition.formals)
+      )@(returnidentifier::scope.variables);
+          } in
+  let checkedFunc_Definition = 
+      {
+            t = func_definition.t;
+              name = func_definition.name;
+                formals = func_definition.formals;
+                  body = List.fold_left func_definition.body;
+
+      } in
+  checkedFunc_Definition
 (*let add_func_definition scope func = 
 | "SETUP", fdecl_list ->
 	(
@@ -372,6 +421,6 @@ let checkFunc scope func_def = match func_def.fbody with
 (* type program = identifier list * func_definition list (* global vars, funcs*) *)
 (* Add the identifiers (variables) and function definitions to global scope *)
 
-let evalprogram program globalTable =
+(*let evalprogram program globalTable =
 	let run, _ = List.fold_left processBdecl(globalTable, []) program in
-	run
+	run*)
