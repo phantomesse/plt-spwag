@@ -284,8 +284,11 @@ let compile (slides, identifiers, scripts) =
     "<html>\n\n"^
     "<head>\n" ^
 
+    (* Title *)
+    tab 1 ^ "<title>SPWAG</title>" ^
+
     (* If we have time, we should abstract out the config paths *)
-    tab 1 ^ "<link rel=\"stylesheet\" type=\"text/less\" href=\"../../config/config.css\">\n" ^
+    tab 1 ^ "<link rel=\"stylesheet\" type=\"text/less\" href=\"../../../config/config.css\">\n" ^
 
     tab 1 ^ "<style type=\"text/css\">\n" ^
 
@@ -301,7 +304,7 @@ let compile (slides, identifiers, scripts) =
     String.concat "\n" (List.map get_html_from_slide slides) ^ "\n\n" ^
 
     tab 1 ^ "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js\"></script>\n" ^
-    tab 1 ^ "<script type=\"text/javascript\" src=\"../../config/config.js\"></script>\n\n" ^
+    tab 1 ^ "<script type=\"text/javascript\" src=\"../../../config/config.js\"></script>\n\n" ^
 
     tab 1 ^ "<script>\n" ^
 

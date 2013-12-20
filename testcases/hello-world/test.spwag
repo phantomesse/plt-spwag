@@ -10,6 +10,6 @@ define slide main()
     }
     box() {
         id("hello-world-image")
-        image("cat.jpg")
+        image("../resources/cat.jpg")
     }
 }

@@ -2,7 +2,7 @@ define slide main()
 {
     box() {
         id("title-background")
-        image("titlebg.png")
+        image("../resources/titlebg.png")
         position-x(0)
         position-y(0)
     }
@@ -92,6 +92,6 @@ define comp poem-text-box(mytext) isa box()
 
 define comp fish-box(color) isa box()
 {
-    image("fish.png")
+    image("../resources/fish.png")
     background-color(color)
 }
