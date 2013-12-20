@@ -30,6 +30,13 @@ let funcs_to_js funcs =
 					| _ -> jss
 					) [] funcs 
 
+(* Given local_outer and loclook returned by a statement eval, this merges them for a single local variable map for outer scope
+ * Returns the new loclook *)
+let merge_locals local_outer (local_inner, lookup) = 
+	(StringMap.fold (fun k d a -> if StringMap.mem k a
+		then StringMap.add k d a
+		else a) local_inner local_outer, lookup)
+
 (* Creates a blank slide given it's Identifier *)
 let create_blank_slide i = 
 	let fill_css = 
@@ -304,19 +311,18 @@ let generate (vars, funcs) =
 		 * @param loclook (locals, lookup)
 		 * @param statement the statement the execute
 		 * @return (locals, lookup) *)
-		(* TODO: Local variable scoping doesn't work yet *)
 		and exec loclook = function
-			Sast.Block(stmts) -> let (_, lookup) = (List.fold_left exec loclook stmts) in (fst loclook, lookup) 
+			Sast.Block(stmts) -> merge_locals (fst loclook) (List.fold_left exec loclook stmts)
 			| Sast.Expr(e) -> let _, loclook = eval loclook (fst e) in loclook
 			| Sast.If(e, s1, s2) ->  
 	  			let v, loclook = eval loclook (fst e) in
 				(match v with
-					Ir.Litbool(false) -> exec loclook s2
-					| Ir.Litint(0) -> exec loclook s2
-					| Ir.Litper(0) -> exec loclook s2
-					| Ir.Litstr("") -> exec loclook s2
-					| Ir.Litnull -> exec loclook s2
-					| _ -> exec loclook s1)
+					Ir.Litbool(false) -> merge_locals (fst loclook) (exec loclook s2)
+					| Ir.Litint(0) -> merge_locals (fst loclook) (exec loclook s2)
+					| Ir.Litper(0) -> merge_locals (fst loclook) (exec loclook s2)
+					| Ir.Litstr("") -> merge_locals (fst loclook) (exec loclook s2)
+					| Ir.Litnull -> merge_locals (fst loclook) (exec loclook s2)
+					| _ -> merge_locals (fst loclook) (exec loclook s1))
 			| Sast.While(e, s) ->
 				let rec loop loclook =
 					let v, loclook = eval loclook (fst e) in
@@ -327,7 +333,7 @@ let generate (vars, funcs) =
 						| Ir.Litstr("") -> loclook
 						| Ir.Litnull -> loclook
 						| _ -> loop (exec loclook s))
-				in loop loclook
+				in merge_locals (fst loclook) (loop loclook)
 			| Sast.Declaration(Identifier(s)) -> 
 				if StringMap.mem s (fst loclook)
 				then raise (Failure("The following variable, already declared: " ^ s))

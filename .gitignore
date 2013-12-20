@@ -4,6 +4,7 @@ parser.ml
 parser.mli
 *.cmo
 *.cmi
+*.o
 spwag
 irtester
 compiletester
