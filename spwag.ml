@@ -1,8 +1,10 @@
 (* Author: Aftab Khan, Lauren Zou *)
 
-open Compile
+(*open Compile*)
 
 type action = Ast | Irgenerator | Compile
+
+external preprocess: unit -> string = "caml_preprocess"
 
 let _ =
     let action =
@@ -13,7 +15,8 @@ let _ =
                 ("-c", Compile)
             ]
         else Compile in
-            let lexbuf = Lexing.from_channel stdin in
+            let processed_code = preprocess() in
+            let lexbuf = Lexing.from_string processed_code in
             let program = Parser.program Scanner.token lexbuf in
                 match action with
                 | Ast -> let listing = Ast.string_of_program program
