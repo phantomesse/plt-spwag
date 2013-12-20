@@ -1,4 +1,4 @@
-(* Author: Richard Chiou *)
+(* Author: Richard Chiou, Aditya Majumdar *)
 
 open Ast (* We need to import the operators and other type definitions over, the semantic_analyzer is really confused otherwise. *)
 

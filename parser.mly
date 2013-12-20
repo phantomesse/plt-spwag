@@ -1,7 +1,9 @@
-%{ 
-open Ast 
-open Linecounter
-let parse_error msg = Printf.eprintf "%s at around line %d \n" msg !linecount 
+/* Yunhe (John) Wang, Lauren Zou, Aftab Khan */
+
+%{
+    open Ast
+    open Linecounter
+    let parse_error msg = Printf.eprintf "%s at around line %d \n" msg !linecount
 %}
 
 %token LPAREN RPAREN PLUS MINUS TIMES DIVIDE ASSIGN EOF EQUALS NOTEQUALS LESSTHAN GREATERTHAN NOT OR AND COMMA NEWLINE
@@ -114,7 +116,7 @@ stmt:
     | VAR ID ASSIGN expr NEWLINE                    { Decassign(Identifier($2), $4) }
     
 expr:
-	  NOT expr				 { Notop($2) }
+      NOT expr                       { Notop($2) }
     | expr PLUS expr         { Binop($1, Plus, $3) }
     | expr MINUS expr        { Binop($1, Minus, $3) }
     | expr TIMES expr        { Binop($1, Times, $3) }
@@ -132,7 +134,7 @@ expr:
     | ID                     { Variable(Identifier($1)) }
     | TRUE                   { Litbool(true) }
     | FALSE                  { Litbool(false) }
-	| NULL					 { Litnull }
+    | NULL                     { Litnull }
     | ID ids_list            { Component(Identifier($1), List.rev $2) }
     | ID LPAREN actuals_opt RPAREN mods_opt 
       {Call({
@@ -140,5 +142,4 @@ expr:
         actuals = $3;
         mods = $5;
       })}
-	| LPAREN expr RPAREN   { $2 }
-
+    | LPAREN expr RPAREN   { $2 }
