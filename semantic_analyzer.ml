@@ -142,7 +142,7 @@ let rec expr env = function
       | _, (Equals | Notequals), _  ->   (* Compare Anything *)
 			Sast.Binop(e1, op, e2), Sast.Bool
 					
-	  | (Sast.Str), Plus, (Sast.Str | Sast.Int) ->  (* String Concatenation *) 
+	  | (Sast.Str), Plus, (Sast.Str | Sast.Int | Sast.Bool) ->  (* String Concatenation *) 
 			Sast.Binop(e1, op, e2), Sast.Str		
 					
 	 (* Otherwise Invalid *)
