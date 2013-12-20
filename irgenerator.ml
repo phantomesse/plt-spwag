@@ -3,6 +3,8 @@
 
 open Sast
 open Ir
+open Slide
+open Element
 
 (* Lookup table
  * Cur_path starts with the slide's name, followed by the parent elements
@@ -203,14 +205,59 @@ let generate (vars, funcs) =
 					[] (List.rev rlist)
 				in 
 				(Ir.Litcomp(i, slist), loclookp)
-	 	in
+			| Sast.Call(f) ->
+				let fdecl = 
+					let not_slide (check:Sast.func_definition) = (match check.t with
+						Ast.Slide -> raise (Failure ("Cannot call a slide like a regular function: " ^ (id_to_str f.cname)))
+						| _ -> check)
+					in
+	    			try not_slide (StringMap.find (id_to_str f.cname) (snd loclook).funcs_in)
+	    			with Not_found -> raise (Failure ("undefined function " ^ (id_to_str f.cname)))
+				in
+				let (actuals, loclook) = 
+						List.fold_left
+						(fun (actuals, loclook) actual -> let (r, loclook) = eval loclook (fst actual) in (r :: actuals, loclook))
+						([], loclook) (List.rev f.actuals)
+				in
+				let (locals, lookup) = loclook in
+				let r, returned_lookup = 
+					try (Ir.Litnull, call fdecl actuals lookup)
+					with ReturnException(r, lookup) -> (r, lookup)
+				in
+				(match fdecl.t with
+					Ast.Slide -> raise (Failure ("This shouldn't be displayed."))
+					| Ast.Attr -> (Ir.Litnull, (locals, returned_lookup))
+					| Ast.Func -> (r, (locals, returned_lookup))
+					| Ast.Comp -> 
+						let (locals, returned_lookup) = exec (locals, returned_lookup) f.mods in
+						(match lookup.cur_element with
+							(* Bind to slide *)
+							None -> 
+								let the_slide = (StringMap.find lookup.cur_slide returned_lookup.slides_out) in
+								let the_element = (match returned_lookup.cur_element with
+									None -> raise (Failure ("Element binding error"))
+									| Some(x) -> x)
+								in
+								(the_slide.elements <- (StringMap.add the_element.id the_element the_slide.elements)); 
+								(Ir.Litnull, (locals, {returned_lookup with cur_element=None}))
+							(* Bind to another element *)
+							| Some(par_element) -> 
+								let the_element = (match returned_lookup.cur_element with
+									None -> raise (Failure ("Element binding error"))
+									| Some(x) -> x)
+								in
+								(par_element.elements <- (StringMap.add the_element.id the_element par_element.elements));  
+								(Ir.Litnull, (locals, {returned_lookup with cur_element=Some(par_element)}))
+						)
+			)
 
 		(* Actually executes statements
 		 * This part doesn't use the type info, more useful for javascript compiling later on
 		 * @param loclook (locals, lookup)
 		 * @param statement the statement the execute
 		 * @return (locals, lookup) *)
-		let rec exec loclook = function
+		(* TODO: Local variable scoping doesn't work yet *)
+		and exec loclook = function
 			Sast.Block(stmts) -> let (_, lookup) = (List.fold_left exec loclook stmts) in (fst loclook, lookup) 
 			| Sast.Expr(e) -> let _, loclook = eval loclook (fst e) in loclook
 			| Sast.If(e, s1, s2) ->  
