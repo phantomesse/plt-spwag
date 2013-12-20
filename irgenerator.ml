@@ -273,7 +273,7 @@ let generate (vars, funcs) =
 				(Ir.Litcomp(i, slist), loclookp)
 			| Sast.Call(f) ->
 				(* TODO: Check for built-in functions 
-				 * Left: on-click on-press get set *)
+				 * Left: get set *)
 				let process_built_in_attr built_in_name =
 					let (actual, loclook) = eval loclook (fst (List.hd f.actuals)) in
 					let (locals, lookup) = loclook in
@@ -319,7 +319,47 @@ let generate (vars, funcs) =
 						(match actual with
 							Ir.Litint(i) -> (Ir.Litint(get_rand i), loclook)
 							| _ -> raise (Failure ("You must pass in an integer to random()")))
- 					| Identifier(_) -> 
+ 					| Identifier("on-click") ->
+						let f_to_call = (match (List.hd f.actuals) with
+							(Sast.Call(f),_) -> f
+							| _ -> raise (Failure ("You must pass in an function to call  to on-click()")))
+						in	
+						let (pactuals, loclook) = 
+							List.fold_left
+							(fun (actuals, loclook) actual -> let (r, loclook) = eval loclook (fst actual) in (r :: actuals, loclook))
+							([], loclook) (List.rev f_to_call.actuals)
+						in
+						let (locals, lookup) = loclook in
+						(match lookup.cur_element with
+								None -> 
+									let the_slide = StringMap.find lookup.cur_slide lookup.slides_out in
+									(Litnull, (locals,
+									{lookup with slides_out = StringMap.add lookup.cur_slide
+									({the_slide with onclick = Some({Ir.cname=f_to_call.cname; actuals=pactuals;})}) lookup.slides_out}))
+								| Some(x) -> (Litnull, (locals, 
+									{lookup with cur_element = Some({x with onclick = Some({Ir.cname=f_to_call.cname; actuals=pactuals;})})}))
+						)
+					| Identifier("on-press") ->
+						let f_to_call = (match (List.nth f.actuals 1) with
+							(Sast.Call(f),_) -> f
+							| _ -> raise (Failure ("You must pass in a function to call as 2nd parameter to on-press()")))
+						in
+						let (key_to_press, loclook) = eval loclook (fst (List.hd f.actuals)) in
+						let key_to_press = (match key_to_press with
+							Ir.Litstr(s) -> s
+							| _ ->  raise (Failure ("You must pass in a string as key as 1st parameter to on-press()")))
+						in
+						let (pactuals, loclook) = 
+							List.fold_left
+							(fun (actuals, loclook) actual -> let (r, loclook) = eval loclook (fst actual) in (r :: actuals, loclook))
+							([], loclook) (List.rev f_to_call.actuals)
+						in
+						let (locals, lookup) = loclook in
+						let the_slide = StringMap.find lookup.cur_slide lookup.slides_out in
+							(Litnull, (locals,
+							{lookup with slides_out = StringMap.add lookup.cur_slide
+							({the_slide with onpress = Some(key_to_press,{Ir.cname=f_to_call.cname; actuals=pactuals;})}) lookup.slides_out}))
+					| Identifier(_) -> 
 				(* The rest of these lines are for non-built-in functions *)
 				let fdecl = 
 					(match f.cname with
