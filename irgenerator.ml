@@ -170,44 +170,61 @@ let generate (vars, funcs) =
 		 * @param expression the expression to evaluate
 		 * @return (Ir.literal, (locals, lookup)) *)
 		let rec eval loclook = function
-			(*TODO: Need to add more binary operations*)
 			Sast.Binop(e1, op, e2) ->
 				let r1, loclook = eval loclook (fst e1) in
 				let r2, loclook = eval loclook (fst e2) in
+				let evaluate_eq b = function Ast.Equals -> b | _ -> (not b) in 
 				(match r1, op, r2 with
 
 					Ir.Litint(i1), Ast.Plus, Ir.Litint(i2) -> (Ir.Litint(i1 + i2), loclook)
 					| Ir.Litint(a), Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr((string_of_int a) ^ b), loclook)
 					| Ir.Litstr(a), Ast.Plus, Ir.Litint(b) -> (Ir.Litstr(a ^ (string_of_int b)), loclook)
+					| Ir.Litper(i1), Ast.Plus, Ir.Litper(i2) -> (Ir.Litper(i1 + i2), loclook)
+					| Ir.Litper(a), Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr((string_of_int a) ^ "%" ^ b), loclook)
+					| Ir.Litstr(a), Ast.Plus, Ir.Litper(b) -> (Ir.Litstr(a ^ (string_of_int b) ^ "%"), loclook)
 					| Ir.Litstr(a), Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr(a ^ b), loclook)
+					| Ir.Litstr(a), Ast.Plus, Ir.Litbool(b) -> (Ir.Litstr(a ^ (string_of_bool b)), loclook)
+					| Ir.Litbool(a), Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr((string_of_bool a) ^ b), loclook)
+					| Ir.Litstr(a), Ast.Plus, Ir.Litslide(Identifier(b)) -> (Ir.Litstr(a ^ b), loclook)
+					| Ir.Litslide(Identifier(a)), Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr(a ^ b), loclook)
+					| Ir.Litnull, Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr(b), loclook)
+					| Ir.Litstr(a), Ast.Plus, Ir.Litnull -> (Ir.Litstr(a), loclook)
 
 					| Ir.Litint(i1), Ast.Minus, Ir.Litint(i2) -> (Ir.Litint(i1 - i2), loclook)
+					| Ir.Litper(i1), Ast.Minus, Ir.Litper(i2) -> (Ir.Litper(i1 - i2), loclook)
 
 					| Ir.Litint(i1), Ast.Times, Ir.Litint(i2) -> (Ir.Litint(i1 * i2), loclook)
+					| Ir.Litint(i1), Ast.Times, Ir.Litper(i2) -> (Ir.Litper(i1 * i2), loclook)
+					| Ir.Litper(i1), Ast.Times, Ir.Litint(i2) -> (Ir.Litper(i1 * i2), loclook)
 
 					| Ir.Litint(i1), Ast.Divide, Ir.Litint(i2) -> (Ir.Litint(i1 / i2), loclook)
+					| Ir.Litper(i1), Ast.Divide, Ir.Litint(i2) -> (Ir.Litper(i1 / i2), loclook)
+					
+					| Ir.Litint(i1), (Ast.Equals | Ast.Notequals), Ir.Litint(i2) -> (Ir.Litbool(evaluate_eq (i1 = i2) op), loclook)
+					| Ir.Litper(i1), (Ast.Equals | Ast.Notequals), Ir.Litper(i2) -> (Ir.Litbool(evaluate_eq (i1 = i2) op), loclook)
+					| Ir.Litstr(i1), (Ast.Equals | Ast.Notequals), Ir.Litstr(i2) -> (Ir.Litbool(evaluate_eq ((String.compare i1 i2) = 0) op), loclook)
+					| Ir.Litbool(i1), (Ast.Equals | Ast.Notequals), Ir.Litbool(i2) -> (Ir.Litbool(evaluate_eq (i1 = i2) op), loclook)
+					| Ir.Litcomp(Identifier(i1), slist1), (Ast.Equals | Ast.Notequals), Ir.Litcomp(Identifier(i2), slist2) -> 
+						(Ir.Litbool(evaluate_eq ((String.compare i1 i2) = 0 && 
+						(List.fold_left2 (fun t s1 s2 ->
+							if t then ((String.compare s1 s2) = 0)
+							else false) true slist1 slist2)) op
+						), loclook)
+					| Ir.Litslide(Identifier(s1)), (Ast.Equals | Ast.Notequals), Ir.Litslide(Identifier(s2)) ->  (Ir.Litbool(evaluate_eq ((String.compare s1 s2) = 0) op), loclook)
+					| Ir.Litnull, (Ast.Equals | Ast.Notequals), Ir.Litnull -> (Ir.Litbool(evaluate_eq true op), loclook)
+					| _, (Ast.Equals | Ast.Notequals), _ -> (Ir.Litbool(evaluate_eq false op), loclook)
+
+					| Ir.Litint(i1), Ast.Lessthan, Ir.Litint(i2) -> (Ir.Litbool(i1 < i2), loclook)
+					| Ir.Litint(i1), Ast.Greaterthan, Ir.Litint(i2) -> (Ir.Litbool(i1 > i2), loclook)
+					| Ir.Litper(i1), Ast.Lessthan, Ir.Litper(i2) -> (Ir.Litbool(i1 < i2), loclook)
+					| Ir.Litper(i1), Ast.Greaterthan, Ir.Litper(i2) -> (Ir.Litbool(i1 > i2), loclook)
+					| Ir.Litstr(s1), Ast.Lessthan, Ir.Litstr(s2) -> (Ir.Litbool((String.compare s1 s2) < 0), loclook)
+					| Ir.Litstr(s1), Ast.Greaterthan, Ir.Litstr(s2) -> (Ir.Litbool((String.compare s1 s2) > 0), loclook)
+					
+					| Ir.Litbool(s1), Ast.Or, Ir.Litbool(s2) -> (Ir.Litbool(s1 || s2), loclook)
+					| Ir.Litbool(s1), Ast.And, Ir.Litbool(s2) -> (Ir.Litbool(s1 && s2), loclook)
 
 				  	| a, op, b -> raise(Failure("Semantic Analyzer should print out error for this operation"))
-			  (*
-				  | (Ir.Litbool), (And | Or), () ->  (* And/or operators *)
-						Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
-							
-				  | (Int), (Lessthan | Greaterthan), (Int) ->  (* > , < *)
-						Sast.Binop(e1, op, e2), Sast.Bool
-								
-				  | (Int), (Plus | Minus | Times | Divide), (Int) ->  (* Arithmetic on ints *)
-						Sast.Binop(e1, op, e2), Sast.Int   
-				
-				  | (Per), (Plus | Minus | Times | Divide), (Per) ->  (* Arithmetic on percents *)
-						Sast.Binop(e1, op, e2), Sast.Per   
-						
-				  | _, (Equals | Notequals), _  ->   (* Compare Anything *)
-						Sast.Binop(e1, op, e2), Sast.Bool
-								
-				  | (Str), Plus, (Str | Int) ->  (* String Concatenation *) 
-						Sast.Binop(e1, op, e2), Sast.Str		
-								
-				 (* Otherwise Invalid *) *)
 				)
 			| Sast.Notop(e) -> 
 				let r, loclook = eval loclook (fst e) in
@@ -255,7 +272,8 @@ let generate (vars, funcs) =
 				in 
 				(Ir.Litcomp(i, slist), loclookp)
 			| Sast.Call(f) ->
-				(* TODO: Check for built-in functions *)
+				(* TODO: Check for built-in functions 
+				 * Left: on-click on-press get set *)
 				let process_built_in_attr built_in_name =
 					let (actual, loclook) = eval loclook (fst (List.hd f.actuals)) in
 					let (locals, lookup) = loclook in
@@ -295,6 +313,12 @@ let generate (vars, funcs) =
    					| Identifier("text") -> process_built_in_attr "text"
    					| Identifier("next") -> process_built_in_attr "next"
    					| Identifier("prev") -> process_built_in_attr "prev"
+					| Identifier("random") -> 
+						let (actual, loclook) = eval loclook (fst (List.hd f.actuals)) in
+						let get_rand integer = Random.self_init(); Random.int integer in
+						(match actual with
+							Ir.Litint(i) -> (Ir.Litint(get_rand i), loclook)
+							| _ -> raise (Failure ("You must pass in an integer to random()")))
  					| Identifier(_) -> 
 				(* The rest of these lines are for non-built-in functions *)
 				let fdecl = 
