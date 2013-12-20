@@ -21,7 +21,8 @@ let _ =
                 match action with
                 | Ast -> let listing = Ast.string_of_program program
                          in print_string listing
-                | Irgenerator -> (* let sast = Semantic_analyzer.evalprogram program symbol_table
-                                 in *) (*let ir = Irgenerator.generate program (* sast *) (* for testing purposes only *)
-                                 in print_string ir*) print_string "HI" 
+                | Irgenerator -> let sast = Sastinjector.inject program 
+                                 in let ir = Irgenerator.generate sast
+                                 in let output = Compile.compile ir
+								 in print_string output
                 | Compile -> (*Compile.compile program*) print_string "HI"

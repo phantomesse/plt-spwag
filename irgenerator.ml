@@ -141,17 +141,25 @@ let generate (vars, funcs) =
 		 * @param expression the expression to evaluate
 		 * @return (Ir.literal, (locals, lookup)) *)
 		let rec eval loclook = function
-		(* This part is easy, can do when half asleep
+			(*TODO: Need to add more binary operations*)
 			Sast.Binop(e1, op, e2) ->
-				let r1, loclook = eval loclook e1 in
-				let r2, loclook = eval loclook e2 in
-				let boolean i = if i then 1 else 0 in
+				let r1, loclook = eval loclook (fst e1) in
+				let r2, loclook = eval loclook (fst e2) in
 				(match r1, op, r2 with
-					Ir.Litint(i1), Plus, Ir.Litint(i2) -> (Ir.Litint(i1 + i2), loclook)
-					| Ir.Litint(i1), Minus, Ir.Litint(i2) -> (Ir.Litint(i1 - i2), loclook)
-					| Ir.Litint(i1), Times, Ir.Litint(i2) -> (Ir.Litint(i1 * i2), loclook)
-					| Ir.Litint(i1), Divide, Ir.Litint(i2) -> (Ir.Litint(i1 / i2), loclook)
-					| 
+
+					Ir.Litint(i1), Ast.Plus, Ir.Litint(i2) -> (Ir.Litint(i1 + i2), loclook)
+					| Ir.Litint(a), Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr((string_of_int a) ^ b), loclook)
+					| Ir.Litstr(a), Ast.Plus, Ir.Litint(b) -> (Ir.Litstr(a ^ (string_of_int b)), loclook)
+					| Ir.Litstr(a), Ast.Plus, Ir.Litstr(b) -> (Ir.Litstr(a ^ b), loclook)
+
+					| Ir.Litint(i1), Ast.Minus, Ir.Litint(i2) -> (Ir.Litint(i1 - i2), loclook)
+
+					| Ir.Litint(i1), Ast.Times, Ir.Litint(i2) -> (Ir.Litint(i1 * i2), loclook)
+
+					| Ir.Litint(i1), Ast.Divide, Ir.Litint(i2) -> (Ir.Litint(i1 / i2), loclook)
+
+				  	| a, op, b -> raise(Failure("Semantic Analyzer should print out error for this operation"))
+			  (*
 				  | (Ir.Litbool), (And | Or), () ->  (* And/or operators *)
 						Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
 							
@@ -170,24 +178,8 @@ let generate (vars, funcs) =
 				  | (Str), Plus, (Str | Int) ->  (* String Concatenation *) 
 						Sast.Binop(e1, op, e2), Sast.Str		
 								
-				 (* Otherwise Invalid *)
-				  | a, op, b -> raise(Failure("Binop "^ (string_of_binop op) ^" does not work with operands "^ (string_of_type_t a) ^", "^ (string_of_type_t b) ^ "\n"))
+				 (* Otherwise Invalid *) *)
 				)
-				
-				
-				(match op with
-				  Add -> v1 + v2
-				| Sub -> v1 - v2
-				| Mult -> v1 * v2
-				| Div -> v1 / v2
-				| Equal -> boolean (v1 = v2)
-				| Neq -> boolean (v1 != v2)
-				| Less -> boolean (v1 < v2)
-				| Leq -> boolean (v1 <= v2)
-				| Greater -> boolean (v1 > v2)
-				| Geq -> boolean (v1 >= v2)), env
-				|
-				*)
 			| Sast.Notop(e) -> 
 				let r, loclook = eval loclook (fst e) in
 				(match r with
