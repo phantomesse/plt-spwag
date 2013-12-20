@@ -361,17 +361,10 @@ let checkFunc scope func_definition = match func_definition.body with
           name = func_definition.name;
           formals = func_definition.formals;
           paractuals = func_definition.paractuals;
-          inheritance = func_defintion.inheritance;
-          
+          inheritance = func_definition.inheritance;
+
           (*body = Ast.Litnull; *)(* no expression? *)
 } in
-let formalToVdecl = function
-    | frml -> { 
-                vnamedt = frml.pdt;
-                vname = frml.pname;
-                value = Ast.Noexpr
-              }
-      in
   let retScope = {
       parent = scope.parent;
       functionsons = scope.functions;
