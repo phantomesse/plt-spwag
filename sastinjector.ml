@@ -1,3 +1,6 @@
+(* Author: Yunhe (John) Wang *)
+(* Useful for testing etc. *)
+
 open Sast
 open Ast
 

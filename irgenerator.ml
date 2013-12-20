@@ -259,34 +259,6 @@ let ir_set_css attribute avalue path lookup = (match path with
 	| _ -> raise (Failure ("The first parameter of set() must be a slide or component."))
 	)
 
-(* 
-This code might be useful, may not be, we'll see
-(* Binds something to the given slide or element
- * @param path the path to whatever you want to bind
- * @param output what you're binding to, should be slides_out
- * @param elementp The element to bind to the path, or None to bind a blank slide
- * @return the updated output -> slides_out
- *)
-let bind_to_slide_comp path output = function
-	None -> 
-				in
-		StringMap.add (hd path) (create_blank_slide (hd path)) output
-	| Some(x) ->
-		(* e is the element, p is the full path for error printing, last param is the partial path *)
-		(* returns the parent element that needs its binding changed *)
-		let rec get_element (e : Element.element) p = function
-			[] -> e
-			| hd::[] -> e
-			| hd::tl -> 
-				try get_element (StringMap.find hd e.elements) tl
-  				with Not_found -> raise (Failure ("Cannot find the following element: " ^ String.concat "->" p))
-		in
-		let element_name = hd (List.rev path) in
-		if (StringMap.mem (id_to_str func.name) lookup.funcs_in) 
-		then raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
-		else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
-*)
-
 exception ReturnException of literal * lookup_table
 
 (* Main function that performs IR generation *)
