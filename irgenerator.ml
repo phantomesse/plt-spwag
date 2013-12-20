@@ -170,19 +170,40 @@ let generate (vars, funcs) =
 			| Sast.Litnull -> (Ir.Litnull, loclook)
 			| Sast.Assign(Identifier(i), (e,_)) ->
 				let r, (locals, lookup) = eval loclook e in
-				if StringMap.mem i locals 
+				if StringMap.mem i locals
 					then r, (StringMap.add i r locals, lookup)
-				else if StringMap.mem i lookup.vars_in
+				else if StringMap.mem i lookup.vars_in 
 					then r, (locals, {lookup with vars_in=StringMap.add i r lookup.vars_in})
 				else raise (Failure ("Undeclared identifier " ^ i))
 			| Sast.Variable(Identifier(i)) -> 
-				if StringMap.mem i (fst loclook) 
+				let (locals, lookup) = loclook in
+				if ((StringMap.mem i lookup.funcs_in) 
+					&& (match (StringMap.find i lookup.funcs_in).t with Ast.Slide -> true | _ -> false))
+					then if (not (StringMap.mem i lookup.slides_out))
+						then try (Ir.Litslide(Identifier(i)), (locals, 
+							{(call (StringMap.find i lookup.funcs_in) [] lookup) with cur_slide=lookup.cur_slide})) 
+							with ReturnException(r, l) -> (Ir.Litslide(Identifier(i)), (fst loclook, {l with cur_slide=lookup.cur_slide}))
+						else (Ir.Litslide(Identifier(i)), (locals, lookup)) 
+				else if StringMap.mem i (fst loclook) 
 					then (StringMap.find i (fst loclook), loclook)
 				else if StringMap.mem i (snd loclook).vars_in
 					then (StringMap.find i (snd loclook).vars_in, loclook)
 				else raise (Failure ("Undeclared identifier " ^ i))
-	
-		in
+			| Sast.Component(i, elist) ->
+				let (_, loclook) = (eval loclook (Sast.Variable(i))) in
+				let (rlist, loclookp) = 
+						List.fold_left
+						(fun (actuals, loclook) actual -> let (r, loclook) = eval loclook (fst actual) in (r :: actuals, loclook))
+						([], loclook) (List.rev elist)
+				in
+				let slist = List.fold_left
+					(fun l r -> (match r with 
+						Ir.Litstr(s) -> (s :: l) 
+						| _ -> raise (Failure ("Only strings allowed in brackets, for " ^ (id_to_str i)) )) )
+					[] (List.rev rlist)
+				in 
+				(Ir.Litcomp(i, slist), loclookp)
+	 	in
 
 		(* Actually executes statements
 		 * This part doesn't use the type info, more useful for javascript compiling later on
