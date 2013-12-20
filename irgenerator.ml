@@ -49,33 +49,54 @@ let create_blank_element =
     	border = ""; border_color = ""; width = ""; height = "";}
 	in
 	{Element.id="";image="";text="";style=fill_css;onclick=None;elements=StringMap.empty;}
-(*
-(* Binds something to the given slide or element
- * @param path the path to whatever you want to bind
- * @param output what you're binding to, should be slides_out
- * @param elementp The element to bind to the path, or None to bind a blank slide
- * @return the updated output -> slides_out
+
+(* Binds css to an element 
+ * @param attribute the css attribute, as a string
+ * @param value the value to bind it to, Ir.literal
+ * @param elementp the element to bind css to
+ * @return the updated element
  *)
-let bind_to_slide_comp path output = function
-	None -> 
-				in
-		StringMap.add (hd path) (create_blank_slide (hd path)) output
-	| Some(x) ->
-		(* e is the element, p is the full path for error printing, last param is the partial path *)
-		(* returns the parent element that needs its binding changed *)
-		let rec get_element (e : Element.element) p = function
-			[] -> e
-			| hd::[] -> e
-			| hd::tl -> 
-				try get_element (StringMap.find hd e.elements) tl
-  				with Not_found -> raise (Failure ("Cannot find the following element: " ^ String.concat "->" p))
-		in
-		let element_name = hd (List.rev path) in
-		if (StringMap.mem (id_to_str func.name) lookup.funcs_in) 
-		then raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
-		else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
-*)
-			
+let ir_bind_css_element attribute value (elementp:Element.element) = (match (attribute, value) with
+	("display", Ir.Litbool(b)) -> {elementp with style= {elementp.style with display=b}}
+    | ("position_x", Ir.Litint(i)) -> {elementp with style= {elementp.style with position_x=(string_of_int i)}}
+    | ("position_y", Ir.Litstr(s)) -> {elementp with style= {elementp.style with position_y=s}}
+    | ("margin_top", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_top=s}}
+    | ("margin_bottom", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_bottom=s}}
+    | ("margin_left", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_left=s}}
+    | ("margin_right", Ir.Litstr(s)) -> {elementp with style= {elementp.style with margin_right=s}}
+    | ("padding_top", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_top=s}}
+    | ("padding_bottom", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_bottom=s}}
+    | ("padding_left", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_left=s}}
+    | ("padding_right", Ir.Litstr(s)) -> {elementp with style= {elementp.style with padding_right=s}}
+    | ("text_color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with text_color=s}}
+    | ("background_color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with background_color=s}}
+    | ("font", Ir.Litstr(s)) -> {elementp with style= {elementp.style with font=s}}
+    | ("font_size", Ir.Litstr(s)) -> {elementp with style= {elementp.style with font_size=s}}
+    | ("font_decoration", Ir.Litstr(s)) -> {elementp with style= {elementp.style with font_decoration=s}}
+    | ("border", Ir.Litstr(s)) -> {elementp with style= {elementp.style with border=s}}
+    | ("border_color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with border_color=s}}
+    | ("width", Ir.Litstr(s)) -> {elementp with style= {elementp.style with width=s}}
+    | ("height", Ir.Litstr(s)) -> {elementp with style= {elementp.style with height=s}}
+    | ("id", Ir.Litstr(s)) -> {elementp with id=s}
+    | ("image", Ir.Litstr(s)) -> {elementp with image=s}
+    | ("text", Ir.Litstr(s)) -> {elementp with text=s}
+	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly: " ^ attribute))
+	)	
+
+(* Binds css to a slide 
+ * @param attribute the css attribute, as a string
+ * @param value the value to bind it to, Ir.literal
+ * @param slidep the Slide.slide
+ * @return the updated slide
+ *)
+let ir_bind_css_slide attribute value (slidep:Slide.slide) = (match (attribute, value) with
+	("padding_top", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_top=(string_of_int i)}}
+	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly: " ^ attribute))
+	)
+
+
+
+
 exception ReturnException of literal * lookup_table
 
 (* Main function that performs IR generation *)
@@ -206,13 +227,39 @@ let generate (vars, funcs) =
 				in 
 				(Ir.Litcomp(i, slist), loclookp)
 			| Sast.Call(f) ->
+				(* TODO: Check for built-in functions *)
+				let process_built_in_attr built_in_name =
+					let (actual, loclook) = eval loclook (fst (List.hd f.actuals)) in
+					let (locals, lookup) = loclook in
+					(match lookup.cur_element with
+							None -> 
+								let the_slide = StringMap.find lookup.cur_slide lookup.slides_out in
+								(actual, (locals,
+								{lookup with slides_out = StringMap.add lookup.cur_slide
+								(ir_bind_css_slide built_in_name actual the_slide) lookup.slides_out}))
+							| Some(x) -> (actual, (locals, 
+								{lookup with cur_element = Some(ir_bind_css_element built_in_name actual x)}))
+					)
+				in
+				(match f.cname with
+					Identifier("position-x") -> process_built_in_attr "position-x"
+					| Identifier(_) -> 
+				(* The rest of these lines are for non-built-in functions *)
 				let fdecl = 
-					let not_slide (check:Sast.func_definition) = (match check.t with
-						Ast.Slide -> raise (Failure ("Cannot call a slide like a regular function: " ^ (id_to_str f.cname)))
-						| _ -> check)
-					in
-	    			try not_slide (StringMap.find (id_to_str f.cname) (snd loclook).funcs_in)
-	    			with Not_found -> raise (Failure ("undefined function " ^ (id_to_str f.cname)))
+					(match f.cname with
+						(* Except the special component box *)
+						Identifier("box") -> 
+							{Sast.t=Ast.Comp;name=Sast.Identifier("box");formals=[];
+							inheritance=Some(Sast.Identifier("box"));paractuals=[];body=[];}
+						(* All others, you must find the function *)
+						| Identifier(_) ->
+						let not_slide (check:Sast.func_definition) = (match check.t with
+							Ast.Slide -> raise (Failure ("Cannot call a slide like a regular function: " ^ (id_to_str f.cname)))
+							| _ -> check)
+						in
+	    				try not_slide (StringMap.find (id_to_str f.cname) (snd loclook).funcs_in)
+	    				with Not_found -> raise (Failure ("undefined function " ^ (id_to_str f.cname)))
+					)
 				in
 				let (actuals, loclook) = 
 						List.fold_left
@@ -249,7 +296,8 @@ let generate (vars, funcs) =
 								(par_element.elements <- (StringMap.add the_element.id the_element par_element.elements));  
 								(Ir.Litnull, (locals, {returned_lookup with cur_element=Some(par_element)}))
 						)
-			)
+				)
+				)
 
 		(* Actually executes statements
 		 * This part doesn't use the type info, more useful for javascript compiling later on
@@ -340,4 +388,31 @@ let generate (vars, funcs) =
 	in
 	(StringMap.fold (fun k d l -> d :: l) (pre_ir.slides_out) [], vars, funcs_to_js funcs)
 
-	
+(* 
+This code might be useful, may not be, we'll see
+(* Binds something to the given slide or element
+ * @param path the path to whatever you want to bind
+ * @param output what you're binding to, should be slides_out
+ * @param elementp The element to bind to the path, or None to bind a blank slide
+ * @return the updated output -> slides_out
+ *)
+let bind_to_slide_comp path output = function
+	None -> 
+				in
+		StringMap.add (hd path) (create_blank_slide (hd path)) output
+	| Some(x) ->
+		(* e is the element, p is the full path for error printing, last param is the partial path *)
+		(* returns the parent element that needs its binding changed *)
+		let rec get_element (e : Element.element) p = function
+			[] -> e
+			| hd::[] -> e
+			| hd::tl -> 
+				try get_element (StringMap.find hd e.elements) tl
+  				with Not_found -> raise (Failure ("Cannot find the following element: " ^ String.concat "->" p))
+		in
+		let element_name = hd (List.rev path) in
+		if (StringMap.mem (id_to_str func.name) lookup.funcs_in) 
+		then raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
+		else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
+*)
+
