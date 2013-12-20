@@ -394,7 +394,7 @@ let checkFunc scope func_definition = match func_definition.body with
 [] -> raise(Failure("Empty functions are invalid"))
 (* Not sure if you need a | before  the [] case ... anyway, empty functions not allowed *)
     | x ->
-             (*let return_type = func_definition.t *)(* Which type the function returns *)
+        let return_type = func_definition.t in(* Which type the function returns *)
         let returnidentifier = {
           t = func_definition.t;
           body = func_definition.body; (* "return" ?*)
