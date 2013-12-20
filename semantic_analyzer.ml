@@ -1,15 +1,15 @@
 (* Author: Richard Chiou
    Contributor: Aditya Majumdar
-   Quick to do list:
-	functioncall: checks if function call has correct structure
-	Component of identifier: This is hard to write
-	Call of func_call: Easier to write but still annoying
-	Declaration of identifier: need to write add identifier to symbol table
-	Decassign of identifier * expr: need to write add to symbol table
-	func_def: checks if function definition has valid table
-	program: take in an Ast.program and output an Sast.program
+   Quick to do list, order by priority:
+   	program: take in an Ast.program and output an Sast.program
 		add_identifier: adds identifier to symbol table
 		add_function: adds function to symbol table
+	func_def: checks if function definition has valid table
+	Declaration of identifier: need to write add identifier to symbol table
+	Decassign of identifier * expr: need to write add to symbol table
+	functioncall: checks if function call has correct structure
+	Call of func_call: Easier to write but still annoying
+	Component of identifier: This is hard to write
 *)
 
 open Ast
@@ -126,7 +126,7 @@ let rec expr env = function
 	
 	match t1, op, t2 with
 	  | (Bool), (And | Or), (Bool) ->  (* And/or operators *)
-			Sast.Binop(e1, op, e2), Ast.Bool (* Boolean *) 
+		Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
 				
       | (Int), (Lessthan | Greaterthan), (Int) ->  (* > , < *)
 			Sast.Binop(e1, op, e2), Ast.Bool
