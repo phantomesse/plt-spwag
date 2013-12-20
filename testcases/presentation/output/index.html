@@ -6,6 +6,45 @@
     <title>SPWAG</title>    <link rel="stylesheet" type="text/less" href="../../../config/config.css">
     <style type="text/css">
 
+        #workflow {
+            background-color: #373B44;
+        }
+
+        #workflow-title-underline {
+            position: absolute;
+            left: 70px;
+            top: 90px;
+            background-color: #BD5532;
+            width: 760px;
+            height: 5px;
+        }
+
+
+        #workflow-title {
+            position: absolute;
+            left: 70px;
+            top: 40px;
+            color: #E1B866;
+            font-family: 'Josefin Slab', serif;
+            font-size: 60px;
+            font-weight: bold;
+        }
+
+
+        #workflow-content {
+            position: absolute;
+            left: 70px;
+            top: 150px;
+            width: 760px;
+            height: 420px;
+        }
+
+        #workflow-content- {
+            color: #EEE;
+            font-size: 30px;
+        }
+
+
         #overview {
             background-color: #373B44;
         }
@@ -13,8 +52,8 @@
         #overview-title-underline {
             position: absolute;
             left: 70px;
-            top: 100px;
-            background-color: #E1B866;
+            top: 90px;
+            background-color: #BD5532;
             width: 760px;
             height: 5px;
         }
@@ -55,8 +94,8 @@
         #motivation-title-underline {
             position: absolute;
             left: 70px;
-            top: 100px;
-            background-color: #E1B866;
+            top: 90px;
+            background-color: #BD5532;
             width: 760px;
             height: 5px;
         }
@@ -91,6 +130,18 @@
             background-color: #373B44;
         }
 
+        #main-subtitle {
+            position: absolute;
+            left: 0px;
+            top: 320px;
+            color: #BD5532;
+            font-family: 'Josefin Slab', serif;
+            font-size: 40px;
+            font-weight: bold;
+            width: 900px;
+        }
+
+
         #main-spwag {
             position: absolute;
             left: 0px;
@@ -103,6 +154,86 @@
         }
 
 
+        #main-block {
+            position: absolute;
+            left: 0px;
+            top: 350px;
+            background-color: #BD5532;
+            width: 900px;
+            height: 250px;
+        }
+
+
+        #main-authors {
+            position: absolute;
+            left: 0px;
+            top: 430px;
+            color: #EEE;
+            font-size: 30px;
+            width: 900px;
+        }
+
+
+        #lessons-learned {
+            background-color: #373B44;
+        }
+
+        #lessons-learned-title-underline {
+            position: absolute;
+            left: 70px;
+            top: 90px;
+            background-color: #BD5532;
+            width: 760px;
+            height: 5px;
+        }
+
+
+        #lessons-learned-title {
+            position: absolute;
+            left: 70px;
+            top: 40px;
+            color: #E1B866;
+            font-family: 'Josefin Slab', serif;
+            font-size: 60px;
+            font-weight: bold;
+        }
+
+
+        #lessons-learned-content {
+            position: absolute;
+            left: 70px;
+            top: 150px;
+            width: 760px;
+            height: 420px;
+        }
+
+        #lessons-learned-content-content4 {
+            color: #CCC;
+            font-size: 26px;
+        }
+
+
+        #lessons-learned-content-content3 {
+            padding-top: 30px;
+            color: #EEE;
+            font-size: 26px;
+        }
+
+
+        #lessons-learned-content-content2 {
+            padding-top: 30px;
+            color: #CCC;
+            font-size: 26px;
+        }
+
+
+        #lessons-learned-content-content1 {
+            padding-top: 30px;
+            color: #EEE;
+            font-size: 26px;
+        }
+
+
         #implementation {
             background-color: #373B44;
         }
@@ -110,8 +241,8 @@
         #implementation-title-underline {
             position: absolute;
             left: 70px;
-            top: 100px;
-            background-color: #E1B866;
+            top: 90px;
+            background-color: #BD5532;
             width: 760px;
             height: 5px;
         }
@@ -141,10 +272,44 @@
             font-size: 30px;
         }
 
+
+        #demo {
+            background-color: #373B44;
+        }
+
+        #demo-demo {
+            position: absolute;
+            left: 0px;
+            top: 120px;
+            color: #E1B866;
+            font-family: 'Josefin Slab', serif;
+            font-size: 180px;
+            font-weight: bold;
+            width: 900px;
+        }
+
     </style>
 </head>
 
 <body>
+    <div id="workflow" class="slide">
+        <div id="workflow-title-underline" class="box">
+        </div>
+
+
+        <div id="workflow-title" class="box">
+            Roles & Responsibilities
+        </div>
+
+
+        <div id="workflow-content" class="box">
+            <div id="workflow-content-" class="box">
+                Who did what? Put a chart here!
+            </div>
+        </div>
+        <a class="prev" href="#implementation"></a>
+        <a class="next" href="#demo"></a>
+    </div>
     <div id="overview" class="slide">
         <div id="overview-title-underline" class="box">
         </div>
@@ -182,10 +347,56 @@
         <a class="next" href="#implementation"></a>
     </div>
     <div id="main" class="slide">
+        <div id="main-subtitle" class="box">
+            SIMPLE PRESENTATION WEB APP GENERATOR
+        </div>
+
+
         <div id="main-spwag" class="box">
             SPWAG
         </div>
+
+
+        <div id="main-block" class="box">
+        </div>
+
+
+        <div id="main-authors" class="box">
+            Lauren Zou, Aftab Khan, Richard Chiou<br />Yunhe (John) Wang, Aditya Majumdar
+        </div>
         <a class="next" href="#overview"></a>
+    </div>
+    <div id="lessons-learned" class="slide">
+        <div id="lessons-learned-title-underline" class="box">
+        </div>
+
+
+        <div id="lessons-learned-title" class="box">
+            Lessons Learned
+        </div>
+
+
+        <div id="lessons-learned-content" class="box">
+            <div id="lessons-learned-content-content4" class="box">
+                Language was too ambitions and took more time than anticipated.
+            </div>
+
+
+            <div id="lessons-learned-content-content3" class="box">
+                Group work vs. individual work. Need to be more efficient with group meeting time.
+            </div>
+
+
+            <div id="lessons-learned-content-content2" class="box">
+                Could not find a mutually convenient weekly meeting time for entire group. Difficulty splitting up tasks.
+            </div>
+
+
+            <div id="lessons-learned-content-content1" class="box">
+                Design decisions kept changing. Need a stable design plan from the beginning.
+            </div>
+        </div>
+        <a class="prev" href="#demo"></a>
     </div>
     <div id="implementation" class="slide">
         <div id="implementation-title-underline" class="box">
@@ -202,14 +413,44 @@
                 Put a fucking data flow chart here.
             </div>
         </div>
-        <a class="prev" href="#overview"></a>
-        <a class="next" href="#implementation"></a>
+        <a class="prev" href="#motivation"></a>
+        <a class="next" href="#workflow"></a>
+    </div>
+    <div id="demo" class="slide">
+        <div id="demo-demo" class="box">
+            SPWAG Demo
+        </div>
+        <a class="prev" href="#workflow"></a>
+        <a class="next" href="#lessons-learned"></a>
     </div>
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="../../../config/config.js"></script>
 
     <script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

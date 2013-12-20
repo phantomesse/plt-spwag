@@ -10,6 +10,37 @@ define slide main()
         width(900)
     }
 
+    box() {
+        id("block")
+        position-x(0)
+        position-y(350)
+        background-color("#BD5532")
+        width(900)
+        height(250)
+    }
+
+    box() {
+        id("subtitle")
+        position-x(0)
+        position-y(320)
+        font("'Josefin Slab', serif")
+        font-size(40)
+        font-decoration("bold")
+        text("SIMPLE PRESENTATION WEB APP GENERATOR")
+        text-color("#BD5532")
+        width(900)
+    }
+
+    box() {
+        id("authors")
+        position-x(0)
+        position-y(430)
+        font-size(30)
+        text("Lauren Zou, Aftab Khan, Richard Chiou<br />Yunhe (John) Wang, Aditya Majumdar")
+        text-color(fgcolor())
+        width(900)
+    }
+
     next(overview)
 }
 
@@ -80,8 +111,85 @@ define slide implementation()
         content-text("Put a fucking data flow chart here.")
     }
 
-    prev(overview)
-    next(implementation)
+    prev(motivation)
+    next(workflow)
+}
+
+define slide workflow()
+{
+    background-color(bgcolor())
+
+    title("Roles & Responsibilities") {
+        id("title")
+    }
+    title-underline() {
+        id("title-underline")
+    }
+
+    content() {
+        id("content")
+
+        content-text("Who did what? Put a chart here!")
+    }
+
+    prev(implementation)
+    next(demo)
+}
+
+define slide demo()
+{
+    background-color(bgcolor())
+
+    title("SPWAG Demo") {
+        id("demo")
+        position-x(0)
+        position-y(120)
+        font-size(180)
+        width(900)
+    }
+
+    prev(workflow)
+    next(lessons-learned)
+}
+
+define slide lessons-learned()
+{
+    background-color(bgcolor())
+
+    title("Lessons Learned") {
+        id("title")
+    }
+    title-underline() {
+        id("title-underline")
+    }
+
+    content() {
+        id("content")
+
+        content-text("Design decisions kept changing. Need a stable design plan from the beginning.") {
+            id("content1")
+            padding-top(30)
+            font-size(26)
+        }
+        content-text("Could not find a mutually convenient weekly meeting time for entire group. Difficulty splitting up tasks.") {
+            id("content2")
+            padding-top(30)
+            font-size(26)
+            text-color("#CCC")
+        }
+        content-text("Group work vs. individual work. Need to be more efficient with group meeting time.") {
+            id("content3")
+            padding-top(30)
+            font-size(26)
+        }
+        content-text("Language was too ambitions and took more time than anticipated.") {
+            id("content4")
+            font-size(26)
+            text-color("#CCC")
+        }
+    }
+
+    prev(demo)
 }
 
 define comp title(text) isa box()
@@ -98,8 +206,8 @@ define comp title(text) isa box()
 define comp title-underline() isa box()
 {
     position-x(70)
-    position-y(100)
-    background-color(accentcolor())
+    position-y(90)
+    background-color("#BD5532")
     width(760)
     height(5)
 }
