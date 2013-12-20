@@ -174,17 +174,22 @@ let string_of_operator operator = match operator with
 
 (* Translates an expression into a string *)
 let rec string_of_expression (expression_detail, expression_type) = match expression_detail with
-    | Binop (expr1, operator, expr2) -> string_of_expression expr1 ^ " " ^ string_of_operator operator ^ " " ^ string_of_expression expr2
+    | Binop (expr1, operator, expr2) ->
+        string_of_expression expr1 ^ " " ^ string_of_operator operator ^ " " ^ string_of_expression expr2
     | Notop expr -> "!(" ^ string_of_expression expr ^ ")"
     | Litint integer -> string_of_int integer
     | Litper integer -> string_of_int integer ^ "%"
     | Litbool boolean -> string_of_bool boolean
     | Litstr str -> str
     | Litnull -> "null"
-    | Assign (identifier, expr) -> string_of_identifier identifier ^ " = " ^ string_of_expression expr
+    | Assign (identifier, expr) ->
+        string_of_identifier identifier ^ " = " ^ string_of_expression expr
     | Variable identifier -> string_of_identifier identifier
-    | Component (identifier, exprlist) -> "TODO" (* identifier["child"]["child"] etc. to fetch component *)
-    | Call func_call -> string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
+    | Component (parent, children) ->
+        "$('#" ^ string_of_identifier parent ^ " " ^
+        String.concat " " (List.map (fun child -> "#" ^ string_of_expression child) children) ^ "')"
+    | Call func_call ->
+        string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
 ;;
 
 (* Translates a statement into a string *)
