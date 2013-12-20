@@ -66,10 +66,21 @@ let main_slide_css = {
 let element_map = StringMap.empty in
 let element_map = StringMap.add "hello-world-text" hw_text element_map in
 
+let expression = (Sast.Litbool(true), Bool) in
+
+let stmt = Decassign(Identifier("lauren"), (Litstr("sadness"), Str)) in
+
 let myjs = {
     name=Sast.Identifier("a_js_function"); (* Name of the function *)
     formals=[ Sast.Identifier("hello"); Sast.Identifier("cool"); Sast.Identifier("awesome") ]; (* Formal parameters *)
-    body=[Sast.Declaration(Sast.Identifier("foo"))];  (* Body of javascript definition *)
+    body=[
+        Declaration(Sast.Identifier("foo"));
+        Block([stmt; stmt]);
+        Expr(expression);
+        Return(expression);
+        If(expression, stmt, stmt);
+        While(expression, stmt);
+        ];  (* Body of javascript definition *)
 } in
 
 let main_slide = {

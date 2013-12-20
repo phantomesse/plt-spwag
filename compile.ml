@@ -133,6 +133,21 @@ let get_html_from_slide slide =
 
 let string_of_identifier = function
     Identifier(s) -> s
+;;
+
+let string_of_expression expr =
+    "hello world"
+;;
+
+let rec translate_statements_to_javascript statement = match statement with
+    | Block stmt -> String.concat "\n            " (List.map translate_statements_to_javascript stmt)
+    | Expr expr -> string_of_expression expr
+    | Return expr -> "return " ^ string_of_expression expr ^ ";"
+    | If (expr, stmt1, stmt2) -> "if (" ^ string_of_expression expr ^ ") {\n" ^ translate_statements_to_javascript stmt1 ^ "\n} else {\n" ^ translate_statements_to_javascript stmt2 ^ "\n}\n" (* if (foo == 42) stmt1 else stmt2 end *)
+    | While (expr, stmt) -> "while (" ^ string_of_expression expr ^ ") {\n" ^ translate_statements_to_javascript stmt ^ "\n}\n"
+    | Declaration identifier -> "var " ^ string_of_identifier identifier ^ ";"
+    | Decassign (identifier, expr) -> "var " ^ string_of_identifier identifier ^ " = " ^ string_of_expression expr ^ ";"
+;;
 
 let translate_to_javascript script =
 (*    type js_definition = {
@@ -147,7 +162,8 @@ let translate_to_javascript script =
     String.concat ", " (List.map (fun identifier -> string_of_identifier identifier) script.formals) ^ ") {\n"^
 
     (* Statements *)
-    
+    "            " ^
+    String.concat "\n            " (List.map translate_statements_to_javascript script.body) ^ "\n" ^
 
     "        }"
 ;;
