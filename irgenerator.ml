@@ -356,28 +356,35 @@ let generate (vars, funcs) =
 		(* Call its parent if it's a comp and its parent is not "box" *)
 		(* Finally, do nothing if it's any other type of function*)
 		let lookup = function 
-					Ast.Slide -> {lookupparam with 
-						slides_out= StringMap.add (id_to_str fdef.name) (create_blank_slide fdef.name) lookupparam.slides_out;
-						cur_slide = (id_to_str fdef.name);}
-					| Ast.Comp -> (match fdef.inheritance with
-						Some(Sast.Identifier("box")) -> {lookupparam with cur_element = Some(create_blank_element)}
-						| Some(Sast.Identifier(s)) ->  
-							let parent = 
-								try StringMap.find s lookupparam.funcs_in
-								with Not_found -> raise (Failure ("The following component is not defined: " ^ s))
-							in
-							let isComp = function Ast.Comp -> true | _ -> false in
-							if isComp parent.t
-							then
-								(call parent [] lookupparam) (* TODO: Evaluate the paractuals *)  
-							else
-								raise (Failure ("A component can only inherit from a component for " ^ (id_to_str fdef.name)))
-						| None -> raise (Failure ("The following component needs to inherit from a component: " ^ (id_to_str fdef.name)))
-						)
-					| _ -> lookupparam
+			Ast.Slide -> (locals, {lookupparam with 
+				slides_out= StringMap.add (id_to_str fdef.name) (create_blank_slide fdef.name) lookupparam.slides_out;
+				cur_slide = (id_to_str fdef.name);})
+			| Ast.Comp -> (match fdef.inheritance with
+				Some(Sast.Identifier("box")) -> (locals, {lookupparam with cur_element = Some(create_blank_element)})
+				| Some(Sast.Identifier(s)) ->  
+					let parent = 
+						try StringMap.find s lookupparam.funcs_in
+						with Not_found -> raise (Failure ("The following component is not defined: " ^ s))
+					in
+					let isComp = function Ast.Comp -> true | _ -> false in
+					if isComp parent.t
+					then
+						let loclook = (locals, lookupparam) in
+						let (paractuals, loclook) = 
+							List.fold_left
+							(fun (actuals, loclook) actual -> let (r, loclook) = eval loclook (fst actual) in (r :: actuals, loclook))
+							([], loclook) (List.rev fdef.paractuals)
+						in
+						try (fst loclook, (call parent paractuals (snd loclook)))
+						with ReturnException(r, lookup) -> (fst loclook, lookup)
+					else
+						raise (Failure ("A component can only inherit from a component for " ^ (id_to_str fdef.name)))
+				| None -> raise (Failure ("The following component needs to inherit from a component: " ^ (id_to_str fdef.name)))
+				)
+			| _ -> (locals, lookupparam)
 		in			
 		(* Now recursively execute every statement with the updated locals *)
-		snd (List.fold_left exec (locals, lookup fdef.t) fdef.body) 
+		snd (List.fold_left exec (lookup fdef.t) fdef.body) 
 	in
 
 	(* Here is where all the functions get called to produce the final output *)
