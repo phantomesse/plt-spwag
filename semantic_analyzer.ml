@@ -1,15 +1,16 @@
-(* Authors: Richard Chiou, Aditya Majumdar
-   Quick to do list, order by priority:
+(*  Author: Richard Chiou
+    Contributor: Aditya Majumdar
+    Quick to do list, order by priority:
    	program: take in an Ast.program and output an Sast.program
-		add_identifier: adds identifier to symbol table
-		add_function: adds function to symbol table
-	Block
-	func_definition: Aditya really needs to get this working
-	functioncall: Prototype written, need func_definition
-	Declaration of identifier: this should be fine
-	Decassign of identifier * expr: this should be fine
-	Call of func_call: Prototype needs to be debugged
-	Component of identifier: This is hard to write
+		helper function that parses identifier list and adds to symbol table (compiles)
+		helper function that parses func_definition list and adds to symbol table (compiles)
+	Return (how do we return the correct type?)
+	check_function: see if function definition is valid (Compiles)
+	functioncall: Prototype written, but needs working func_definition
+	Declaration of identifier: this should be fine, though I haven't tested it
+	Decassign of identifier * expr: this should be fine, though I haven't tested it
+	Call of func_call: Prototype is written, but still needs to be debugged
+	Component of identifier: This is hard to write, save this for last
 *)
 
 open Ast
@@ -384,72 +385,79 @@ type func_definition = { (* Handles declarations of functions, components, attri
     paractuals: expr list; (* This represents the actuals passed to the parent *)
     body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
 }
-
 *)
 
-
-(* func_def stuff *)
-
-let checkFunc scope func_definition = match func_definition.body with
-[] -> raise(Failure("Empty functions are invalid"))
-(* Not sure if you need a | before  the [] case ... anyway, empty functions not allowed *)
-    | x ->
-        let return_type = func_definition.t in(* Which type the function returns *)
-        let returnidentifier = {
+(* check to see if func_definition is valid, and return function that is evaluated *)
+let check_function env func_definition = match func_definition.body with
+	[] -> raise(Failure("Empty functions are invalid"))
+	(* Not sure if you need a | before the [] case ... anyway, empty functions not allowed *)
+  | x ->
+        (*let return_type = func_definition.t in Which type the function returns: this is unused because design issues *)
+        (* Why are we even doing this return stuff *)
+		(* let returnidentifier = {
           t = func_definition.t;
           body = func_definition.body; (* "return" ?*)
           name = func_definition.name;
           formals = func_definition.formals;
           paractuals = func_definition.paractuals;
           inheritance = func_definition.inheritance;
+} in *)
 
-          (*body = Ast.Litnull; *)(* no expression? *)
-} in
-  let retScope = {
-      parent = scope.parent;
-      functions = scope.functions;
-      variables = scope.variables;
-          } in
-  let checkedFunc_Definition = 
-      {
-            t = func_definition.t;
-              name = func_definition.name;
-                formals = func_definition.formals;
-                 (* body = List.fold_left func_definition.body; *)
-                 body = func_definition.body;
-                 (* inheritance = retScope.parent; *)
-                 inheritance = func_definition.inheritance;
+	let parentscope = {		(* Do we need this parent scope? Maybe we should just use global because functions *)
+		parent = env.parent;
+		functions = env.functions;
+		variables = (List.map (identify env) func_definition.formals)@(env.variables);	
+    } in
+	let checked_func_definition = {
+		t = func_definition.t;
+        name = func_definition.name;
+        formals = func_definition.formals;
+		inheritance = func_definition.inheritance; 	(* how are we going to deal with inheritance? *)
+	    paractuals = func_definition.paractuals;
+        body = fst(x, (List.fold_left stmts(parentscope, []) func_definition.body ));  
+                (* inheritance = retScope.parent; *)
+
 				(* parent is a symbol table option *)
 				(* inheritance is an identifier option *)
-
-                 paractuals = func_definition.paractuals;
-
       } in
-  checkedFunc_Definition
-  
-(*let add_func_definition scope func = 
-	(
-	  (* LOAD all funcs in list into symbol table (b/c all funcs should be able to "find" i.e. call each other) *)
-	    let addFunc scope fdecl =  
-				{ parent = scope.parent;
-				  functions = fdecl::scope.functions;
-				  variables = scope.variables }
-			in
-			let newGlobal = List.fold_left addFunc(scope) fdecls (* new scope containing all funcs in setup *)
-		  in  
-	    let subScope = {
-			  parent =  Some newGlobal;  (* set parent to newglobalscope parameter *)
-			  functions = [];
-			  variables = []; 
-		  }
-		  in
-		  (* MAP through each function and check *)
-		  (List.map (processFdecl subScope) fdecl_list), newGlobal  (* newFdecls, newScope *)
-   )
-| _ , [] ->   [], scope  (* Non-"SETUP" bname should have empty fdecls list *)
-| _ , _  ->   raise(Failure("Functions can only be declared in SETUP (at beginning)")) 
-*)
+	checked_func_definition
 
+(* Add a list of func_definitions to the symbol table *)
+let add_func_definitions env funcdefs =
+	let addfunc scope funcdef =  
+	  { parent = scope.parent;
+		functions = funcdef::scope.functions;
+		variables = scope.variables }
+	in
+	let global = List.fold_left addfunc(env) funcdefs (* new scope containing all func_definitions *)
+	in  
+	let subscope = {
+		parent =  Some global;  
+		functions = [];
+		variables = []; 
+	}
+	in (List.map (check_function subscope) funcdefs), global  (* newFdecls, newScope *)
+	
+(* Add a list of identifiers to the symbol table *)
+let add_identifiers env identifiers =
+	let addid scope id =  
+	  { parent = scope.parent;
+		functions = scope.functions;
+		variables = id::scope.variables }
+	in
+	let global = List.fold_left addid(env) identifiers (* new scope containing all func_definitions *)
+	in  
+	let subscope = {
+		parent =  Some global;  
+		functions = [];
+		variables = []; 
+	}
+	in let check_identifier env identifier = (* Check to see if identifier is valid: namely, does it exist in the symbol table already? *)
+	if (types_equal (find_variable env identifier) identifier) then
+		raise(Failure("Existing variable declaration"))
+	else
+		identifier
+	in (List.map (check_identifier subscope) identifiers), global  (* newFdecls, newScope *)
 
 (* Run our program *)
 (* Input: Ast.Program, Symbol_Table *)
