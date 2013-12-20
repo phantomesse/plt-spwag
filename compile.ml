@@ -42,9 +42,16 @@ let string_of_css_font_decoration decoration = match decoration with
     | _ -> ""
 ;;
 
+(* Translates a CSS position property *)
 let string_of_css_position_property left top =
     if String.length top > 0 || String.length left > 0 then
-        tab 3^ "position: absolute;\n"
+        tab 3 ^ "position: absolute;\n"
+    else ""
+;;
+(* Translates a CSS border property *)
+let string_of_css_border_property width color =
+    if String.length width > 0 then
+        tab 3 ^ "border: " ^ width ^ " " ^ color ^ " solid;\n"
     else ""
 
 (* Translates the CSS of an element given the CSS style and id *)
@@ -74,8 +81,7 @@ let string_of_element_css (style:Element.css) id =
     string_of_css_property "font-size" (string_pixel_percent style.font_size) ^
     string_of_css_font_decoration style.font_decoration ^
 
-    string_of_css_property "border-width" (string_pixel_percent style.border) ^
-    string_of_css_property "border-color" style.border_color ^
+    string_of_css_border_property (string_pixel_percent style.border) style.border_color ^
 
     string_of_css_property "width" (string_pixel_percent style.width) ^
     string_of_css_property "height" (string_pixel_percent style.height) ^
@@ -175,6 +181,19 @@ let string_of_identifier = function
     Identifier(s) -> s
 ;;
 
+(* Translates literals into strings *)
+let string_of_literal literal = match literal with
+    | Litint integer -> string_of_int integer
+    | Litper integer -> string_of_int integer ^ "%"
+    | Litstr str -> "\"" ^ str ^ "\""
+    | Litbool boolean -> string_of_bool boolean
+    | Litcomp (parent, children) ->
+        "" ^ string_of_identifier parent ^ "-" ^
+        String.concat "-" (List.map (fun child -> child) children) 
+    | Litslide identifier -> string_of_identifier identifier
+    | Litnull -> "null"
+;;
+
 (* Translates an operator into a string *)
 let string_of_operator operator = match operator with
     | Plus -> "+"
@@ -187,7 +206,7 @@ let string_of_operator operator = match operator with
     | Greaterthan -> ">"
     | Or -> "||"
     | And -> "&&"
-
+;;
 (* Translates an expression into a string *)
 let rec string_of_expression (expression_detail, expression_type) = match expression_detail with
     | Binop (expr1, operator, expr2) ->
@@ -196,16 +215,17 @@ let rec string_of_expression (expression_detail, expression_type) = match expres
     | Litint integer -> string_of_int integer
     | Litper integer -> string_of_int integer ^ "%"
     | Litbool boolean -> string_of_bool boolean
-    | Litstr str -> str
+    | Litstr str -> "\"" ^ str ^ "\""
     | Litnull -> "null"
     | Assign (identifier, expr) ->
         string_of_identifier identifier ^ " = " ^ string_of_expression expr
     | Variable identifier -> string_of_identifier identifier
     | Component (parent, children) ->
-        "$('#" ^ string_of_identifier parent ^ " " ^
-        String.concat " " (List.map (fun child -> "#" ^ string_of_expression child) children) ^ "')"
-    | Call func_call ->
-        string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
+        "" ^ string_of_identifier parent ^ "-" ^
+        String.concat "-" (List.map (fun child -> string_of_expression child) children)
+    | Call func_call -> match func_call.cname with
+        | Identifier("set") -> "$('#" ^ string_of_expression (List.nth func_call.actuals 0) ^ "').css(" ^ string_of_expression (List.nth func_call.actuals 1) ^ ", " ^ string_of_expression (List.nth func_call.actuals 2) ^ ");\n" (* set(object, attribute, new atribute) *)
+        | _ -> string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
 ;;
 
 (* Translates a statement into a string *)
@@ -243,26 +263,13 @@ let get_javascript script =
     tab 2 ^ "}"
 ;;
 
-(* Translates literals into strings *)
-let string_of_literal literal = match literal with
-    | Litint integer -> string_of_int integer
-    | Litper integer -> string_of_int integer ^ "%"
-    | Litstr str -> str
-    | Litbool boolean -> string_of_bool boolean
-    | Litcomp (parent, children) ->
-        "$('#" ^ string_of_identifier parent ^ " " ^
-        String.concat " " (List.map (fun child -> "#" ^ child) children) ^ "')"
-    | Litslide identifier -> string_of_identifier identifier
-    | Litnull -> "null"
-;;
-
 (* Translates onclick functionality *)
 let string_of_onclick js_call id = match js_call with
     | None -> ""
     | Some(onclick) -> 
-        tab 2 ^ "$('#" ^ id ^ "').bind('click', " ^ string_of_identifier onclick.cname ^ "(" ^
+        tab 2 ^ "$('#" ^ id ^ "').click(function() {\n" ^ string_of_identifier onclick.cname ^ "(" ^
         String.concat ", " (List.map string_of_literal onclick.actuals) ^
-        "));\n"
+        ")\n});\n"
 ;;
 
 (* Translates onpress functionality *)

@@ -6,45 +6,6 @@
     <title>SPWAG</title>    <link rel="stylesheet" type="text/less" href="../../../config/config.css">
     <style type="text/css">
 
-        #workflow {
-            background-color: #373B44;
-        }
-
-        #workflow-title-underline {
-            position: absolute;
-            left: 70px;
-            top: 90px;
-            background-color: #BD5532;
-            width: 760px;
-            height: 5px;
-        }
-
-
-        #workflow-title {
-            position: absolute;
-            left: 70px;
-            top: 40px;
-            color: #E1B866;
-            font-family: 'Josefin Slab', serif;
-            font-size: 60px;
-            font-weight: bold;
-        }
-
-
-        #workflow-content {
-            position: absolute;
-            left: 50px;
-            top: 150px;
-            width: 800px;
-            height: 420px;
-        }
-
-        #workflow-content- {
-            color: #EEE;
-            font-size: 30px;
-        }
-
-
         #overview {
             background-color: #373B44;
         }
@@ -78,12 +39,9 @@
             height: 420px;
         }
 
-        #overview-content-spwag-box {
-            padding-top: 10px;
-            padding-bottom: 10px;
-            color: #373B44;
-            background-color: #73C8A9;
-            width: 120px;
+        #overview-content- {
+            color: #EEE;
+            font-size: 30px;
         }
 
 
@@ -120,9 +78,24 @@
             height: 420px;
         }
 
-        #motivation-content- {
+        #motivation-content-content3 {
+            padding-top: 30px;
             color: #EEE;
-            font-size: 30px;
+            font-size: 36px;
+        }
+
+
+        #motivation-content-content2 {
+            padding-top: 52px;
+            color: #CCC;
+            font-size: 26px;
+        }
+
+
+        #motivation-content-content1 {
+            padding-top: 30px;
+            color: #EEE;
+            font-size: 26px;
         }
 
 
@@ -304,6 +277,20 @@
             padding-left: 10px;
             padding-right: 10px;
             color: #373B44;
+            background-color: #E1B866;
+            font-weight: bold;
+        }
+
+
+        #implementation-content-preprocessor {
+            position: absolute;
+            left: 0px;
+            top: 204px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 10px;
+            padding-right: 10px;
+            color: #373B44;
             background-color: #73C8A9;
             font-weight: bold;
         }
@@ -346,7 +333,7 @@
             padding-left: 10px;
             padding-right: 10px;
             color: #373B44;
-            background-color: #73C8A9;
+            background-color: #E1B866;
             font-weight: bold;
         }
 
@@ -388,7 +375,7 @@
             padding-left: 10px;
             padding-right: 10px;
             color: #373B44;
-            background-color: #73C8A9;
+            background-color: #E1B866;
             font-weight: bold;
         }
 
@@ -455,6 +442,14 @@
         }
 
 
+        #implementation-content-arrow0 {
+            position: absolute;
+            left: 35px;
+            top: 33px;
+            padding-top: 10px;
+        }
+
+
         #demo {
             background-color: #373B44;
         }
@@ -474,24 +469,6 @@
 </head>
 
 <body>
-    <div id="workflow" class="slide">
-        <div id="workflow-title-underline" class="box">
-        </div>
-
-
-        <div id="workflow-title" class="box">
-            Roles & Responsibilities
-        </div>
-
-
-        <div id="workflow-content" class="box">
-            <div id="workflow-content-" class="box">
-                Who did what? Put a chart here!
-            </div>
-        </div>
-        <a class="prev" href="#implementation"></a>
-        <a class="next" href="#demo"></a>
-    </div>
     <div id="overview" class="slide">
         <div id="overview-title-underline" class="box">
         </div>
@@ -503,8 +480,8 @@
 
 
         <div id="overview-content" class="box">
-            <div id="overview-content-spwag-box" class="box">
-                SPWAG
+            <div id="overview-content-" class="box">
+                SPWAG is a simple language that streamlines presentation creation, saving you time while producing beautiful (and functional) slideshows.
             </div>
         </div>
         <a class="prev" href="#main"></a>
@@ -521,8 +498,18 @@
 
 
         <div id="motivation-content" class="box">
-            <div id="motivation-content-" class="box">
-                SPWAG is a simple language that streamlines presentation creation, saving you time while producing beautiful (and functional) slideshows.
+            <div id="motivation-content-content3" class="box">
+                Cross-Compatibility, Portability, Distributability
+            </div>
+
+
+            <div id="motivation-content-content2" class="box">
+                SPWAG presentations are accessible on any web-connected Desktop or Mobile platform, regardless of operating system
+            </div>
+
+
+            <div id="motivation-content-content1" class="box">
+                Compiled SPWAG may be integrated with existing web content, increasing content visibility
             </div>
         </div>
         <a class="prev" href="#overview"></a>
@@ -560,7 +547,7 @@
 
         <div id="lessons-learned-content" class="box">
             <div id="lessons-learned-content-content4" class="box">
-                Language was too ambitions and took more time than anticipated.
+                Aspects of language were too ambitions and took more time than anticipated.
             </div>
 
 
@@ -603,6 +590,11 @@
 
             <div id="implementation-content-sast" class="box">
                 SAST
+            </div>
+
+
+            <div id="implementation-content-preprocessor" class="box">
+                Preprocessor
             </div>
 
 
@@ -674,15 +666,20 @@
             <div id="implementation-content-arrow1" class="box">
                 <img src="../resources/arrow_horz.png" />
             </div>
+
+
+            <div id="implementation-content-arrow0" class="box">
+                <img src="../resources/arrow_vert_up.png" />
+            </div>
         </div>
         <a class="prev" href="#motivation"></a>
-        <a class="next" href="#workflow"></a>
+        <a class="next" href="#demo"></a>
     </div>
     <div id="demo" class="slide">
         <div id="demo-demo" class="box">
             SPWAG Demo
         </div>
-        <a class="prev" href="#workflow"></a>
+        <a class="prev" href="#implementation"></a>
         <a class="next" href="#lessons-learned"></a>
     </div>
 
@@ -761,17 +758,29 @@
 
 
 
+
+
+        $('#demo-demo').click(function() {
+changebackground()
+});
+
+        function changebackground() {
+            $('#demo').css("background-color", "#BD5532");
+;
+            $('#implementation-content-html-css-javascript').css("background-color", "deeppink");
+;
+        }
         function bgcolor() {
-            return #373B44;
+            return "#373B44";
         }
         function fgcolor() {
-            return #EEE;
+            return "#EEE";
         }
         function accentcolor() {
-            return #E1B866;
+            return "#E1B866";
         }
         function cyan() {
-            return #73C8A9;
+            return "#73C8A9";
         }
     </script>
 
