@@ -90,12 +90,7 @@ let rec find_function scope name = (* name is an identifier *)
 		let num_funcs = List.length (getGlobalScope scope).functions in*)
 		raise(Failure("Function not found in global scope"))
 
-(*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements 
-	Component of identifier: identifier has to be slide or variable (component or slide) 
-	expr list are strings
-*)
-
-(* Check if valid func call  *)
+(*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements  *)
 
 (* let functioncall env call = function
 	let actuallist = expr env call.actuals 
@@ -254,30 +249,57 @@ let rec expr env = function
     | Decassign of identifier * expr (* Declaring a variable and then assigning it something *) Partially complete
 	*)
 
-let rec stmt env = function
-    | Ast.Expr(e) ->    Sast.Expr(expr env e)
-    | Ast.Return(e1) -> Sast.Return(expr env e1) (* I have not written checking for e1 yet *)
+(* 	Fixed the block statement by instead folding over a tuple with the scope and list of statements 
+	Need to take a look at Return though
+*)
+
+let rec stmts (env, stmtlist) stmt =
+	let newscope = {
+	  parent =  Some env;  (* set parent to newglobalscope parameter *)
+	  functions = [];
+	  variables = []; 
+	} in
+	match stmt with
 	
-    (*| Ast.Block(s1) ->  let scope' = { S.parent = Some(env.scope); S.variables = [] }
-                        and exceptions' = { excep_parent = Some(env.exception_scope); exceptions = [] }
-                        in
-                            (* New environment: same, but with new symbol tables *)
-                            let env' = { env with scope = scope';
-                                         exception_scope = exceptions' } in
-                            let s1 = List.map (fun s -> stmt env' s) s1 in
-                                scope'.S.variables <- List.rev scope'.S.variables; (* side-effect *)
-                                Sast.Block(scope', s1)
-	This block code needs to be rewritten *)
+    | Ast.Expr(e) ->  env, Sast.Expr(expr env e)::stmtlist
+    (*| Ast.Return(e1) -> Sast.Return(expr env e1) (* I have not written checking for e1 yet *)*)
+    | Ast.Block(b) -> env, Sast.Block(snd(List.fold_left stmts(newscope,[]) b))::stmtlist
+(*	| Ast.Return(e) -> 		(* We need to figure out how to match return types since identifiers aren't associated with types *)
+		let e1 = expr env e in
+		let _, t1 = ec in
+		if (typeEq t1 returntype )
+		  then env, Sast.Return(e1)::stmtList
+		else raise(Failure("Return type of function body doesn't match: found"^(string_of_datatype t1)^" but expected "^(string_of_datatype returntype)))
+*)	
+(*	| Ast.Block(s1) ->  (* This block code is modified from Edwards' slides and does not work *)
+		let newscope = { S.parent = Some(env.scope); S.variables = []; S.functions = [] } in
+         (* New environment: same, but with new symbol tables *)
+            let env' = { env with scope = newscope } in
+            let s1 = List.map (fun s -> stmt newenv s) s1 in
+            newscope.S.variables <- List.rev newscope.S.variables; (* side-effect *)
+            Sast.Block(newscope, s1)
     | Ast.If(e, s1, s2) ->  (
         let e1 = expr env e in
 		let _, t1 = e1 in 	(* Get the type of e1 *)
 		if (types_equal t1 Sast.Bool) then 
+			let newscope, thenblock = (stmts(
 			Sast.If (e1, stmt env s1, stmt env s2) (* Check then, else *)
 		else
 			raise(Failure(string_of_type_t t1^"type must be bool"))
-	  )
+	  )*)
+
+    | Ast.If(e, s1, s2) ->
+		let e1 = expr env e in
+		let _, t1 = e1 in
+		if (types_equal t1 Sast.Bool) then 
+			let nextscope, thenblock = (stmts(newscope, []) s1) in 
+			let _, elseblock = (stmts (newscope, []) s2) in
+			try
+				nextscope, Sast.If( e1, List.hd(thenblock), List.hd(elseblock) )::stmtlist
+			with Failure("hd") -> raise(Failure("If failed"))
+		else raise(Failure("predicate of If should be bool but found "^(string_of_type_t t1)))
 	  
-	| Ast.While(e, s1) ->  (
+(*	| Ast.While(e, s1) ->  (
 		let e1 = expr env e in
 		let _, t1 = e1 in 	(* Get the type of e1 *)
 		if (types_equal t1 Sast.Bool) then
@@ -285,7 +307,17 @@ let rec stmt env = function
 		else
 			raise(Failure(string_of_type_t t1^"type must be bool"))
 	  )
-	  
+*)
+	| Ast.While(e, s) ->
+		let e1 = expr env e in
+		let _, t1 = e1 in
+		if (types_equal t1 Sast.Bool) then
+			let nextscope, loopbody = (stmts(newscope, []) s) in
+			try
+				nextscope, Sast.While(e1, List.hd(loopbody))::stmtlist
+			with Failure("hd") -> raise(Failure("While failed"))
+		else raise(Failure("predicate of If should be bool but found "^(string_of_type_t t1)))
+		
 	| Ast.Declaration(v) ->
 		let id = identify env v in
 		if (find_variable env id = id) then (* If declaration exists, don't allow duplicate *)
@@ -293,7 +325,7 @@ let rec stmt env = function
 		(* else we have to add the variable declaration to the symbol table*)
 		else
 			ignore (id::(env.variables));			
-			Sast.Declaration(id)
+			env, Sast.Declaration(id)::stmtlist
                 
 	| Ast.Decassign(v, e) ->
 		let id = identify env v in
@@ -302,7 +334,7 @@ let rec stmt env = function
 		else
 			ignore (id::(env.variables)); 
 			let e = expr env e in
-			Sast.Decassign(id, e)
+			env, Sast.Decassign(id, e)::stmtlist
 		(*let _, t2 = e in
 		if (types_equal t1 t2) then	(* variable types need to match *)
 							(* we have to add the variable declaration to the symbol table; I'll write this later *)
