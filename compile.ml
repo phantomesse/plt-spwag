@@ -193,28 +193,38 @@ let rec string_of_expression (expression_detail, expression_type) = match expres
 ;;
 
 (* Translates a statement into a string *)
-let rec string_of_statement statement = match statement with
-    | Block stmt -> String.concat "\n            " (List.map string_of_statement stmt)
-    | Expr expr -> string_of_expression expr
-    | Return expr -> "return " ^ string_of_expression expr ^ ";"
-    | If (expr, stmt1, stmt2) -> "if (" ^ string_of_expression expr ^ ") {\n" ^ string_of_statement stmt1 ^ "\n} else {\n" ^ string_of_statement stmt2 ^ "\n}\n" (* if (foo == 42) stmt1 else stmt2 end *)
-    | While (expr, stmt) -> "while (" ^ string_of_expression expr ^ ") {\n" ^ string_of_statement stmt ^ "\n}\n"
-    | Declaration identifier -> "var " ^ string_of_identifier identifier ^ ";"
-    | Decassign (identifier, expr) -> "var " ^ string_of_identifier identifier ^ " = " ^ string_of_expression expr ^ ";"
+let rec string_of_statement statement tab_level = match statement with
+    | Block stmt ->
+        String.concat "\n" (List.map (fun statement -> string_of_statement statement tab_level) stmt)
+    | Expr expr ->
+        tab tab_level ^ string_of_expression expr ^ ";"
+    | Return expr ->
+        tab tab_level ^ "return " ^ string_of_expression expr ^ ";"
+    | If (expr, stmt1, stmt2) ->
+        tab tab_level ^ "if (" ^ string_of_expression expr ^ ") {\n" ^ (string_of_statement stmt1 (tab_level + 1)) ^ "\n" ^
+        tab tab_level ^ "} else {\n" ^ (string_of_statement stmt2 (tab_level + 1)) ^ "\n" ^
+        tab tab_level ^ "}\n"
+    | While (expr, stmt) ->
+        tab tab_level ^ "while (" ^ string_of_expression expr ^ ") {\n" ^ (string_of_statement stmt (tab_level + 1)) ^ "\n" ^
+        tab tab_level ^ "}\n"
+    | Declaration identifier ->
+        tab tab_level ^ "var " ^ string_of_identifier identifier ^ ";"
+    | Decassign (identifier, expr) ->
+        tab tab_level ^ "var " ^ string_of_identifier identifier ^ " = " ^ string_of_expression expr ^ ";"
 ;;
 
 (* Translates the script into JavaScript *)
 let get_javascript script =
     (* Function definition *)
-    "function " ^ string_of_identifier script.name ^ "(" ^
+    tab 2 ^ "function " ^ string_of_identifier script.name ^ "(" ^
 
     (* Formals *)
     String.concat ", " (List.map (fun identifier -> string_of_identifier identifier) script.formals) ^ ") {\n"^
 
     (* Statements *)
-    String.concat "\n" (List.map string_of_statement script.body) ^ "\n" ^
+    String.concat "\n" (List.map (fun statement -> string_of_statement statement 3) script.body) ^ "\n" ^
 
-    "}"
+    tab 2 ^ "}"
 ;;
 
 let compile (slides, identifiers, scripts) =
@@ -249,4 +259,4 @@ let compile (slides, identifiers, scripts) =
     tab 1 ^ "</script>\n\n" ^
 
     "</body>\n\n" ^
-    "</html>"
+    "</html>\n"
