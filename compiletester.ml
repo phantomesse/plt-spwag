@@ -5,9 +5,7 @@ open Ir.Element
 open Ir.Slide
 
 let _ = 
-let hw_text_css = {
-    cclass="box-hello-world";
-    
+let hw_text_css = {    
     display=true;
 
     position_x="";
@@ -39,11 +37,10 @@ let hw_text_css = {
 
 let hw_text = {
     id="hello-world-text";
-    eclass="box";
     image="";
     text="Hello world!";
     style=hw_text_css;
-    (*onclick=Null;*)
+    onclick=None;
     elements=StringMap.empty
 } in
 
@@ -73,12 +70,12 @@ let main_slide = {
     prev="";
     image="";
     style=main_slide_css;
-    (*onclick="";
-    onpress="";*)
+    onclick=None;
+    onpress=None;
     elements=element_map
 } in
 
-let program = ([ hw_text_css ], [], [ main_slide ], []) in
+let program = ([ main_slide ], [], []) in
 
 let html = Compile.compile program in
 print_string html

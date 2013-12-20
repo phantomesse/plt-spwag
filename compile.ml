@@ -3,6 +3,7 @@
 open Ir
 open Ir.Element
 open Ir.Slide
+module StringMap = Map.Make(String)
 
 let string_of_property property value =
     if String.length value > 0 then
@@ -12,7 +13,7 @@ let string_of_property property value =
 ;;
 
 let string_of_css elem =
-    "        ." ^ elem.cclass ^ " {\n" ^
+    (*"        ." ^ elem.cclass ^ " {\n" ^*)
 
     (*string_of_property "display", string_of_bool elem.display ^*)
     
@@ -45,7 +46,15 @@ let string_of_css elem =
     "        }"
 ;;
 
-let compile (styles, slides, identifiers, scripts) =
+let get_css_from_element element =
+    "this is an element" ^ element.Element.id
+;;
+
+let get_css_from_slide slide =
+    String.concat "" (List.map get_css_from_element (StringMap.fold (fun id element l -> element::l) slide.Slide.elements []))
+;;
+
+let compile (slides, identifiers, scripts) =
     "<!DOCTYPE html>\n\n"^
     "<html>\n\n"^
     "<head>\n" ^
@@ -56,7 +65,8 @@ let compile (styles, slides, identifiers, scripts) =
     "    <style type=\"text/css\">\n" ^
 
     (* *)
-    String.concat "" (List.map string_of_css styles) ^ "\n" ^
+    (*String.concat "" (List.map string_of_css styles) ^ "\n" ^*)
+    String.concat "" (List.map get_css_from_slide slides) ^ "\n" ^
 
     "    </style>\n" ^
 
