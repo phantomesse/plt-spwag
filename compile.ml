@@ -13,7 +13,7 @@ let string_of_property property value =
 ;;
 
 let string_of_css style classname =
-    "        ." ^ classname ^ " {\n" ^
+    "        #" ^ classname ^ " {\n" ^
 
     (*string_of_property "display", string_of_bool elem.display ^*)
     
@@ -47,7 +47,7 @@ let string_of_css style classname =
 ;;
 
 let string_of_slide_css style classname =
-    "        ." ^ classname ^ " {\n" ^
+    "        #" ^ classname ^ " {\n" ^
 
     (*string_of_property "display", string_of_bool elem.display ^*)
     
@@ -84,6 +84,31 @@ let get_css_from_slide slide =
     String.concat "\n\n" (List.map get_css_from_element (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^ id)::l) slide.Slide.elements []))
 ;;
 
+let get_html_from_element (element, element_id) =
+    "        <div id=\"" ^ element_id ^ "\" class=\"box\">\n" ^
+    "        </div>"
+;;
+
+let get_html_from_slide slide =
+    "    <div id=\"" ^ slide.Slide.id ^ "\" class=\"slide\">\n" ^
+
+    (* Get the HTML from each element of this slide *)
+    String.concat "\n\n" (List.map get_html_from_element (StringMap.fold (fun id element l -> (element, slide.Slide.id ^ "-" ^id)::l) slide.Slide.elements [])) ^ "\n" ^
+
+    "    </div>"
+
+(* <div id="main" class="slide">
+        <div id="hello-world-text" class="box">
+            Hello World!
+        </div>
+
+        <div id="hello-world-image" class="box">
+            <img src="cat.jpg" />
+        </div>
+    </div>*)
+
+;;
+
 let compile (slides, identifiers, scripts) =
     "<!DOCTYPE html>\n\n"^
     "<html>\n\n"^
@@ -94,9 +119,8 @@ let compile (slides, identifiers, scripts) =
 
     "    <style type=\"text/css\">\n" ^
 
-    (* *)
-    (*String.concat "" (List.map string_of_css styles) ^ "\n" ^*)
-    String.concat "" (List.map get_css_from_slide slides) ^ "\n" ^
+    (* Abstract out all of the CSS *)
+    String.concat "\n" (List.map get_css_from_slide slides) ^ "\n" ^
 
     "    </style>\n" ^
 
@@ -104,6 +128,7 @@ let compile (slides, identifiers, scripts) =
     "<body>\n" ^
 
     (* HTML components such as slides and elements go here *)
+    String.concat "\n" (List.map get_html_from_slide slides) ^ "\n\n" ^
 
     "    <script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js\"></script>\n" ^
     "    <script type=\"text/javascript\" src=\"../../../config/config.js\"></script>\n" ^
