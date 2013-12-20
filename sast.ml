@@ -5,7 +5,7 @@ open Ast (* We need to import the operators and other type definitions over, the
 (* 	All objects must be one of these types 
 	Varidentifier is incredibly problematic *)
 	
-type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier | Null
+(* type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier | Null*)
 
 (* Identifiers *)
 type identifier = Identifier of string
@@ -31,7 +31,7 @@ and expr_detail =
     | Component of identifier * expr list (* identifier["child"]["child"] etc. to fetch component *)
     | Call of func_call (* Calling a function, unique in that it can contain statements*)
 
-and expr = expr_detail * t
+and expr = expr_detail * Ast.t
 
 (* Calls and executes function. Follows a control flow detailed in the LRM/Revisions doc *)
 and stmt = (* Statements ; WIP *)
@@ -45,7 +45,7 @@ and stmt = (* Statements ; WIP *)
 
 (* Function definition that makes up the basic structure of the program*)
 type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
-    t: func_type; (* e.g. slide, component, attribute, func *)
+    sast_t: func_type; (* e.g. slide, component, attribute, func *)
     name : identifier; (* Name of the function *)
     formals : identifier list; (* Name of the formal parameters *)
     inheritance : identifier option; (* Name of any parent components, ie box, or null *)

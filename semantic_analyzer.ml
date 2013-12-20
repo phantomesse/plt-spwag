@@ -1,19 +1,18 @@
 (* Author: Richard Chiou
    Contributor: Aditya Majumdar
    Quick to do list:
-	func_call
-	Component of identifier
-	Call of func_call
-	Declaration of identifier: add identifier to symbol table
-	Decassign of identifier * expr: add to symbol table
-	Debug func_def stuff
+	functioncall: checks if function call has correct structure
+	Component of identifier: This is hard to write
+	Call of func_call: Easier to write but still annoying
+	Declaration of identifier: need to write add identifier to symbol table
+	Decassign of identifier * expr: need to write add to symbol table
+	func_def: checks if function definition has valid table
 	program: take in an Ast.program and output an Sast.program
-		and associated functions to inspect the identifier and func_definition lists
-		These associated functions will be extremely long and painful to write
+		add_identifier: adds identifier to symbol table
+		add_function: adds function to symbol table
 *)
 
 open Ast
-open Sast
 module StringMap = Map.Make(String)
 
 type symbol_table = {
@@ -41,6 +40,7 @@ let string_of_type_t = function
 	| Attrtype -> "Attrtype"
 	| Functype -> "Functype"
 	| Varidentifier -> "Varidentifier"
+	| Null -> ""
 
 let string_of_func_type = function
 	  Slide -> "Slide"
@@ -85,7 +85,7 @@ let rec find_function scope name = (* name is an identifier *)
 		(*let build_string tmpString nextString = tmpString^" \n"^nextString in
 		let func_names_string = List.fold_left build_string("") (List.map (fun {t=_, name=s, formals=_, inheritance=_, paractuals=_, body=_} -> n ) (getGlobalScope scope).functions) in
 		let num_funcs = List.length (getGlobalScope scope).functions in*)
-		raise(Failure("Function "^name^" not found in global scope"))
+		raise(Failure("Function not found in global scope"))
 
 (*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements 
 	Component of identifier: identifier has to be slide or variable (component or slide) 
@@ -98,7 +98,7 @@ type func_call = {
     actuals : expr list; (* Evaluated actual parameters *)
     mods : stmt; (* Additional statements, which could be a block *)
 }  *)
-let functioncall env = function
+(*let functioncall env = function*)
 
 (* Check if valid identifier *)
 let identify env = function
@@ -110,11 +110,11 @@ let identify env = function
 let rec expr env = function
 
     (* Simple evaluation of primitives *)
-    Ast.Litint(v) -> Sast.Litint(v), Sast.Int
-  | Ast.Litper(v) -> Sast.Litper(v), Sast.Per
-  | Ast.Litstr(v) -> Sast.Litstr(v), Sast.Str
-  | Ast.Litbool(v) -> Sast.Litbool(v), Sast.Bool
-  | Ast.Litnull() -> Sast.Litnull(), Sast.Null
+    Ast.Litint(v) -> Sast.Litint(v), Ast.Int
+  | Ast.Litper(v) -> Sast.Litper(v), Ast.Per
+  | Ast.Litstr(v) -> Sast.Litstr(v), Ast.Str
+  | Ast.Litbool(v) -> Sast.Litbool(v), Ast.Bool
+  | Ast.Litnull -> Sast.Litnull, Ast.Null
   
   | Ast.Binop (expr1, op, expr2) ->  (* evaluate operators *)
     (
@@ -126,22 +126,22 @@ let rec expr env = function
 	
 	match t1, op, t2 with
 	  | (Bool), (And | Or), (Bool) ->  (* And/or operators *)
-			Sast.Binop(e1, op, e2), Sast.Bool (* Boolean *) 
+			Sast.Binop(e1, op, e2), Ast.Bool (* Boolean *) 
 				
       | (Int), (Lessthan | Greaterthan), (Int) ->  (* > , < *)
-			Sast.Binop(e1, op, e2), Sast.Bool
+			Sast.Binop(e1, op, e2), Ast.Bool
 					
 	  | (Int), (Plus | Minus | Times | Divide), (Int) ->  (* Arithmetic on ints *)
-			Sast.Binop(e1, op, e2), Sast.Int   
+			Sast.Binop(e1, op, e2), Ast.Int   
 
 	  | (Per), (Plus | Minus | Times | Divide), (Per) ->  (* Arithmetic on percents *)
-			Sast.Binop(e1, op, e2), Sast.Per   
+			Sast.Binop(e1, op, e2), Ast.Per   
 			
       | _, (Equals | Notequals), _  ->   (* Compare Anything *)
-			Sast.Binop(e1, op, e2), Sast.Bool
+			Sast.Binop(e1, op, e2), Ast.Bool
 					
 	  | (Str), Plus, (Str | Int) ->  (* String Concatenation *) 
-			Sast.Binop(e1, op, e2), Sast.Str		
+			Sast.Binop(e1, op, e2), Ast.Str		
 					
 	 (* Otherwise Invalid *)
 	  | a, op, b -> raise(Failure("Binop "^ (string_of_binop op) ^" does not work with operands "^ (string_of_type_t a) ^", "^ (string_of_type_t b) ^ "\n"))
@@ -152,7 +152,7 @@ let rec expr env = function
 	let e1 = expr env v in
 	let _, t1 = e1 in (* Get the type of e1 *)
 	match t1 with 
-	  | Bool -> Sast.Notop(e1), Sast.Bool
+	  | Bool -> Sast.Notop(e1), Ast.Bool
 	  | _ -> raise(Failure("Invalid operand ("^string_of_type_t t1^") for not operator"))
 	)
 	
@@ -161,29 +161,29 @@ let rec expr env = function
 	and id = identify env lhs in	(* check if identifier *)
     (* let _, t1 = e1 (* type of rhs *) in *)
 	(*if (types_equal t1 t2) then *)			(* the types need to match? *)
-		Sast.Assign(id, e1), Sast.Varidentifier
+		Sast.Assign(id, e1), Ast.Varidentifier
 	(*else
 		raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))*)
 	
   | Ast.Variable(v) -> 				(* If identify function works, this will work *)
 	let id = identify env v in
 	(*let _, t1 = id (* type of rhs *) in*)
-	Sast.Variable(id), Sast.Varidentifier
+	Sast.Variable(id), Ast.Varidentifier
 	
   | Ast.Call(funccall) -> (
 	 (* Evaluate if this is a valid func_call: 
 		cname : identifier; (* Name of the function *)
 		actuals : expr list; (* Evaluated actual parameters *)
 		mods : stmt; (* Additional statements, which could be a block *) *)
-		let id = functioncall env funccall in
-		let funct = find_function env id.cname in	(* Check to see if said function exists *)
+		(*let id = functioncall env funccall in *)
+		let funct = find_function env funccall.cname in	(* Check to see if said function exists *)
 		(* We need to now check that the arguments are valid *)
 		(* Do we need to getting types from identifiers somehow? *)
 		let formallist = List.map (identify env) funct.formals in
-		let formalTypes = List.map snd(formallist) in
+		(*let formalTypes = List.map fst(formallist) in*)
 		(* Get the list of actuals and their types *)
 		let actuallist = List.map (identify env) funccall.actuals in
-		let actualtypes = List.map snd(actuallist) in
+		(*let actualtypes = List.map fst(actuallist) in*)
 		
 		(* check each type from checked list against fdecl param types in scope's function list *)
 		let rec checktypes list1 list2 = match list1, list2 with
@@ -194,7 +194,7 @@ let rec expr env = function
 		  ( types_equal (List.hd(list1)) (List.hd(list2)) ) && types_equal (List.tl(list1)) (List.tl(list2))
 			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
-		if (checktypes formalTypes checkedTypes)
+		if (checktypes formallist checkedlist)
 			then Sast.Call (id), funct.t
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
@@ -212,9 +212,9 @@ let rec expr env = function
 		Step 3: Go to step 1, break from loop when exprlist has been parsed through
 		Hardest part is the error checking, but the recursive function will be annoying as well... *)
 
-		let rec returncomp currentcomp exprlist = match exprlist with
+		(*let rec returncomp currentcomp exprlist = match exprlist with
 		| [] -> (* run some code *)
-		| _ ->  Sast.Component (id, (expr env exprlist)
+		| _ ->*)  Sast.Component (id, (expr env exprlist)), Ast.Varidentifier
 
 			
   (*Below code is old
@@ -338,12 +338,40 @@ let checkFunc scope func_def = match func_def.fbody with
 		checkedFdecl
 *)
 
+(*let add_func_definition scope func = 
+| "SETUP", fdecl_list ->
+	(
+	  (* LOAD all funcs in list into symbol table (b/c all funcs should be able to "find" i.e. call each other) *)
+	    let addFunc scope fdecl =  
+				{ parent = scope.parent;
+				  functions = fdecl::scope.functions;
+				  variables = scope.variables }
+			in
+			let newGlobal = List.fold_left addFunc(scope) fdecls (* new scope containing all funcs in setup *)
+		  in  
+	    let subScope = {
+			  parent =  Some newGlobal;  (* set parent to newglobalscope parameter *)
+			  functions = [];
+			  variables = []; 
+		  }
+		  in
+		  (* MAP through each function and check *)
+		  (List.map (processFdecl subScope) fdecl_list), newGlobal  (* newFdecls, newScope *)
+   )
+| _ , [] ->   [], scope  (* Non-"SETUP" bname should have empty fdecls list *)
+| _ , _  ->   raise(Failure("Functions can only be declared in SETUP (at beginning)")) 
+*)
+
+
+
 (* Run our program *)
 (* Input: Ast.Program, Symbol_Table *)
 (* Output: Sast.Program *)
 (* This is WIP *)
 
 (* type program = identifier list * func_definition list (* global vars, funcs*) *)
-(* Check the identifier list and the func_definition list before running the program *)
+(* Add the identifiers (variables) and function definitions to global scope *)
 
-(*let evalprogram program globalTable = *)
+let evalprogram program globalTable =
+	let run, _ = List.fold_left processBdecl(globalTable, []) program in
+	run
