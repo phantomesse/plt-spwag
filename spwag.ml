@@ -15,8 +15,8 @@ let _ =
                 ("-c", Compile)
             ]
         else Compile in
-            let processed_code = preprocess() in
-            let lexbuf = Lexing.from_string processed_code in
+            let processed_code = stdin (* preprocess() *) in
+            let lexbuf = Lexing.from_channel processed_code in
             let program = Parser.program Scanner.token lexbuf in
                 match action with
                 | Ast -> let listing = Ast.string_of_program program
