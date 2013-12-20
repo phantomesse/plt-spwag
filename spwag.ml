@@ -1,4 +1,4 @@
-(* Author: Aftab Khan, Lauren Zou, Yunhe (John) Wang *)
+(* Author: Aftab Khan, Lauren Zou Contributor: Yunhe (John) Wang *)
 
 type action = Ast | Irgenerator | Compile
 

@@ -1,4 +1,4 @@
-(* Authors: Yunhe (John) Wang and Aftab Khan *)
+(* Author: Yunhe (John) Wang Contributor: Aftab Khan *)
 (* Reference the Ast only for function types and operators, all else is in sast/ir *)
 
 open Sast
@@ -66,25 +66,25 @@ let create_blank_element =
 let ir_bind_css_element attribute value (elementp:Element.element) = (match (attribute, value) with
 	("display", Ir.Litbool(b)) -> {elementp with style= {elementp.style with display=b}}
     | ("position-x", Ir.Litint(i)) -> {elementp with style= {elementp.style with position_x=(string_of_int i)}}
-    | ("position-x", Ir.Litper(i)) -> {elementp with style= {elementp.style with position_x=(string_of_int i)}}
+    | ("position-x", Ir.Litper(i)) -> {elementp with style= {elementp.style with position_x=(string_of_int i)^"%"}}
     | ("position-y", Ir.Litint(i)) -> {elementp with style= {elementp.style with position_y=(string_of_int i)}}
-    | ("position-y", Ir.Litper(i)) -> {elementp with style= {elementp.style with position_y=(string_of_int i)}}
+    | ("position-y", Ir.Litper(i)) -> {elementp with style= {elementp.style with position_y=(string_of_int i)^"%"}}
     | ("margin-top", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_top=(string_of_int i)}}
-    | ("margin-top", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_top=(string_of_int i)}}
+    | ("margin-top", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_top=(string_of_int i)^"%"}}
     | ("margin-bottom", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_bottom=(string_of_int i)}}
-    | ("margin-bottom", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_bottom=(string_of_int i)}}
+    | ("margin-bottom", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_bottom=(string_of_int i)^"%"}}
     | ("margin-left", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_left=(string_of_int i)}}
-    | ("margin-left", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_left=(string_of_int i)}}
+    | ("margin-left", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_left=(string_of_int i)^"%"}}
     | ("margin-right", Ir.Litint(i)) -> {elementp with style= {elementp.style with margin_right=(string_of_int i)}}
-    | ("margin-right", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_right=(string_of_int i)}}
+    | ("margin-right", Ir.Litper(i)) -> {elementp with style= {elementp.style with margin_right=(string_of_int i)^"%"}}
     | ("padding-top", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_top=(string_of_int i)}}
-    | ("padding-top", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_top=(string_of_int i)}}
+    | ("padding-top", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_top=(string_of_int i)^"%"}}
     | ("padding-bottom", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_bottom=(string_of_int i)}}
-    | ("padding-bottom", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_bottom=(string_of_int i)}}
+    | ("padding-bottom", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_bottom=(string_of_int i)^"%"}}
     | ("padding-left", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_left=(string_of_int i)}}
-    | ("padding-left", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_left=(string_of_int i)}}
+    | ("padding-left", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_left=(string_of_int i)^"%"}}
     | ("padding-right", Ir.Litint(i)) -> {elementp with style= {elementp.style with padding_right=(string_of_int i)}}
-    | ("padding-right", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_right=(string_of_int i)}}
+    | ("padding-right", Ir.Litper(i)) -> {elementp with style= {elementp.style with padding_right=(string_of_int i)^"%"}}
     | ("text-color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with text_color=s}}
     | ("background-color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with background_color=s}}
     | ("font", Ir.Litstr(s)) -> {elementp with style= {elementp.style with font=s}}
@@ -93,9 +93,9 @@ let ir_bind_css_element attribute value (elementp:Element.element) = (match (att
     | ("border", Ir.Litint(i)) -> {elementp with style= {elementp.style with border=(string_of_int i)}}
     | ("border-color", Ir.Litstr(s)) -> {elementp with style= {elementp.style with border_color=s}}
     | ("width", Ir.Litint(i)) -> {elementp with style= {elementp.style with width=(string_of_int i)}}
-    | ("width", Ir.Litper(i)) -> {elementp with style= {elementp.style with width=(string_of_int i)}}
+    | ("width", Ir.Litper(i)) -> {elementp with style= {elementp.style with width=(string_of_int i)^"%"}}
     | ("height", Ir.Litint(i)) -> {elementp with style= {elementp.style with height=(string_of_int i)}}
-    | ("height", Ir.Litper(i)) -> {elementp with style= {elementp.style with height=(string_of_int i)}}
+    | ("height", Ir.Litper(i)) -> {elementp with style= {elementp.style with height=(string_of_int i)^"%"}}
     | ("id", Ir.Litstr(s)) -> {elementp with id=s}
     | ("image", Ir.Litstr(s)) -> {elementp with image=s}
     | ("text", Ir.Litstr(s)) -> {elementp with text=s}
@@ -110,13 +110,13 @@ let ir_bind_css_element attribute value (elementp:Element.element) = (match (att
  *)
 let ir_bind_css_slide attribute value (slidep:Slide.slide) = (match (attribute, value) with
 	("padding-top", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_top=(string_of_int i)}}
-    | ("padding-top", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_top=(string_of_int i)}}
+    | ("padding-top", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_top=(string_of_int i)^"%"}}
     | ("padding-bottom", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_bottom=(string_of_int i)}}
-    | ("padding-bottom", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_bottom=(string_of_int i)}}
+    | ("padding-bottom", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_bottom=(string_of_int i)^"%"}}
     | ("padding-left", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_left=(string_of_int i)}}
-    | ("padding-left", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_left=(string_of_int i)}}
+    | ("padding-left", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_left=(string_of_int i)^"%"}}
     | ("padding-right", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_right=(string_of_int i)}}
-    | ("padding-right", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_right=(string_of_int i)}}
+    | ("padding-right", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_right=(string_of_int i)^"%"}}
     | ("text-color", Ir.Litstr(s)) -> {slidep with style= {slidep.style with text_color=s}}
     | ("background-color", Ir.Litstr(s)) -> {slidep with style= {slidep.style with background_color=s}}
     | ("font", Ir.Litstr(s)) -> {slidep with style= {slidep.style with font=s}}
@@ -130,8 +130,115 @@ let ir_bind_css_slide attribute value (slidep:Slide.slide) = (match (attribute, 
 	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly on slide: " ^ attribute))
 	)
 
-
-
+(* Gets the css attribute of a particular component/slide that must have already been bound
+ * @param attribute the attribute, as a string
+ * @param path the Ir.Litcomp or Ir.Litslide
+ * @param lookup the lookup table
+ * @return the attribute, as an Ir.literal
+ *)
+let ir_get_css attribute path lookup = (match path with
+	Ir.Litslide(Identifier(s)) -> 
+		let the_slide = StringMap.find s lookup.slides_out in
+		let is_null s_in = ((compare s_in "") = 0) in
+		let is_per s_in = ((String.get s_in ((String.length s_in)-1)) = '%') in
+		let per_to_int s_in = int_of_string (String.sub s_in 0 ((String.length s_in)-1)) in 
+		let int_or_per the_attr = 
+			if is_null the_attr then Ir.Litnull 
+			else if is_per the_attr then Ir.Litper(per_to_int the_attr) 
+			else Ir.Litint(int_of_string the_attr)
+		in
+		(match attribute with
+			"padding-top" -> int_or_per the_slide.style.padding_top
+		    | "padding-bottom" -> int_or_per the_slide.style.padding_bottom
+		    | "padding-left" -> int_or_per the_slide.style.padding_left
+		    | "padding-right" -> int_or_per the_slide.style.padding_right
+		    | "text-color" -> Ir.Litstr(the_slide.style.text_color)
+		    | "background-color" -> Ir.Litstr(the_slide.style.background_color)
+		    | "font" -> Ir.Litstr(the_slide.style.font)
+		    | "font-size" ->  int_or_per the_slide.style.font_size
+		    | "font-decoration" ->  Ir.Litstr(the_slide.style.font_decoration)
+		    | "border" -> int_or_per the_slide.style.border
+		    | "border-color" -> Ir.Litstr(the_slide.style.border_color)
+		    | "next" -> Ir.Litslide(Identifier(the_slide.next))
+		    | "prev" -> Ir.Litslide(Identifier(the_slide.prev))
+		    | "image" -> Ir.Litstr(the_slide.image)
+			| _ -> raise (Failure ("The following built-in attribute does not exist for slide used in get(): " ^ attribute))
+		)
+	| Ir.Litcomp(Identifier(s), slist) ->
+		let the_slide = StringMap.find s lookup.slides_out in
+		let the_comp = StringMap.find (List.hd slist) the_slide.elements in
+		(* e is the element, p is the full path for error printing, last param is the partial path *)
+		(* returns the element represented by the path *)
+		let rec get_comp (e : Element.element) p = function
+			[] -> e
+			| hd::tl -> 
+				try get_comp (StringMap.find hd e.elements) p tl
+  				with Not_found -> raise (Failure ("Cannot find the following component: " ^ String.concat "->" p))
+		in
+		let the_comp = get_comp the_comp slist (List.tl slist) in
+		let is_null s_in = ((compare s_in "") = 0) in
+		let is_per s_in = ((String.get s_in ((String.length s_in)-1)) = '%') in
+		let per_to_int s_in = int_of_string (String.sub s_in 0 ((String.length s_in)-1)) in 
+		let int_or_per the_attr = 
+			if is_null the_attr then Ir.Litnull 
+			else if is_per the_attr then Ir.Litper(per_to_int the_attr) 
+			else Ir.Litint(int_of_string the_attr)
+		in
+		(match attribute with
+			"display" -> Ir.Litbool(the_comp.style.display)
+			| "position-x" -> int_or_per the_comp.style.position_x
+		    | "position-y" -> int_or_per the_comp.style.position_y
+		    | "margin-top" -> int_or_per the_comp.style.margin_top
+		    | "margin-bottom" -> int_or_per the_comp.style.margin_bottom
+		    | "margin-left" -> int_or_per the_comp.style.margin_left
+		    | "margin-right" -> int_or_per the_comp.style.margin_right
+			| "padding-top" -> int_or_per the_comp.style.padding_top
+		    | "padding-bottom" -> int_or_per the_comp.style.padding_bottom
+		    | "padding-left" -> int_or_per the_comp.style.padding_left
+		    | "padding-right" -> int_or_per the_comp.style.padding_right
+		    | "text-color" -> Ir.Litstr(the_comp.style.text_color)
+		    | "background-color" -> Ir.Litstr(the_comp.style.background_color)
+		    | "font" -> Ir.Litstr(the_comp.style.font)
+		    | "font-size" ->  int_or_per the_comp.style.font_size
+		    | "font-decoration" ->  Ir.Litstr(the_comp.style.font_decoration)
+		    | "border" -> int_or_per the_comp.style.border
+		    | "border-color" -> Ir.Litstr(the_comp.style.border_color)
+		    | "width" -> int_or_per the_comp.style.width
+		    | "height" -> int_or_per the_comp.style.height
+		    | "id" -> Ir.Litstr(the_comp.id)
+		    | "image" -> Ir.Litstr(the_comp.image)
+		    | "text" -> Ir.Litstr(the_comp.text)
+			| _ -> raise (Failure ("The following built-in attribute does not exist for comp used in get(): " ^ attribute))
+		)
+	| _ -> raise (Failure ("The first parameter of get() must be a slide or component."))
+	)
+(* 
+This code might be useful, may not be, we'll see
+(* Binds something to the given slide or element
+ * @param path the path to whatever you want to bind
+ * @param output what you're binding to, should be slides_out
+ * @param elementp The element to bind to the path, or None to bind a blank slide
+ * @return the updated output -> slides_out
+ *)
+let bind_to_slide_comp path output = function
+	None -> 
+				in
+		StringMap.add (hd path) (create_blank_slide (hd path)) output
+	| Some(x) ->
+		(* e is the element, p is the full path for error printing, last param is the partial path *)
+		(* returns the parent element that needs its binding changed *)
+		let rec get_element (e : Element.element) p = function
+			[] -> e
+			| hd::[] -> e
+			| hd::tl -> 
+				try get_element (StringMap.find hd e.elements) tl
+  				with Not_found -> raise (Failure ("Cannot find the following element: " ^ String.concat "->" p))
+		in
+		let element_name = hd (List.rev path) in
+		if (StringMap.mem (id_to_str func.name) lookup.funcs_in) 
+		then raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
+		else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
+*)
 
 exception ReturnException of literal * lookup_table
 
@@ -258,7 +365,12 @@ let generate (vars, funcs) =
 					then (StringMap.find i (snd loclook).vars_in, loclook)
 				else raise (Failure ("Undeclared identifier " ^ i))
 			| Sast.Component(i, elist) ->
-				let (_, loclook) = (eval loclook (Sast.Variable(i))) in
+				let (the_slide, loclook) = (eval loclook (Sast.Variable(i))) in
+				let loclook = (match the_slide with
+					Ir.Litslide(_) -> loclook
+					| _ -> raise (Failure ("The following slide has not been created, used on a Component literal: " ^ (id_to_str i)))
+					)
+				in
 				let (rlist, loclookp) = 
 						List.fold_left
 						(fun (actuals, loclook) actual -> let (r, loclook) = eval loclook (fst actual) in (r :: actuals, loclook))
@@ -356,9 +468,16 @@ let generate (vars, funcs) =
 						in
 						let (locals, lookup) = loclook in
 						let the_slide = StringMap.find lookup.cur_slide lookup.slides_out in
-							(Litnull, (locals,
+							(Ir.Litnull, (locals,
 							{lookup with slides_out = StringMap.add lookup.cur_slide
 							({the_slide with onpress = Some(key_to_press,{Ir.cname=f_to_call.cname; actuals=pactuals;})}) lookup.slides_out}))
+					| Identifier("get") -> 
+						let (param1, loclook) = eval loclook (fst (List.hd f.actuals)) in
+						let (param2, loclook) = eval loclook (fst (List.nth f.actuals 1)) in
+						(match param2 with
+							Ir.Litstr(s) ->  (ir_get_css s param1 (snd loclook), loclook)
+							| _ ->  raise (Failure ("You must pass in a string as attribute name as 2nd parameter to get()"))
+						)
 					| Identifier(_) -> 
 				(* The rest of these lines are for non-built-in functions *)
 				let fdecl = 
@@ -510,31 +629,5 @@ let generate (vars, funcs) =
 	in
 	(StringMap.fold (fun k d l -> d :: l) (pre_ir.slides_out) [], vars, funcs_to_js funcs)
 
-(* 
-This code might be useful, may not be, we'll see
-(* Binds something to the given slide or element
- * @param path the path to whatever you want to bind
- * @param output what you're binding to, should be slides_out
- * @param elementp The element to bind to the path, or None to bind a blank slide
- * @return the updated output -> slides_out
- *)
-let bind_to_slide_comp path output = function
-	None -> 
-				in
-		StringMap.add (hd path) (create_blank_slide (hd path)) output
-	| Some(x) ->
-		(* e is the element, p is the full path for error printing, last param is the partial path *)
-		(* returns the parent element that needs its binding changed *)
-		let rec get_element (e : Element.element) p = function
-			[] -> e
-			| hd::[] -> e
-			| hd::tl -> 
-				try get_element (StringMap.find hd e.elements) tl
-  				with Not_found -> raise (Failure ("Cannot find the following element: " ^ String.concat "->" p))
-		in
-		let element_name = hd (List.rev path) in
-		if (StringMap.mem (id_to_str func.name) lookup.funcs_in) 
-		then raise (Failure ("There are two definitions for function name " ^ (id_to_str func.name)))
-		else {lookup with funcs_in = StringMap.add (id_to_str func.name) func lookup.funcs_in} 	
-*)
+
 
