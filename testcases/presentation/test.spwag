@@ -108,7 +108,113 @@ define slide implementation()
     content() {
         id("content")
 
-        content-text("Put a fucking data flow chart here.")
+        flow-box("Scanner") {
+            id("scanner")
+            position-x(0)
+            position-y(0)
+        }
+
+        arrow("horz") {
+            id("arrow1")
+            padding-top(10)
+            position-x(97)
+            position-y(0)
+        }
+
+        flow-box("Parser") {
+            id("parser")
+            position-x(155)
+            position-y(0)
+        }
+
+        arrow("vert") {
+            id("arrow2")
+            position-x(170)
+            position-y(44)
+        }
+
+        flow-box("AST") {
+            id("ast")
+            position-x(155)
+            position-y(102)
+        }
+
+        arrow("horz") {
+            id("arrow3")
+            padding-top(10)
+            position-x(213)
+            position-y(102)
+        }
+
+        flow-box("Semantic Analyzer") {
+            id("semantic-analyzer")
+            position-x(271)
+            position-y(102)
+        }
+
+        arrow("vert") {
+            id("arrow4")
+            position-x(290)
+            position-y(146)
+        }
+
+        flow-box("SAST") {
+            id("sast")
+            position-x(271)
+            position-y(204)
+        }
+
+        arrow("horz") {
+            id("arrow5")
+            padding-top(10)
+            position-x(341)
+            position-y(204)
+        }
+
+        flow-box("IR Generator") {
+            id("ir-generator")
+            position-x(399)
+            position-y(204)
+        }
+
+        arrow("horz") {
+            id("arrow6")
+            padding-top(10)
+            position-x(541)
+            position-y(204)
+        }
+
+        flow-box("IR") {
+            id("ir")
+            position-x(599)
+            position-y(204)
+        }
+
+        arrow("horz") {
+            id("arrow7")
+            padding-top(10)
+            position-x(638)
+            position-y(204)
+        }
+
+        flow-box("Compile") {
+            id("compile")
+            position-x(696)
+            position-y(204)
+        }
+
+        arrow("vert") {
+            id("arrow8")
+            padding-top(10)
+            position-x(730)
+            position-y(238)
+        }
+
+        flow-box("HTML, CSS, JavaScript") {
+            id("html-css-javascript")
+            position-x(678)
+            position-y(306)
+        }
     }
 
     prev(motivation)
@@ -214,9 +320,9 @@ define comp title-underline() isa box()
 
 define comp content() isa box()
 {
-    position-x(70)
+    position-x(50)
     position-y(150)
-    width(760)
+    width(800)
     height(420)
 }
 
@@ -225,6 +331,23 @@ define comp content-text(text) isa box()
     text(text)
     text-color(fgcolor())
     font-size(30)
+}
+
+define comp flow-box(text) isa box()
+{
+    padding-top(10)
+    padding-bottom(10)
+    padding-left(10)
+    padding-right(10)
+    background-color(cyan())
+    text(text)
+    text-color(bgcolor())
+    font-decoration("bold")
+}
+
+define comp arrow(direction) isa box()
+{
+    image("../resources/arrow_" + direction + ".png")
 }
 
 # DEFINE SOME COLORS
