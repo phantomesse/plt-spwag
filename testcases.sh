@@ -12,6 +12,7 @@ if [ $# -eq 0 ]
     testcases[0]='hello-world'
     testcases[1]='one-fish-two-fish'
     testcases[2]='presentation'
+    testcases[3]='fiver'
 
     for testcase in "${testcases[@]}"
     do

@@ -1,5 +1,5 @@
-OBJS = preprocessor.o linecounter.cmo ast.cmo sast.cmo ir.cmo sastinjector.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo
-
+OBJS = preprocessor.o linecounter.cmo ast.cmo sast.cmo ir.cmo sastinjector.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo 
+#sastinjector.cmo
 
 spwag: $(OBJS)
 	ocamlc -custom -o spwag $(OBJS)
@@ -57,5 +57,10 @@ semantic_analyzer.cmx : sast.cmx ast.cmx
 spwag.cmo : scanner.cmo sastinjector.cmo parser.cmi irgenerator.cmo \
     compile.cmo ast.cmo
 spwag.cmx : scanner.cmx sastinjector.cmx parser.cmx irgenerator.cmx \
+    compile.cmx ast.cmx
+
+#spwag.cmo : scanner.cmo semantic_analyzer.cmo parser.cmi irgenerator.cmo \
+    compile.cmo ast.cmo
+#spwag.cmx : scanner.cmx semantic_analyzer.cmx parser.cmx irgenerator.cmx \
     compile.cmx ast.cmx
 parser.cmi : ast.cmo

@@ -68,6 +68,13 @@ let type_to_t = function
 	| Comp -> Sast.Comptype
 	| Attr -> Sast.Attrtype
 	| Func -> Sast.Functype
+
+(* Convert AST identifier to SAST identifier *)
+let identify env = function
+    Ast.Identifier(v) -> Sast.Identifier(v)
+    (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
+	Sast.Identifier(vdecl), Sast.Varidentifier*)
+
 	
 let string_of_expr = function
 	| _ -> "(not implemented ... yet)"
@@ -110,12 +117,8 @@ let rec find_function scope name = (* name is an identifier *)
 		raise(Failure("Function not found in global scope"))
 
 (*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements  *)
-	
-(* Convert AST identifier to SAST identifier *)
-let identify env = function
-    Ast.Identifier(v) -> Sast.Identifier(v)
-    (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
-	Sast.Identifier(vdecl), Sast.Varidentifier*)
+
+
 
 (* check to see if valid function call *)
 let functioncall env call = 
@@ -135,6 +138,11 @@ let functioncall env call =
 		mods = call.mods;  
       } in
 	checked_func_call	
+		
+(* let func_call_conversion env (fc: Ast.func_call) = { 	
+	Sast.cname = identify env fc.cname;
+	Sast.actuals = List.rev(List.fold_left (fun l e -> (expr env e)::l ) [] c.actuals);
+	Sast.mods = Lst.hd snd(stmts(env, []) fc.mods)} in *)
 	
 (* Check if valid expression*)
 let rec expr env = function
@@ -289,7 +297,7 @@ let rec stmts (env, stmtlist) stmt =
 	  functions = [];
 	  variables = []; 
 	} in
-	match stmt with
+	match stmt with 
 	
     | Ast.Expr(e) ->  env, Sast.Expr(expr env e)::stmtlist
     (*| Ast.Return(e1) -> Sast.Return(expr env e1) (* I have not written checking for e1 yet *)*)
