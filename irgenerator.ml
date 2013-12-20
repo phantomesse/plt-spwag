@@ -110,6 +110,23 @@ let ir_bind_css_element attribute value (elementp:Element.element) = (match (att
  *)
 let ir_bind_css_slide attribute value (slidep:Slide.slide) = (match (attribute, value) with
 	("padding-top", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_top=(string_of_int i)}}
+    | ("padding-top", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_top=(string_of_int i)}}
+    | ("padding-bottom", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_bottom=(string_of_int i)}}
+    | ("padding-bottom", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_bottom=(string_of_int i)}}
+    | ("padding-left", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_left=(string_of_int i)}}
+    | ("padding-left", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_left=(string_of_int i)}}
+    | ("padding-right", Ir.Litint(i)) -> {slidep with style= {slidep.style with padding_right=(string_of_int i)}}
+    | ("padding-right", Ir.Litper(i)) -> {slidep with style= {slidep.style with padding_right=(string_of_int i)}}
+    | ("text-color", Ir.Litstr(s)) -> {slidep with style= {slidep.style with text_color=s}}
+    | ("background-color", Ir.Litstr(s)) -> {slidep with style= {slidep.style with background_color=s}}
+    | ("font", Ir.Litstr(s)) -> {slidep with style= {slidep.style with font=s}}
+    | ("font-size", Ir.Litint(i)) -> {slidep with style= {slidep.style with font_size=(string_of_int i)}}
+    | ("font-decoration", Ir.Litstr(s)) -> {slidep with style= {slidep.style with font_decoration=s}}
+    | ("border", Ir.Litint(i)) -> {slidep with style= {slidep.style with border=(string_of_int i)}}
+    | ("border-color", Ir.Litstr(s)) -> {slidep with style= {slidep.style with border_color=s}}
+    | ("next", Ir.Litslide(Identifier(s))) -> {slidep with next=s}
+    | ("prev", Ir.Litslide(Identifier(s))) -> {slidep with prev=s}
+    | ("image", Ir.Litstr(s)) -> {slidep with image=s}
 	| (_,_) -> raise (Failure ("The following built-in attribute is not used correctly on slide: " ^ attribute))
 	)
 
@@ -276,6 +293,8 @@ let generate (vars, funcs) =
    					| Identifier("id") -> process_built_in_attr "id"
    					| Identifier("image") -> process_built_in_attr "image"
    					| Identifier("text") -> process_built_in_attr "text"
+   					| Identifier("next") -> process_built_in_attr "next"
+   					| Identifier("prev") -> process_built_in_attr "prev"
  					| Identifier(_) -> 
 				(* The rest of these lines are for non-built-in functions *)
 				let fdecl = 
