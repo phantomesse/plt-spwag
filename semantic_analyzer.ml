@@ -73,7 +73,7 @@ let rec find_variable scope name =
     | _ -> raise Not_found
 	
 (* This find_function function goes up to global scope before searching *)
-let rec find_function scope name =
+let rec find_function scope name = (* name is an identifier *)
 	let rec global scope = match scope.parent with	(* All functions are global *)
 		| None -> scope
 		| Some(parent) -> (global parent)
@@ -97,7 +97,7 @@ type func_call = {
     actuals : expr list; (* Evaluated actual parameters *)
     mods : stmt; (* Additional statements, which could be a block *)
 }  *)
-(*let functioncall env = function*)
+let functioncall env = function
 
 (* Check if valid identifier *)
 let identify env = function
@@ -169,36 +169,37 @@ let rec expr env = function
 	(*let _, t1 = id (* type of rhs *) in*)
 	Sast.Variable(id), Sast.Varidentifier
 	
-(*  | Ast.Call(funccall) ->
-		(* Evaluate if this is a valid func_call: must have cname : identifier; (* Name of the function *)
-    actuals : expr list; (* Evaluated actual parameters *)
-    mods : stmt; (* Additional statements, which could be a block *) *)
-		(* Then check to see if said function exists *)
-
-		(*CGL has a call of string, exprList *)
-  | Ast.Call (string, exprList) ->
-		(
-		let funcFound = find_function scope string in
-		let formalTypes = List.map (fun {pdt=s; pname=_} -> s) funcFound.formals in
-		let checkedExprs = List.map (exprCheck scope) exprList in
-		let checkedTypes = List.map snd(checkedExprs) in
+  | Ast.Call(funccall) -> (
+	 (* Evaluate if this is a valid func_call: 
+		cname : identifier; (* Name of the function *)
+		actuals : expr list; (* Evaluated actual parameters *)
+		mods : stmt; (* Additional statements, which could be a block *) *)
+		let id = functioncall env funccall in
+		let funct = find_function env id.cname in	(* Check to see if said function exists *)
+		(* We need to now check that the arguments are valid *)
+		(* Do we need to getting types from identifiers somehow? *)
+		let formallist = List.map (identify env) funct.formals in
+		let formalTypes = List.map snd(formallist) in
+		(* Get the list of actuals and their types *)
+		let actuallist = List.map (identify env) funccall.actuals in
+		let actualtypes = List.map snd(actuallist) in
 		
 		(* check each type from checked list against fdecl param types in scope's function list *)
-		let rec typesMatch list1 list2 = match list1,list2 with
+		let rec checktypes list1 list2 = match list1,list2 with
 		| [], [] -> true
-		| [], _ -> raise(Failure(" found parameters when expecting none "))
-		| _ , [] -> raise(Failure(" found no parameters when expecting parameters"))
+		| [], _ -> raise(Failure(" there should be no parameters "))
+		| _ , [] -> raise(Failure(" there are missing parameters"))
 		| _ , _ -> 
 			try
-		  ( typeEq (List.hd(list1)) (List.hd(list2)) ) && typesMatch (List.tl(list1)) (List.tl(list2))
+		  ( types_equal (List.hd(list1)) (List.hd(list2)) ) && types_equal (List.tl(list1)) (List.tl(list2))
 			with Failure("hd") ->
-				raise(Failure(" trying List.hd on [] in exprCheck:Ast.Call"))
+				raise(Failure(" mismatched types "))
 		in
-		if (typesMatch formalTypes checkedTypes)
-		  then Sast.Call (string , checkedExprs) , funcFound.fdt
-	  else
-			raise(Failure("Arguments for function: "^ string ^" do not match function signature"))
-		)*)
+		if (types_equal formalTypes checkedTypes)
+		  then Sast.Call (id) , Sast.funccall
+	    else
+			raise(Failure("Arguments for function do not match those given in the definition"))
+		)
   
   (* Component of identifier: identifier has to be slide or variable (component or slide) *)
 	  
