@@ -3,7 +3,7 @@
 /* 
  * Reads SPWAG source files (without curly braces "{}") from Standard In
  * and inserts curly braces as appropriate. Preprocessed SPWAG code is
- * printed to Standard Out.
+ * returned to calling OCaml function as a String.
  */
 
 #include <stdlib.h>
@@ -22,6 +22,7 @@ void addNTabs(int n, char *destination){
 	}
 }
 
+// corresponds to OCaml function type: unit -> String
 CAMLprim value caml_preprocess(value unit)
 {
 	char buffer[BUF_SIZE];
