@@ -3,10 +3,6 @@
 (* Identifiers *)
 type identifier = Identifier of string
 		
-(* 	All objects must be one of these types 
-	Varidentifier is incredibly problematic *)
-type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier | Null
-		
 (* Operators *)
 type operator = Plus | Minus | Times | Divide | Equals | Notequals | Lessthan | Greaterthan | Or | And
 
