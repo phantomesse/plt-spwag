@@ -34,6 +34,15 @@ let types_equal t1 t2 = match t1,t2 with _, _ -> if (t1 = t2)
     then true
 		else false
 
+let identifier_of_string = function
+    s -> Identifier(s)
+		
+let string_of_identifier = function
+    Identifier(s) -> s
+	
+let string_of_expr = function
+    s -> Litstr(s)
+		
 let string_of_type_t = function
       Sast.Int -> "Int"
     | Sast.Bool -> "Bool"
@@ -93,9 +102,7 @@ let rec find_function scope name = (* name is an identifier *)
 
 (*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements  *)
 	
-	(* List.find (fun {cname=c; value=_; mods = _} -> c = call) scope.functions Code to check if func call is in symbol table *)	
-
-(* Check if valid identifier *)
+(* Convert AST identifier to SAST identifier *)
 let identify env = function
     Ast.Identifier(v) -> Sast.Identifier(v)
     (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
@@ -184,23 +191,24 @@ let rec expr env = function
 	(*let _, t1 = id (* type of rhs *) in*)
 	Sast.Variable(id), Sast.Varidentifier
 	
+	(* let string_of_identifier = function
+    Identifier(s) -> s *)
   | Ast.Call(funccall) -> (
-	 (* Evaluate if this is a valid func_call: 
-		cname : identifier; (* Name of the function *)
-		actuals : expr list; (* Evaluated actual parameters *)
-		mods : stmt; (* Additional statements, which could be a block *) *)
-		let fc = functioncall env funccall in
+		let fc = functioncall env funccall in		(* Evaluate if this is a valid func_call *)
 		let funct = find_function env fc.cname in	(* Check to see if said function exists *)
 		(* We need to now check that the arguments are valid *)
-		(* Do we need to getting types from identifiers somehow? *)
+		(* Do we even need to get types from identifiers somehow? *)
 		let formallist = List.map (identify env) funct.formals in
+		(*let formalstoidentifiers = List.map (string_of_identifier) formallist in
+		let identifierstoexprs = List.map (Litstr)*)
 		(*let formalTypes = List.map fst(formallist) in*)
 		(* Get the list of actuals and their types *)
-		let actualstoidentifiers = List.map (Identifier) funccall.actuals in (*problematic line*)
-		let actuallist = List.map (identify env) actualstoidentifiers in
+		let actualstostrings = List.map (string_of_expr) funccall.actuals in 	
+		let stringstoids = List.map (identifier_of_string) actualstostrings in 
+		let actuallist = List.map (identify env) stringstoids in
 		(*let actualtypes = List.map fst(actuallist) in*)
 		
-		(* check each type from checked list against fdecl param types in scope's function list *)
+		(* compare the forms and actuals *)
 		let rec checktypes list1 list2 = match list1, list2 with
 		| [], [] -> true
 		| [], _ -> raise(Failure(" there should be no parameters "))
@@ -210,7 +218,7 @@ let rec expr env = function
 			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
 		if (checktypes formallist actuallist)
-			then Sast.Call (id), funct.t
+		then Sast.Call (fc), funct.t
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
@@ -229,7 +237,10 @@ let rec expr env = function
 
 		(*let rec returncomp currentcomp exprlist = match exprlist with
 		| [] -> (* run some code *)
-		| _ ->*)  Sast.Component (id, (expr env exprlist)), Sast.Varidentifier
+		
+		| _ ->*)
+		let checkedexprs = List.map (expr env) exprlist in
+		Sast.Component (id, checkedexprs), Sast.Varidentifier
 			
   (*Below code is old
   
@@ -250,20 +261,6 @@ let rec expr env = function
     Sast.Assign(id, e1), id_type, expr_type
 *)
 
-(*stmt = (* Statements ; WIP *)
-      Block of stmt list (* { ... } *) Taken from Edwards' slides, but it probably doesn't work
-    | Expr of expr (* foo = bar + 3; *) Done!
-    | Return of expr (* return 42; *) Done!
-    | If of expr * stmt * stmt (* if (foo == 42) stmt1 else stmt2 end *) Should work
-    | While of expr * stmt (* while (i<10) \n  i = i + 1 \n end \n *) Should work
-    | Declaration of identifier (* Declaring a variable *) Partially complete
-    | Decassign of identifier * expr (* Declaring a variable and then assigning it something *) Partially complete
-	*)
-
-(* 	Fixed the block statement by instead folding over a tuple with the scope and list of statements 
-	Need to take a look at Return though
-*)
-
 let rec stmts (env, stmtlist) stmt =
 	let newscope = {
 	  parent =  Some env;  (* set parent to newglobalscope parameter *)
@@ -277,8 +274,8 @@ let rec stmts (env, stmtlist) stmt =
     | Ast.Block(b) -> env, Sast.Block(snd(List.fold_left stmts(newscope,[]) b))::stmtlist
 	| Ast.Return(e) -> 		(* We need to figure out how to match return types since identifiers aren't associated with types *)
 		let e1 = expr env e in
-		let _, t1 = e1 in
-		(*if (typeEq t1 returntype )
+		(*let _, t1 = e1 in
+		if (typeEq t1 returntype )
 		  then*) env, Sast.Return(e1)::stmtlist
 		(*else raise(Failure("Return type of function body doesn't match: found"^(string_of_datatype t1)^" but expected "^(string_of_datatype returntype)))*)
 	
@@ -353,43 +350,9 @@ let rec stmts (env, stmtlist) stmt =
 		else	
 			raise(Failure(string_of_type_t t1^" expression does not match identifier "^string_of_type_t t2))	*)
 
-(* Basing this off CGL language
-
-They have:
-
-type datatype = IntType | DoubleType | BoolType | StringType | CardType |
-    ListType | PlayerType | AnytypeType
-
-type formal =
-{
-    pdt : datatype;
-    pname : string;
-}    
-
-type fdecl =
-{
-    fdt : Ast.datatype;       || Our equivalent is t : func_type
-    fname : string;         || Our equivalent is name : identifier
-    formals : Ast.formal list;    || Our equivalent is formals : identifier list
-    fbody : stmt list;        || Our equivalent is body : stmt list;
-}
-
-Ours:
-
-type func_definition = { (* Handles declarations of functions, components, attributes, slides *)
-    t: func_type; (* e.g. slide, component, attribute, func *)
-    name : identifier; (* Name of the function *)
-    formals : identifier list; (* Name of the formal parameters *)
-    inheritance : identifier option; (* Name of any parent components, ie box, or null *)
-    paractuals: expr list; (* This represents the actuals passed to the parent *)
-    body : stmt list; (* Conditional, Return Statements, Function Declarations/Calls, etc. *)
-}
-*)
-
 (* check to see if func_definition is valid, and return function that is evaluated *)
 let check_function env func_definition = match func_definition.body with
-	[] -> raise(Failure("Empty functions are invalid"))
-	(* Not sure if you need a | before the [] case ... anyway, empty functions not allowed *)
+	[] -> raise(Failure("Empty functions are invalid")) (* Empty functions not allowed *)
   | x ->
         (*let return_type = func_definition.t in Which type the function returns: this is unused because design issues *)
         (* Why are we even doing this return stuff *)
@@ -402,7 +365,7 @@ let check_function env func_definition = match func_definition.body with
           inheritance = func_definition.inheritance;
 } in *)
 
-	let parentscope = {		(* Do we need this parent scope? Maybe we should just use global because functions *)
+	let parentscope = {		
 		parent = env.parent;
 		functions = env.functions;
 		variables = (List.map (identify env) func_definition.formals)@(env.variables);	
