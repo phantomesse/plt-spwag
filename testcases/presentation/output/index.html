@@ -6,45 +6,6 @@
     <title>SPWAG</title>    <link rel="stylesheet" type="text/less" href="../../../config/config.css">
     <style type="text/css">
 
-        #workflow {
-            background-color: #373B44;
-        }
-
-        #workflow-title-underline {
-            position: absolute;
-            left: 70px;
-            top: 90px;
-            background-color: #BD5532;
-            width: 760px;
-            height: 5px;
-        }
-
-
-        #workflow-title {
-            position: absolute;
-            left: 70px;
-            top: 40px;
-            color: #E1B866;
-            font-family: 'Josefin Slab', serif;
-            font-size: 60px;
-            font-weight: bold;
-        }
-
-
-        #workflow-content {
-            position: absolute;
-            left: 50px;
-            top: 150px;
-            width: 800px;
-            height: 420px;
-        }
-
-        #workflow-content- {
-            color: #EEE;
-            font-size: 30px;
-        }
-
-
         #overview {
             background-color: #373B44;
         }
@@ -508,24 +469,6 @@
 </head>
 
 <body>
-    <div id="workflow" class="slide">
-        <div id="workflow-title-underline" class="box">
-        </div>
-
-
-        <div id="workflow-title" class="box">
-            Roles & Responsibilities
-        </div>
-
-
-        <div id="workflow-content" class="box">
-            <div id="workflow-content-" class="box">
-                Who did what? Put a chart here!
-            </div>
-        </div>
-        <a class="prev" href="#implementation"></a>
-        <a class="next" href="#demo"></a>
-    </div>
     <div id="overview" class="slide">
         <div id="overview-title-underline" class="box">
         </div>
@@ -730,13 +673,13 @@
             </div>
         </div>
         <a class="prev" href="#motivation"></a>
-        <a class="next" href="#workflow"></a>
+        <a class="next" href="#demo"></a>
     </div>
     <div id="demo" class="slide">
         <div id="demo-demo" class="box">
             SPWAG Demo
         </div>
-        <a class="prev" href="#workflow"></a>
+        <a class="prev" href="#implementation"></a>
         <a class="next" href="#lessons-learned"></a>
     </div>
 
@@ -817,11 +760,6 @@
 
 
 
-
-
-
-
-
         $('#demo-demo').click(function() {
 changebackground()
 });
@@ -829,7 +767,7 @@ changebackground()
         function changebackground() {
             $('#demo').css("background-color", "#BD5532");
 ;
-            $('#implementation-content-preprocessor').css("background-color", "deeppink");
+            $('#implementation-content-html-css-javascript').css("background-color", "deeppink");
 ;
         }
         function bgcolor() {

@@ -253,10 +253,11 @@ define slide implementation()
     }
 
     prev(motivation)
-    next(workflow)
+    # next(workflow)
+    next(demo)
 }
 
-define slide workflow()
+## define slide workflow()
 {
     background-color(bgcolor())
 
@@ -275,7 +276,7 @@ define slide workflow()
 
     prev(implementation)
     next(demo)
-}
+} ##
 
 define slide demo()
 {
@@ -290,14 +291,15 @@ define slide demo()
         on-click(changebackground())
     }
 
-    prev(workflow)
+    prev(implementation) 
+    # prev(workflow)
     next(lessons-learned)
 }
 
 define func changebackground()
 {
     set(demo, "background-color", "#BD5532")
-    set(implementation[content][preprocessor], "background-color", "deeppink")
+    set(implementation[content][html-css-javascript], "background-color", "deeppink")
 }
 
 define slide lessons-learned()
