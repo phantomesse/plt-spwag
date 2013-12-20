@@ -1,0 +1,10 @@
+box() {
+            id("spwag-box")
+            padding-top(10)
+            padding-bottom(10)
+            background-color(cyan())
+            text("SPWAG")
+            text-color(bgcolor())
+            width(120)
+            on-click(background-color("#BD5532"))
+      }
