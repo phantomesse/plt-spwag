@@ -54,8 +54,8 @@ let string_of_element_css (style:Element.css) id =
     string_of_css_display_property style.display ^
     
     string_of_css_position_property style.position_x style.position_y ^
-    string_of_css_property "left" style.position_x ^
-    string_of_css_property "top" style.position_y ^
+    string_of_css_property "left" (string_pixel_percent style.position_x) ^
+    string_of_css_property "top" (string_pixel_percent style.position_y) ^
 
     string_of_css_property "margin-top" (string_pixel_percent style.margin_top) ^
     string_of_css_property "margin-bottom" (string_pixel_percent style.margin_bottom) ^

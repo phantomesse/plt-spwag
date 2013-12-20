@@ -2,26 +2,12 @@ define slide main()
 {
     background-color(bgcolor())
 
-    heading("SPWAG") {
-        id("title")
-        padding-top(100)
-        font-size(150)
+    title("SPWAG") {
+        id("spwag")
+        position-x(0)
+        position-y(100)
+        font-size(180)
         width(900)
-    }
-
-    heading("Simple Presentation Web App Generator") {
-        id("subtitle")
-        padding-top(10)
-        padding-bottom(50)
-        font-size(40)
-        font-decoration("bold")
-        text-color(accentcolor())
-        width(960)
-    }
-
-    heading("Lauren Zou (ljz2112), Aftab Khan (ajk2194), Richard Chiou (rc2758),<br />Yunhe (John) Wang (yw2439), Aditya Majumdar (am3713)") {
-        id("authors")
-        font-size(24)
     }
 
     next(overview)
@@ -31,36 +17,125 @@ define slide overview()
 {
     background-color(bgcolor())
 
-    slide-heading("What is SPWAG?") {
+    title("What is SPWAG?") {
         id("title")
     }
+    title-underline() {
+        id("title-underline")
+    }
+
+    content() {
+        id("content")
+
+        box() {
+            id("spwag-box")
+            padding-top(10)
+            padding-bottom(10)
+            background-color(cyan())
+            text("SPWAG")
+            text-color(bgcolor())
+            width(120)
+        }
+    }
+
+    prev(main)
+    next(motivation)
 }
 
-define comp heading(headingtext) isa box()
+define slide motivation()
 {
-    text(headingtext)
-    text-color(fgcolor())
+    background-color(bgcolor())
+
+    title("Why SPWAG?") {
+        id("title")
+    }
+    title-underline() {
+        id("title-underline")
+    }
+
+    content() {
+        id("content")
+
+        content-text("SPWAG is a simple language that streamlines presentation creation, saving you time while producing beautiful (and functional) slideshows.")
+    }
+
+    prev(overview)
+    next(implementation)
+}
+
+define slide implementation()
+{
+    background-color(bgcolor())
+
+    title("How does SPWAG work?") {
+        id("title")
+    }
+    title-underline() {
+        id("title-underline")
+    }
+
+    content() {
+        id("content")
+
+        content-text("Put a fucking data flow chart here.")
+    }
+
+    prev(overview)
+    next(implementation)
+}
+
+define comp title(text) isa box()
+{
+    position-x(70)
+    position-y(40)
+    text(text)
+    text-color(accentcolor())
     font("'Josefin Slab', serif")
+    font-size(60)
+    font-decoration("bold")
 }
 
-define comp slide-heading(headingtext) isa heading(headingtext)
+define comp title-underline() isa box()
 {
-    background-color("pink")
+    position-x(70)
+    position-y(100)
+    background-color(accentcolor())
+    width(760)
+    height(5)
 }
 
-# Define some colors
+define comp content() isa box()
+{
+    position-x(70)
+    position-y(150)
+    width(760)
+    height(420)
+}
+
+define comp content-text(text) isa box()
+{
+    text(text)
+    text-color(fgcolor())
+    font-size(30)
+}
+
+# DEFINE SOME COLORS
 define func bgcolor()
 {
-    return "#DACFA6" # Beige
+    return "#373B44" # Charcoal Gray
 }
 
 define func fgcolor()
 {
-    return "#2B1A0A" # Dark brown
+    return "#EEE" # Light Gray
 }
 
 define func accentcolor()
 {
-    return "#60222B" # Maroon
+    return "#E1B866" # Soft Goldenrod Yellow
 }
 
+define func cyan()
+{
+    return "#73C8A9"
+}

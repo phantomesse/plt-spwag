@@ -7,44 +7,138 @@
     <style type="text/css">
 
         #overview {
-            background-color: #DACFA6;
+            background-color: #373B44;
         }
 
+        #overview-title-underline {
+            position: absolute;
+            left: 70px;
+            top: 100px;
+            background-color: #E1B866;
+            width: 760px;
+            height: 5px;
+        }
+
+
         #overview-title {
-            color: #2B1A0A;
-            background-color: pink;
+            position: absolute;
+            left: 70px;
+            top: 40px;
+            color: #E1B866;
             font-family: 'Josefin Slab', serif;
+            font-size: 60px;
+            font-weight: bold;
+        }
+
+
+        #overview-content {
+            position: absolute;
+            left: 70px;
+            top: 150px;
+            width: 760px;
+            height: 420px;
+        }
+
+        #overview-content-spwag-box {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            color: #373B44;
+            background-color: #73C8A9;
+            width: 120px;
+        }
+
+
+        #motivation {
+            background-color: #373B44;
+        }
+
+        #motivation-title-underline {
+            position: absolute;
+            left: 70px;
+            top: 100px;
+            background-color: #E1B866;
+            width: 760px;
+            height: 5px;
+        }
+
+
+        #motivation-title {
+            position: absolute;
+            left: 70px;
+            top: 40px;
+            color: #E1B866;
+            font-family: 'Josefin Slab', serif;
+            font-size: 60px;
+            font-weight: bold;
+        }
+
+
+        #motivation-content {
+            position: absolute;
+            left: 70px;
+            top: 150px;
+            width: 760px;
+            height: 420px;
+        }
+
+        #motivation-content- {
+            color: #EEE;
+            font-size: 30px;
         }
 
 
         #main {
-            background-color: #DACFA6;
+            background-color: #373B44;
         }
 
-        #main-title {
-            padding-top: 100px;
-            color: #2B1A0A;
+        #main-spwag {
+            position: absolute;
+            left: 0px;
+            top: 100px;
+            color: #E1B866;
             font-family: 'Josefin Slab', serif;
-            font-size: 150px;
+            font-size: 180px;
+            font-weight: bold;
             width: 900px;
         }
 
 
-        #main-subtitle {
-            padding-top: 10px;
-            padding-bottom: 50px;
-            color: #60222B;
-            font-family: 'Josefin Slab', serif;
-            font-size: 40px;
-            font-weight: bold;
-            width: 960px;
+        #implementation {
+            background-color: #373B44;
+        }
+
+        #implementation-title-underline {
+            position: absolute;
+            left: 70px;
+            top: 100px;
+            background-color: #E1B866;
+            width: 760px;
+            height: 5px;
         }
 
 
-        #main-authors {
-            color: #2B1A0A;
+        #implementation-title {
+            position: absolute;
+            left: 70px;
+            top: 40px;
+            color: #E1B866;
             font-family: 'Josefin Slab', serif;
-            font-size: 24px;
+            font-size: 60px;
+            font-weight: bold;
+        }
+
+
+        #implementation-content {
+            position: absolute;
+            left: 70px;
+            top: 150px;
+            width: 760px;
+            height: 420px;
+        }
+
+        #implementation-content- {
+            color: #EEE;
+            font-size: 30px;
         }
 
     </style>
@@ -52,25 +146,64 @@
 
 <body>
     <div id="overview" class="slide">
+        <div id="overview-title-underline" class="box">
+        </div>
+
+
         <div id="overview-title" class="box">
             What is SPWAG?
         </div>
+
+
+        <div id="overview-content" class="box">
+            <div id="overview-content-spwag-box" class="box">
+                SPWAG
+            </div>
+        </div>
+        <a class="prev" href="#main"></a>
+        <a class="next" href="#motivation"></a>
+    </div>
+    <div id="motivation" class="slide">
+        <div id="motivation-title-underline" class="box">
+        </div>
+
+
+        <div id="motivation-title" class="box">
+            Why SPWAG?
+        </div>
+
+
+        <div id="motivation-content" class="box">
+            <div id="motivation-content-" class="box">
+                SPWAG is a simple language that streamlines presentation creation, saving you time while producing beautiful (and functional) slideshows.
+            </div>
+        </div>
+        <a class="prev" href="#overview"></a>
+        <a class="next" href="#implementation"></a>
     </div>
     <div id="main" class="slide">
-        <div id="main-title" class="box">
+        <div id="main-spwag" class="box">
             SPWAG
         </div>
-
-
-        <div id="main-subtitle" class="box">
-            Simple Presentation Web App Generator
-        </div>
-
-
-        <div id="main-authors" class="box">
-            Lauren Zou (ljz2112), Aftab Khan (ajk2194), Richard Chiou (rc2758),<br />Yunhe (John) Wang (yw2439), Aditya Majumdar (am3713)
-        </div>
         <a class="next" href="#overview"></a>
+    </div>
+    <div id="implementation" class="slide">
+        <div id="implementation-title-underline" class="box">
+        </div>
+
+
+        <div id="implementation-title" class="box">
+            How does SPWAG work?
+        </div>
+
+
+        <div id="implementation-content" class="box">
+            <div id="implementation-content-" class="box">
+                Put a fucking data flow chart here.
+            </div>
+        </div>
+        <a class="prev" href="#overview"></a>
+        <a class="next" href="#implementation"></a>
     </div>
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -83,14 +216,27 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
         function bgcolor() {
-            return #DACFA6;
+            return #373B44;
         }
         function fgcolor() {
-            return #2B1A0A;
+            return #EEE;
         }
         function accentcolor() {
-            return #60222B;
+            return #E1B866;
+        }
+        function cyan() {
+            return #73C8A9;
         }
     </script>
 
