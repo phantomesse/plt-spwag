@@ -209,14 +209,14 @@ let string_of_operator operator = match operator with
 ;;
 
 let string_of_set arg1 arg2 = match arg1 with
-    | "text" -> ".html(" ^ arg2 ^ ");\n"
-    | "image" -> ".html(<img src=\"" ^ arg2 ^ "\" />);\n"
+    | "\"text\"" -> ".html(" ^ arg2 ^ ");\n"
+    | "\"image\"" -> ".html(<img src=\"" ^ arg2 ^ "\" />);\n"
     | _ -> ".css(" ^ arg1 ^ ", " ^ arg2 ^ ");\n"
 ;;
 
 let string_of_get arg1 = match arg1 with
-    | "text" -> ".html();\n"
-    | "image" -> ".children('img');\n"
+    | "\"text\"" -> ".html();\n"
+    | "\"image\"" -> ".children('img');\n"
     | _ -> ".css(" ^ arg1 ^ ");\n"
 ;;
 

@@ -1,57 +1,101 @@
-var numclicks
 var box-size
-var rows
-var columns
+var dim
 
 define slide main()
 {
 	# Some global variables 
 	box-size = 100
-	rows = 5
-	columns = 5
+	dim = 5
     background-color("#333")
 	box() {
 		id("upper")
-		height(30)
-		width(columns * box-size + 50)
+		height(25)
+		width(dim * box-size + 50)
     	background-color("#333")
 	}
 
 	# Container box
 	var r = 0
-	while (r < rows)
+	while (r < dim)
 	{
 		box() {
 			var c = 0
 			id("row"+r)
 			height(box-size)
-			width(columns * box-size + 50)
-			while (c < columns)
+			width(dim * box-size + 50)
+			while (c < dim)
 			{
 				square(r, c)
 				c = c + 1
 			}
 		}
 		r = r + 1
-	}	
+	}
+
+	# Numbering box
+	box() {
+		id("numbers")
+		width(dim * box-size + 50)
+		text("Red: 0 White: " + dim * dim)
+		text-color("white")
+	}
 }
 
 define comp square(x, y) isa box()
 {
-    var box-size = 100
-	
     id("square" + x + y)
     background-color("white")
     width(box-size)
     height(box-size)
 
-	on-click(changecolor(x, y))
+	on-click(changeneighbors(x, y, dim))
+}
+
+define func changeneighbors(x, y, ndim)
+{ 
+	# Update
+	changecolor(x, y)
+	if (x > 0)
+		changecolor(x-1, y)
+	if (x < ndim - 1)
+		changecolor(x+1, y)
+	if (y > 0)
+		changecolor(x, y-1)
+	if (y < ndim + 1)
+		changecolor(x, y+1)
+	
+	# Detect
+	var row = 0
+	var num = 0
+	while row < ndim
+	{
+		var col = 0
+		while col < ndim
+		{
+			var rowid = "row"+row
+			var squareid = "square"+row+col
+			var current = get(main[rowid][squareid], "background-color")
+	
+			if (current == "rgb(255, 255, 255)")
+				num = num + 1
+			col = col + 1
+		}
+		row = row + 1
+	}
+	var nred = ndim * ndim - num
+	set(main["numbers"], "text", "Red: " + nred + " White: " + num)
+
 }
 
 define func changecolor(x, y)
 {
 	var rowid = "row"+x
 	var squareid = "square"+x+y
-	set(main[rowid][squareid], "background-color", "red")
+	var current = get(main[rowid][squareid], "background-color")
+	
+	if (current == "rgb(255, 255, 255)")
+		set(main[rowid][squareid], "background-color", "red")
+	else
+		set(main[rowid][squareid], "background-color", "white")
 }
 
