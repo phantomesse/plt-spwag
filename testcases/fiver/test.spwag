@@ -1,33 +1,57 @@
 var numclicks
+var box-size
+var rows
+var columns
 
 define slide main()
 {
-    # Set background color
+	# Some global variables 
+	box-size = 100
+	rows = 5
+	columns = 5
     background-color("#333")
+	box() {
+		id("upper")
+		height(30)
+		width(columns * box-size + 50)
+    	background-color("#333")
+	}
 
-    var rows = 5
-    var columns = 5
-
-    var r = 0
-    var c = 0
-
-    while (r < rows)
-    {
-        while (c < columns)
-        {
-            square(r, c)
-            c = c + 1
-        }
-        r = r + 1
-    }
+	# Container box
+	var r = 0
+	while (r < rows)
+	{
+		box() {
+			var c = 0
+			id("row"+r)
+			height(box-size)
+			width(columns * box-size + 50)
+			while (c < columns)
+			{
+				square(r, c)
+				c = c + 1
+			}
+		}
+		r = r + 1
+	}	
 }
 
 define comp square(x, y) isa box()
 {
     var box-size = 100
-
-    id(x + "" + y)
+	
+    id("square" + x + y)
     background-color("white")
     width(box-size)
     height(box-size)
+
+	on-click(changecolor(x, y))
 }
+
+define func changecolor(x, y)
+{
+	var rowid = "row"+x
+	var squareid = "square"+x+y
+	set(main[rowid][squareid], "background-color", "red")
+}
+

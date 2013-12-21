@@ -207,6 +207,19 @@ let string_of_operator operator = match operator with
     | Or -> "||"
     | And -> "&&"
 ;;
+
+let string_of_set arg1 arg2 = match arg1 with
+    | "text" -> ".html(" ^ arg2 ^ ");\n"
+    | "image" -> ".html(<img src=\"" ^ arg2 ^ "\" />);\n"
+    | _ -> ".css(" ^ arg1 ^ ", " ^ arg2 ^ ");\n"
+;;
+
+let string_of_get arg1 = match arg1 with
+    | "text" -> ".html();\n"
+    | "image" -> ".children('img');\n"
+    | _ -> ".css(" ^ arg1 ^ ");\n"
+;;
+
 (* Translates an expression into a string *)
 let rec string_of_expression (expression_detail, expression_type) = match expression_detail with
     | Binop (expr1, operator, expr2) ->
@@ -221,11 +234,11 @@ let rec string_of_expression (expression_detail, expression_type) = match expres
         string_of_identifier identifier ^ " = " ^ string_of_expression expr
     | Variable identifier -> string_of_identifier identifier
     | Component (parent, children) ->
-        "" ^ string_of_identifier parent ^ "-" ^
-        String.concat "-" (List.map (fun child -> string_of_expression child) children)
+        "'#" ^ string_of_identifier parent ^ "'" ^
+        String.concat "" (List.map (fun child -> "+ '-' + " ^ string_of_expression child) children)
     | Call func_call -> match func_call.cname with
-        | Identifier("set") -> "$('#" ^ string_of_expression (List.nth func_call.actuals 0) ^ "').css(" ^ string_of_expression (List.nth func_call.actuals 1) ^ ", " ^ string_of_expression (List.nth func_call.actuals 2) ^ ");\n"
-        | Identifier("get") -> "$('#" ^ string_of_expression (List.nth func_call.actuals 0) ^ "').css(" ^ string_of_expression (List.nth func_call.actuals 1) ^ ");\n"
+        | Identifier("set") -> "$(" ^ string_of_expression (List.nth func_call.actuals 0) ^ ")" ^ (string_of_set (string_of_expression (List.nth func_call.actuals 1)) (string_of_expression (List.nth func_call.actuals 2)) )
+        | Identifier("get") -> "$(" ^ string_of_expression (List.nth func_call.actuals 0) ^ ")" ^ (string_of_get (string_of_expression (List.nth func_call.actuals 1)))
         | _ -> string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
 ;;
 

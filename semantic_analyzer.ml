@@ -74,7 +74,6 @@ let identify env = function
     Ast.Identifier(v) -> Sast.Identifier(v)
     (*let vdecl = find_variable env.scope Ast.Identifier in (* Locate a variable by name *)
 	Sast.Identifier(vdecl), Sast.Varidentifier*)
-
 	
 let string_of_expr = function
 	| _ -> "(not implemented ... yet)"
@@ -92,7 +91,6 @@ let string_of_binop = function
 	| And -> "And"
 	| Or -> "Or"
 
-	
 (* This find_variable function is adapted from the slides *)
 let rec find_variable scope name =
     try
@@ -118,8 +116,6 @@ let rec find_function scope name = (* name is an identifier *)
 
 (*  Evaluate func call: Evaluate identifier to be valid (not slide), evaluate actuals are valid expressions, evaluate mods are statements  *)
 
-
-
 (* check to see if valid function call *)
 let functioncall env call = 
 	(*let actuallist = List.map (expr env) call.actuals 
@@ -138,12 +134,16 @@ let functioncall env call =
 		mods = call.mods;  
       } in
 	checked_func_call	
+
+(* Convert function definitions from Ast to Sast *)
+(*let func_def_converstion env (fdef:Ast.func_definition) = 
+		{Sast.t=fdef.t;
+		name= identify env fdef.name;
+		formals = List.rev (List.fold_left (fun l (Ast.Identifier(s)) -> Sast.Identifier(s)::l ) [] fdef.formals);
+		inheritance = (match fdef.inheritance with None -> None | Some(Ast.Identifier(s)) -> Some(Sast.Identifier(s))); 
+		paractuals = List.rev (List.fold_left (fun l e -> (expr env e)::l ) [] fdef.paractuals);
+		body = List.rev (List.fold_left (fun l s -> (convert_stmt s)::l ) [] fdef.body);}*)
 		
-(* let func_call_conversion env (fc: Ast.func_call) = { 	
-	Sast.cname = identify env fc.cname;
-	Sast.actuals = List.rev(List.fold_left (fun l e -> (expr env e)::l ) [] c.actuals);
-	Sast.mods = Lst.hd snd(stmts(env, []) fc.mods)} in *)
-	
 (* Check if valid expression*)
 let rec expr env = function
 
@@ -211,8 +211,8 @@ let rec expr env = function
 	(* let string_of_identifier = function
     Identifier(s) -> s *)
   | Ast.Call(funccall: Ast.func_call) -> (
-		let fc = functioncall env funccall in		(* Evaluate if this is a valid func_call *)
-		let funct = find_function env fc.cname in	(* Check to see if said function exists *)
+		let fc = functioncall env funccall in				(* Evaluate if this is a valid func_call *)
+		let funct = find_function env funccall.cname in		(* Check to see if said function exists *)
 		(* We need to now check that the arguments are valid *)
 		(* Do we even need to get types from identifiers somehow? *)
 		let formallist = List.map (identify env) funct.formals in
@@ -235,7 +235,20 @@ let rec expr env = function
 			with Failure("hd") -> raise(Failure(" mismatched types "))
 		in
 		if (checktypes formallist actuallist) then 
-			(Sast.Call (fc)), type_to_t funct.t	(*Problematic Code*)
+		let rec convert_stmt = function
+			Ast.Block(stmts) -> Sast.Block(List.rev (List.fold_left (fun l s -> (convert_stmt s)::l ) [] stmts))
+		  | Ast.Expr(e) -> Sast.Expr(expr env e)
+		  | Ast.Return(e) -> Sast.Return(expr env e)
+		  | Ast.If(e,s1,s2) -> Sast.If(expr env e, convert_stmt s1, convert_stmt s2)
+    	  | Ast.While(e,s) -> Sast.While(expr env e, convert_stmt s)
+    	  | Ast.Declaration(Identifier(s)) -> Sast.Declaration(Sast.Identifier(s))
+    	  | Ast.Decassign(Identifier(s), e) -> Sast.Decassign(Sast.Identifier(s), expr env e)
+			in
+			let func_call_conversion env (fc: Ast.func_call) = 
+			   {Sast.cname = identify env fc.cname;
+				Sast.actuals = List.rev(List.fold_left (fun l e -> (expr env e)::l ) [] fc.actuals);
+				Sast.mods = convert_stmt fc.mods}
+			in (Sast.Call (func_call_conversion env funccall)), type_to_t funct.t
 	    else
 			raise(Failure("Arguments for function do not match those given in the definition"))
 		)
@@ -289,17 +302,18 @@ let rec expr env = function
     let (_, id_type) = vdecl in (* get the variable's type *)
     let (_, expr_type ) = expreval in
     Sast.Assign(id, e1), id_type, expr_type
-*)
+*) 
 
+(* Fold over an intermediate scope/statement list tuple. *)
 let rec stmts (env, stmtlist) stmt =
 	let newscope = {
-	  parent =  Some env;  (* set parent to newglobalscope parameter *)
+	  parent =  Some env; 
 	  functions = [];
 	  variables = []; 
 	} in
 	match stmt with 
 	
-    | Ast.Expr(e) ->  env, Sast.Expr(expr env e)::stmtlist
+	| Ast.Expr(e) -> env, Sast.Expr(expr env e)::stmtlist
     (*| Ast.Return(e1) -> Sast.Return(expr env e1) (* I have not written checking for e1 yet *)*)
     | Ast.Block(b) -> env, Sast.Block(snd(List.fold_left stmts(newscope,[]) b))::stmtlist
 	| Ast.Return(e) -> 		(* Only funcs can call return, so no error-checking should be fine *)
@@ -404,7 +418,8 @@ let check_function env func_definition = match func_definition.body with
 		t = func_definition.t;
         name = func_definition.name;
         formals = func_definition.formals;
-		inheritance = func_definition.inheritance; 	(* how are we going to deal with inheritance? *)
+		inheritance = func_definition.inheritance; 	 (* how are we going to deal with inheritance? *)
+		(*inheritance = (match func_definition.inheritance with None -> None | Some(Ast.Identifier(s)) -> Some(Sast.Identifier(s))); *)
 	    paractuals = func_definition.paractuals;
         body = fst(x, (List.fold_left stmts(parentscope, []) func_definition.body ));  
       } in
