@@ -223,7 +223,7 @@ let string_of_get arg1 = match arg1 with
 (* Translates an expression into a string *)
 let rec string_of_expression (expression_detail, expression_type) = match expression_detail with
     | Binop (expr1, operator, expr2) ->
-        string_of_expression expr1 ^ " " ^ string_of_operator operator ^ " " ^ string_of_expression expr2
+        "(" ^ string_of_expression expr1 ^ " " ^ string_of_operator operator ^ " " ^ string_of_expression expr2 ^ ")"
     | Notop expr -> "!(" ^ string_of_expression expr ^ ")"
     | Litint integer -> string_of_int integer
     | Litper integer -> string_of_int integer ^ "%"

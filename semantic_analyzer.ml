@@ -1,18 +1,5 @@
 (*  Author: Richard Chiou
     Contributor: Aditya Majumdar
-    Quick to do list, order by priority:
-   	program: take in an Ast.program and output an Sast.program (compiles)
-		helper function that parses identifier list and adds to symbol table (compiles)
-		helper function that parses func_definition list and adds to symbol table (compiles)
-	Return (how do we return the correct type?)
-	check_function: see if function definition is valid (Compiles)
-	check_func_call: see if function call is valid (Compiles)
-	Declaration of identifier: Compiles
-	Decassign of identifier * expr: Compiles
-	
-	Problematic code:
-	Call of func_call: Prototype is written, but still needs to be debugged
-	Component of identifier: This is hard to write, save this for last
 *)
 
 open Ast
@@ -460,7 +447,9 @@ let add_identifiers env identifiers =
 		raise(Failure("Existing variable declaration"))
 	else
 		identifier
-	in (List.map (check_identifier subscope) identifiers), global  (* newFdecls, newScope *)
+	in 
+	let ids = (List.map (check_identifier subscope) identifiers) in
+	(List.map (identify subscope) ids), global  (* newFdecls, newScope *)
 
 (* Run program with input: Ast.Program, Symbol_Table and output: Sast.Program *)
 (* type program = identifier list * func_definition list (* global vars, funcs*) *)
