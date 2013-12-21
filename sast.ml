@@ -2,8 +2,7 @@
 
 open Ast (* We need to import the operators and other type definitions over, the semantic_analyzer is really confused otherwise. *)
 
-(* 	All objects must be one of these types 
-	Varidentifier is incredibly problematic *)
+(* 	All objects must be one of these types *)
 	
 type t = Int | Per | Str | Bool | Slidetype | Comptype | Attrtype | Functype | Varidentifier | Null
 
