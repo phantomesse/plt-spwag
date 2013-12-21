@@ -448,7 +448,7 @@ let add_identifiers env identifiers =
 	else
 		identifier
 	in 
-	let ids = (List.map (check_identifier subscope) identifiers), global (*in
+	ids = (List.map (check_identifier subscope) identifiers), global (*in
 	(List.map (identify subscope) ids), global*)  (* newFdecls, newScope *)
 
 (* Run program with input: Ast.Program, Symbol_Table and output: Sast.Program *)
