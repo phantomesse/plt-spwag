@@ -13,7 +13,7 @@ let _ =
 				("-p", Preprocessor);
                 ("-c", Compile)
             ]
-        else Compile 
+        else Irgenerator 
 	in
 	(match action with
 	    Ast ->
@@ -36,12 +36,13 @@ let _ =
 			let ir = Irgenerator.generate sast in 
 			let output = Compile.compile ir
 			in print_string output
-	    | Compile -> print_string "Heh heh heh" (*
+	    | Compile ->
 			let processed_code = preprocess() in
 			let lexbuf = Lexing.from_string processed_code in
 			let program = Parser.program Scanner.token lexbuf in
 			let sast = Semantic_analyzer.evalprogram program in
+			let sast = (ignore sast; Sastinjector.inject program) in
 			let ir = Irgenerator.generate sast in 
 			let output = Compile.compile ir
-			in print_string output *)
+			in print_string output 
 	)

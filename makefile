@@ -1,4 +1,4 @@
-OBJS = preprocessor.o linecounter.cmo ast.cmo sast.cmo ir.cmo sastinjector.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo 
+OBJS = preprocessor.o linecounter.cmo ast.cmo sast.cmo ir.cmo sastinjector.cmo semantic_analyzer.cmo parser.cmo scanner.cmo irgenerator.cmo compile.cmo spwag.cmo 
 #sastinjector.cmo
 
 spwag: $(OBJS)

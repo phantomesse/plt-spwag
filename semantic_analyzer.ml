@@ -448,7 +448,7 @@ let add_identifiers env identifiers =
 	else
 		identifier
 	in 
-	ids = (List.map (check_identifier subscope) identifiers), global (*in
+	(List.map (check_identifier subscope) identifiers), global (*in
 	(List.map (identify subscope) ids), global*)  (* newFdecls, newScope *)
 
 (* Run program with input: Ast.Program, Symbol_Table and output: Sast.Program *)
@@ -456,7 +456,8 @@ let add_identifiers env identifiers =
 (* Add the identifiers (variables) and function definitions to global scope *)
 let evalprogram program globalTable =
     let identifiers, funcdefs = program in	(*Get the identifier list and the func_definition list*)
+	let identifiers =  List.rev (List.fold_left (fun l (Ast.Identifier(s)) -> Sast.Identifier(s)::l ) [] identifiers) in
 	let ids = add_identifiers globalTable identifiers
 	and funcs = add_func_definitions globalTable funcdefs in
-	let output = ids, funcs in
+	let output = (fst ids), (fst funcs) in
 	output
