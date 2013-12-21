@@ -82,8 +82,7 @@ define func changeneighbors(x, y, ndim)
 		}
 		row = row + 1
 	}
-	var nred = ndim * ndim - num
-	set(main["numbers"], "text", "Red: " + nred + " White: " + num)
+	set(main["numbers"], "text", "Red: " + (ndim * ndim - num) + " White: " + num)
 
 }
 

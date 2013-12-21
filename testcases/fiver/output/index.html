@@ -480,61 +480,60 @@ changeneighbors(0, 0, 5)
 
         function changeneighbors(x, y, ndim) {
             changecolor(x, y);;
-            if (x > 0) {
+            if ((x > 0)) {
                 changecolor(x-1, y);;
             } else {
 
             }
 
-            if (x < ndim - 1) {
-                changecolor(x + 1, y);;
+            if ((x < (ndim - 1))) {
+                changecolor((x + 1), y);;
             } else {
 
             }
 
-            if (y > 0) {
+            if ((y > 0)) {
                 changecolor(x, y-1);;
             } else {
 
             }
 
-            if (y < ndim + 1) {
-                changecolor(x, y + 1);;
+            if ((y < (ndim + 1))) {
+                changecolor(x, (y + 1));;
             } else {
 
             }
 
             var row = 0;
             var num = 0;
-            while (row < ndim) {
+            while ((row < ndim)) {
                 var col = 0;
-                while (col < ndim) {
-                    var rowid = "row" + row;
-                    var squareid = "square" + row + col;
+                while ((col < ndim)) {
+                    var rowid = ("row" + row);
+                    var squareid = (("square" + row) + col);
                     var current = $('#main'+ '-' + rowid+ '-' + squareid).css("background-color");
 ;
-                    if (current == "rgb(255, 255, 255)") {
-                        num = num + 1;
+                    if ((current == "rgb(255, 255, 255)")) {
+                        num = (num + 1);
                     } else {
 
                     }
 
-                    col = col + 1;
+                    col = (col + 1);
                 }
 
-                row = row + 1;
+                row = (row + 1);
             }
 
-            var nred = ndim * ndim - num;
-            $('#main'+ '-' + "numbers").html("Red: " + nred + " White: " + num);
+            $('#main'+ '-' + "numbers").html(((("Red: " + ((ndim * ndim) - num)) + " White: ") + num));
 ;
         }
         function changecolor(x, y) {
-            var rowid = "row" + x;
-            var squareid = "square" + x + y;
+            var rowid = ("row" + x);
+            var squareid = (("square" + x) + y);
             var current = $('#main'+ '-' + rowid+ '-' + squareid).css("background-color");
 ;
-            if (current == "rgb(255, 255, 255)") {
+            if ((current == "rgb(255, 255, 255)")) {
                 $('#main'+ '-' + rowid+ '-' + squareid).css("background-color", "red");
 ;
             } else {
