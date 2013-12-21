@@ -325,7 +325,7 @@ define slide demo-explanation()
 define func changebackground()
 {
     set(demo, "background-color", "#BD5532")
-    set(implementation[content][html-css-javascript], "background-color", "deeppink")
+    set(implementation["content"]["html-css-javascript"], "background-color", "deeppink")
 }
 
 define slide lessons-learned()

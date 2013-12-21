@@ -468,7 +468,7 @@ changecolor(0, 0)
         function changecolor(x, y) {
             var rowid = "row" + x;
             var squareid = "square" + x + y;
-            $('#main-rowid-squareid').css("background-color", "black");
+            $('#main'+ '-' + rowid+ '-' + squareid).css("background-color", "red");
 ;
         }
     </script>

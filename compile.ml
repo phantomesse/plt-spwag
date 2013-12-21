@@ -221,11 +221,11 @@ let rec string_of_expression (expression_detail, expression_type) = match expres
         string_of_identifier identifier ^ " = " ^ string_of_expression expr
     | Variable identifier -> string_of_identifier identifier
     | Component (parent, children) ->
-        "" ^ string_of_identifier parent ^ "-" ^
-        String.concat "-" (List.map (fun child -> string_of_expression child) children)
+        "'#" ^ string_of_identifier parent ^ "'" ^
+        String.concat "" (List.map (fun child -> "+ '-' + " ^ string_of_expression child) children)
     | Call func_call -> match func_call.cname with
-        | Identifier("set") -> "$('#" ^ string_of_expression (List.nth func_call.actuals 0) ^ "').css(" ^ string_of_expression (List.nth func_call.actuals 1) ^ ", " ^ string_of_expression (List.nth func_call.actuals 2) ^ ");\n"
-        | Identifier("get") -> "$('#" ^ string_of_expression (List.nth func_call.actuals 0) ^ "').css(" ^ string_of_expression (List.nth func_call.actuals 1) ^ ");\n"
+        | Identifier("set") -> "$(" ^ string_of_expression (List.nth func_call.actuals 0) ^ ").css(" ^ string_of_expression (List.nth func_call.actuals 1) ^ ", " ^ string_of_expression (List.nth func_call.actuals 2) ^ ");\n"
+        | Identifier("get") -> "$(" ^ string_of_expression (List.nth func_call.actuals 0) ^ ").css(" ^ string_of_expression (List.nth func_call.actuals 1) ^ ");\n"
         | _ -> string_of_identifier func_call.cname ^ "(" ^ String.concat ", " (List.map (fun expr -> string_of_expression expr) func_call.actuals) ^ ");"
 ;;
 
